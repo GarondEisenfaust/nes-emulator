@@ -1,0 +1,38 @@
+name: CI
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        type: [Release, Debug, RelWithDebInfo, MinSizeRel]
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install conan
+        run: pip3 install conan
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.type }}
+
+      - name: Build
+        run: cmake --build ./build/ --config ${{ matrix.type }} --verbose
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest --extra-verbose
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.type }}
+          path: |
+            build/lib
+            build/bin
+          retention-days: 5
