@@ -388,14 +388,20 @@ uint8_t Processor6502::ORA() {
 }
 
 uint8_t Processor6502::PHA() {
-  Write(0x0100 + stkp, a);
+  Write(stkp + 0x0100, a);
   stkp--;
   return 0;
 }
 
 uint8_t Processor6502::PHP() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
-uint8_t Processor6502::PLA() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::PLA() {
+  stkp++;
+  a = Read(stkp + 0x0100);
+  SetFlag(Z, a == 0);
+  SetFlag(N, a & (1 << 6));
+  return 0;
+}
 
 uint8_t Processor6502::PLP() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
