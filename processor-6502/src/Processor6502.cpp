@@ -393,7 +393,10 @@ uint8_t Processor6502::PHA() {
   return 0;
 }
 
-uint8_t Processor6502::PHP() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::PHP() {
+  Write(stackPointer + 0x0100, status);
+  return 0;
+}
 
 uint8_t Processor6502::PLA() {
   stackPointer++;
