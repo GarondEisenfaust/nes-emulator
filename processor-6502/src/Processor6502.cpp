@@ -1,6 +1,6 @@
+#include "Processor6502.h"
 #include "Bus.h"
 #include "Definitions.h"
-#include "Processor6502.h"
 #include "Util.h"
 #include <cstdint>
 #include <iostream>
@@ -251,7 +251,7 @@ uint8_t Processor6502::CLV() {
 
 uint8_t Processor6502::CMP() {
   Fetch();
-  const uint16_t temp = static_cast<uint16_t>(a) - static_cast<uint16_t>(fetched);
+  const uint16_t temp = a - fetched;
   SetFlag(C, a >= fetched);
   SetFlag(N, (temp & (1 << 6)));
   SetFlag(Z, x == fetched);
@@ -260,7 +260,7 @@ uint8_t Processor6502::CMP() {
 
 uint8_t Processor6502::CPX() {
   Fetch();
-  const uint16_t temp = static_cast<uint16_t>(x) - static_cast<uint16_t>(fetched);
+  const uint16_t temp = x - fetched;
   SetFlag(C, x >= fetched);
   SetFlag(N, temp & (1 << 6));
   SetFlag(Z, x == fetched);
@@ -269,7 +269,7 @@ uint8_t Processor6502::CPX() {
 
 uint8_t Processor6502::CPY() {
   Fetch();
-  const uint16_t temp = static_cast<uint16_t>(y) - static_cast<uint16_t>(fetched);
+  const uint16_t temp = y - fetched;
   SetFlag(C, y >= fetched);
   SetFlag(N, temp & (1 << 6));
   SetFlag(Z, y == fetched);
@@ -299,13 +299,37 @@ uint8_t Processor6502::DEY() {
   return 0;
 }
 
-uint8_t Processor6502::EOR() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::EOR() {
+  Fetch();
+  a = a ^ fetched;
+  SetFlag(Z, a == 0);
+  SetFlag(N, y & (1 << 6));
+  return 1;
+}
 
-uint8_t Processor6502::INC() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::INC() {
+  Fetch();
+  auto incremented = fetched;
+  incremented++;
+  Write(addr_abs, incremented);
+  SetFlag(Z, a == 0);
+  SetFlag(N, y & (1 << 6));
+  return 0;
+}
 
-uint8_t Processor6502::INX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::INX() {
+  x++;
+  SetFlag(Z, x == 0);
+  SetFlag(N, x & (1 << 6));
+  return 0;
+}
 
-uint8_t Processor6502::INY() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::INY() {
+  y++;
+  SetFlag(Z, y == 0);
+  SetFlag(N, y & (1 << 6));
+  return 0;
+}
 
 uint8_t Processor6502::JMP() {
   pc = addr_abs;
@@ -314,19 +338,60 @@ uint8_t Processor6502::JMP() {
 
 uint8_t Processor6502::JSR() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
-uint8_t Processor6502::LDA() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::LDA() {
+  Fetch();
+  a = fetched;
+  SetFlag(Z, a == 0);
+  SetFlag(N, a & (1 << 6));
+  return 1;
+}
 
-uint8_t Processor6502::LDX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::LDX() {
+  Fetch();
+  x = fetched;
+  SetFlag(Z, x == 0);
+  SetFlag(N, x & (1 << 6));
+  return 1;
+}
 
-uint8_t Processor6502::LDY() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::LDY() {
+  Fetch();
+  y = fetched;
+  SetFlag(Z, y == 0);
+  SetFlag(N, y & (1 << 6));
+  return 1;
+}
 
-uint8_t Processor6502::LSR() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::LSR() {
+  Fetch();
+  SetFlag(C, fetched & 1);
+  uint8_t temp = fetched >> 1;
+  SetFlag(Z, temp == 0);
+  SetFlag(N, temp & (1 << 6));
 
-uint8_t Processor6502::NOP() { throw NOT_IMPLEMENTED_EXCEPTION; }
+  if (lookup[opcode].addrMode == &Processor6502::IMP) {
+    a = temp;
+  } else {
+    Write(addr_abs, temp);
+  }
+  return 0;
+}
 
-uint8_t Processor6502::ORA() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::NOP() { return 0; }
 
-uint8_t Processor6502::PHA() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::ORA() {
+  Fetch();
+  a = a | fetched;
+  SetFlag(Z, a == 0);
+  SetFlag(N, a & (1 << 6));
+  return 1;
+}
+
+uint8_t Processor6502::PHA() {
+  Write(0x0100 + stkp, a);
+  stkp--;
+  return 0;
+}
 
 uint8_t Processor6502::PHP() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
@@ -344,28 +409,74 @@ uint8_t Processor6502::RTS() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
 uint8_t Processor6502::SBC() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
-uint8_t Processor6502::SEC() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::SEC() {
+  SetFlag(C, true);
+  return 0;
+}
 
-uint8_t Processor6502::SED() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::SED() {
+  SetFlag(D, true);
+  return 0;
+}
 
-uint8_t Processor6502::SEI() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::SEI() {
+  SetFlag(I, true);
+  return 0;
+}
 
-uint8_t Processor6502::STA() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::STA() {
+  Write(addr_abs, a);
+  return 0;
+}
 
-uint8_t Processor6502::STX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::STX() {
+  Write(addr_abs, x);
+  return 0;
+}
 
-uint8_t Processor6502::STY() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::STY() {
+  Write(addr_abs, y);
+  return 0;
+}
 
-uint8_t Processor6502::TAX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::TAX() {
+  x = a;
+  SetFlag(Z, x == 0);
+  SetFlag(N, x & (1 << 6));
+  return 0;
+}
 
-uint8_t Processor6502::TAY() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::TAY() {
+  y = a;
+  SetFlag(Z, y == 0);
+  SetFlag(N, y & (1 << 6));
+  return 0;
+}
 
-uint8_t Processor6502::TSX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::TSX() {
+  x = stkp;
+  SetFlag(Z, x == 0);
+  SetFlag(N, x & (1 << 6));
+  return 0;
+}
 
-uint8_t Processor6502::TXA() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::TXA() {
+  a = x;
+  SetFlag(Z, a == 0);
+  SetFlag(N, a & (1 << 6));
+  return 0;
+}
 
-uint8_t Processor6502::TXS() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::TXS() {
+  stkp = x;
+  return 0;
+}
 
-uint8_t Processor6502::TYA() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::TYA() {
+  a = y;
+  SetFlag(Z, a == 0);
+  SetFlag(N, a & (1 << 6));
+  return 0;
+}
 
-uint8_t Processor6502::XXX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::XXX() { return 0; }
