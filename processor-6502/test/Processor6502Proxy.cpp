@@ -2,6 +2,9 @@
 
 Processor6502Proxy::Processor6502Proxy() : Processor6502() {}
 
+uint16_t Processor6502Proxy::GetAddrAbs() { return addr_abs; }
+void Processor6502Proxy::SetAddrAbs(uint16_t theAddrAbs) { addr_abs = theAddrAbs; }
+
 // Addressing Modes =============================================
 uint8_t Processor6502Proxy::IMP() { return Processor6502::IMP(); }
 uint8_t Processor6502Proxy::IMM() { return Processor6502::IMM(); }

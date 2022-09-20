@@ -103,7 +103,7 @@ class Processor6502 {
   uint8_t TYA();
   uint8_t XXX();
 
- private:
+ protected:
   struct Instruction {
     std::string name;
     uint8_t (Processor6502::*operate)(void) = nullptr;

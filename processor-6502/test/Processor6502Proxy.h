@@ -6,6 +6,9 @@ class Processor6502Proxy : public Processor6502 {
   Processor6502Proxy();
   virtual ~Processor6502Proxy() = default;
 
+  uint16_t GetAddrAbs();
+  void SetAddrAbs(uint16_t theAddrAbs);
+
   // Addressing Modes =============================================
   uint8_t IMP();
   uint8_t IMM();

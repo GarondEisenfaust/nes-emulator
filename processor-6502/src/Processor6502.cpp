@@ -307,7 +307,10 @@ uint8_t Processor6502::INX() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
 uint8_t Processor6502::INY() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
-uint8_t Processor6502::JMP() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::JMP() {
+  pc = addr_abs;
+  return 0;
+}
 
 uint8_t Processor6502::JSR() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
