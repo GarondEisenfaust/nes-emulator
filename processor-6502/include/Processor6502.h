@@ -21,13 +21,13 @@ class Processor6502 {
 
   void ConnectBus(Bus* bus);
 
-  uint8_t fetched = 0x00;  // Represents the working input value to the ALU
-  uint8_t a = 0x00;        // Accumulator Register
-  uint8_t x = 0x00;        // X Register
-  uint8_t y = 0x00;        // Y Register
-  uint8_t stkp = 0x00;     // Stack Pointer (points to location on bus)
-  uint16_t pc = 0x0000;    // Program Counter
-  uint8_t status = 0x00;   // Status Register
+  uint8_t fetched = 0x00;       // Represents the working input value to the ALU
+  uint8_t a = 0x00;             // Accumulator Register
+  uint8_t x = 0x00;             // X Register
+  uint8_t y = 0x00;             // Y Register
+  uint8_t stackPointer = 0x00;  // Stack Pointer (points to location on bus)
+  uint16_t pc = 0x0000;         // Program Counter
+  uint8_t status = 0x00;        // Status Register
 
  protected:
   // Addressing Modes =============================================

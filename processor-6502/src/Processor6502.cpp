@@ -388,16 +388,16 @@ uint8_t Processor6502::ORA() {
 }
 
 uint8_t Processor6502::PHA() {
-  Write(stkp + 0x0100, a);
-  stkp--;
+  Write(stackPointer + 0x0100, a);
+  stackPointer--;
   return 0;
 }
 
 uint8_t Processor6502::PHP() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
 uint8_t Processor6502::PLA() {
-  stkp++;
-  a = Read(stkp + 0x0100);
+  stackPointer++;
+  a = Read(stackPointer + 0x0100);
   SetFlag(Z, a == 0);
   SetFlag(N, a & (1 << 6));
   return 0;
@@ -460,7 +460,7 @@ uint8_t Processor6502::TAY() {
 }
 
 uint8_t Processor6502::TSX() {
-  x = stkp;
+  x = stackPointer;
   SetFlag(Z, x == 0);
   SetFlag(N, x & (1 << 6));
   return 0;
@@ -474,7 +474,7 @@ uint8_t Processor6502::TXA() {
 }
 
 uint8_t Processor6502::TXS() {
-  stkp = x;
+  stackPointer = x;
   return 0;
 }
 
