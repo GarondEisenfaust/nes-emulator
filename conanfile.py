@@ -2,7 +2,7 @@ from conans import ConanFile
 
 
 class CMakeTemplateConan(ConanFile):
-  name = "cmake-template"
+  name = "nes-emulator"
   version = "1.0"
   settings = "os", "compiler", "build_type", "arch"
   generators = "cmake_find_package"
