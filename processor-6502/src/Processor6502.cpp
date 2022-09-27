@@ -99,8 +99,10 @@ Processor6502::Processor6502() {
 void Processor6502::ConnectBus(Bus* bus) { mBus = bus; }
 
 uint8_t Processor6502::Read(uint16_t addr) { return mBus->Read(addr); }
+uint8_t Processor6502::ReadFromStack(uint16_t addr) { return mBus->Read(STACK_BEGIN + addr); }
 
 void Processor6502::Write(uint16_t addr, uint8_t data) { mBus->Write(addr, data); }
+void Processor6502::WriteToStack(uint16_t addr, uint8_t data) { mBus->Write(STACK_BEGIN + addr, data); }
 
 uint8_t Processor6502::BranchIf(std::function<bool(void)> condition) {
   auto additionalCycle = uint8_t{0};
@@ -388,19 +390,19 @@ uint8_t Processor6502::ORA() {
 }
 
 uint8_t Processor6502::PHA() {
-  Write(stackPointer + 0x0100, a);
+  WriteToStack(stackPointer, a);
   stackPointer--;
   return 0;
 }
 
 uint8_t Processor6502::PHP() {
-  Write(stackPointer + 0x0100, status);
+  WriteToStack(stackPointer, status);
   return 0;
 }
 
 uint8_t Processor6502::PLA() {
   stackPointer++;
-  a = Read(stackPointer + 0x0100);
+  a = ReadFromStack(stackPointer);
   SetFlag(Z, a == 0);
   SetFlag(N, a & (1 << 6));
   return 0;

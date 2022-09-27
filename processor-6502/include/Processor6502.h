@@ -13,7 +13,9 @@ class Processor6502 {
   virtual ~Processor6502() = default;
 
   uint8_t Read(uint16_t addr);
+  uint8_t ReadFromStack(uint16_t addr);
   virtual void Write(uint16_t addr, uint8_t data);
+  virtual void WriteToStack(uint16_t addr, uint8_t data);
 
   virtual uint8_t Fetch();
 
