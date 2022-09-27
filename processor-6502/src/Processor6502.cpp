@@ -408,7 +408,12 @@ uint8_t Processor6502::PLA() {
   return 0;
 }
 
-uint8_t Processor6502::PLP() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::PLP() {
+  stackPointer++;
+  status = ReadFromStack(stackPointer);
+  SetFlag(U, 1);
+  return 0;
+}
 
 uint8_t Processor6502::ROL() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
