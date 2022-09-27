@@ -8,6 +8,7 @@ class Processor6502Proxy : public Processor6502 {
 
   uint16_t GetAddrAbs();
   void SetAddrAbs(uint16_t theAddrAbs);
+  void SetOpcode(uint8_t theOpcode);
 
   // Addressing Modes =============================================
   uint8_t IMP();
