@@ -415,9 +415,37 @@ uint8_t Processor6502::PLP() {
   return 0;
 }
 
-uint8_t Processor6502::ROL() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::ROL() {
+  Fetch();
+  uint8_t tempCarry = fetched & (1 << 7);
+  uint8_t temp = (fetched << 1) | (GetFlag(C) << 0);
 
-uint8_t Processor6502::ROR() { throw NOT_IMPLEMENTED_EXCEPTION; }
+  SetFlag(C, tempCarry);
+  SetFlag(Z, temp == 0);
+  SetFlag(N, temp & (1 << 6));
+  if (lookup[opcode].addrMode == &Processor6502::IMP) {
+    a = temp;
+  } else {
+    Write(addr_abs, temp);
+  }
+  return 0;
+}
+
+uint8_t Processor6502::ROR() {
+  Fetch();
+  uint8_t tempCarry = fetched & (1 << 0);
+  uint8_t temp = (fetched >> 1) | (GetFlag(C) << 7);
+
+  SetFlag(C, tempCarry);
+  SetFlag(Z, temp == 0);
+  SetFlag(N, temp & (1 << 6));
+  if (lookup[opcode].addrMode == &Processor6502::IMP) {
+    a = temp;
+  } else {
+    Write(addr_abs, temp);
+  }
+  return 0;
+}
 
 uint8_t Processor6502::RTI() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
