@@ -156,7 +156,10 @@ uint8_t Processor6502::IMP() {
   return 0;
 }
 
-uint8_t Processor6502::IMM() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::IMM() {
+  addr_abs = pc++;
+  return 0;
+}
 
 uint8_t Processor6502::ZP0() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
@@ -164,19 +167,95 @@ uint8_t Processor6502::ZPX() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
 uint8_t Processor6502::ZPY() { throw NOT_IMPLEMENTED_EXCEPTION; }
 
-uint8_t Processor6502::REL() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::REL() {
+  addr_rel = Read(pc);
+  pc++;
+  if (addr_rel & 0x80) {
+    addr_rel |= 0xFF00;
+  }
+  return 0;
+}
 
-uint8_t Processor6502::ABS() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::ABS() {
+  uint16_t low = Read(pc);
+  pc++;
+  uint16_t high = Read(pc);
+  pc++;
 
-uint8_t Processor6502::ABX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+  addr_abs = (high << 8) | low;
 
-uint8_t Processor6502::ABY() { throw NOT_IMPLEMENTED_EXCEPTION; }
+  return 0;
+}
 
-uint8_t Processor6502::IND() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::ABX() {
+  uint16_t low = Read(pc);
+  pc++;
+  uint16_t high = Read(pc);
+  pc++;
 
-uint8_t Processor6502::IZX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+  addr_abs = ((high << 8) | low) + x;
 
-uint8_t Processor6502::IZY() { throw NOT_IMPLEMENTED_EXCEPTION; }
+  if ((addr_abs & 0xFF00) != (high << 8)) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+uint8_t Processor6502::ABY() {
+  uint16_t low = Read(pc);
+  pc++;
+  uint16_t high = Read(pc);
+  pc++;
+
+  addr_abs = ((high << 8) | low) + y;
+
+  if ((addr_abs & 0xFF00) != (high << 8)) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+uint8_t Processor6502::IND() {
+  uint16_t ptrLow = Read(pc);
+  pc++;
+  uint16_t ptrHigh = Read(pc);
+  pc++;
+
+  auto ptr = (ptrHigh << 8) | ptrLow;
+
+  if (ptrLow == 0x00FF) {
+    addr_abs = (Read(ptr & 0xFF00) << 8) | Read(ptr + 0);
+  } else {
+    addr_abs = (Read(ptr + 1) << 8) | Read(ptr + 0);
+  }
+  return 0;
+}
+
+uint8_t Processor6502::IZX() {
+  uint16_t t = Read(pc);
+  pc++;
+
+  uint16_t lo = Read(t + static_cast<uint16_t>(x) & 0x00FF);
+  uint16_t hi = Read(t + static_cast<uint16_t>(x + 1) & 0x00FF);
+
+  addr_abs = (hi << 8) | lo;
+
+  return 0;
+}
+
+uint8_t Processor6502::IZY() {
+  uint16_t t = Read(pc);
+  pc++;
+
+  uint16_t lo = Read(t + static_cast<uint16_t>(y) & 0x00FF);
+  uint16_t hi = Read(t + static_cast<uint16_t>(y + 1) & 0x00FF);
+
+  addr_abs = (hi << 8) | lo;
+
+  return 0;
+}
 
 // Opcodes ======================================================
 uint8_t Processor6502::ADC() { throw NOT_IMPLEMENTED_EXCEPTION; }
