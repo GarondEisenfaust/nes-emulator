@@ -161,11 +161,26 @@ uint8_t Processor6502::IMM() {
   return 0;
 }
 
-uint8_t Processor6502::ZP0() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::ZP0() {
+  addr_abs = Read(pc);
+  pc++;
+  addr_abs &= 0x00FF;
+  return 0;
+}
 
-uint8_t Processor6502::ZPX() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::ZPX() {
+  addr_abs = (Read(pc) + x);
+  pc++;
+  addr_abs &= 0x00FF;
+  return 0;
+}
 
-uint8_t Processor6502::ZPY() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::ZPY() {
+  addr_abs = (Read(pc) + y);
+  pc++;
+  addr_abs &= 0x00FF;
+  return 0;
+}
 
 uint8_t Processor6502::REL() {
   addr_rel = Read(pc);
@@ -258,7 +273,17 @@ uint8_t Processor6502::IZY() {
 }
 
 // Opcodes ======================================================
-uint8_t Processor6502::ADC() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::ADC() {
+  Fetch();
+  uint16_t temp = a + fetched + GetFlag(C);
+  SetFlag(C, temp > 255);
+  SetFlag(Z, (temp & 0x00FF) == 0);
+
+  SetFlag(V, (~(a ^ fetched) & (a ^ temp)) & 0x0080);
+  SetFlag(N, temp & 0x80);
+  a = temp & 0x00FF;
+  return 1;
+}
 
 uint8_t Processor6502::AND() {
   Fetch();
@@ -304,7 +329,23 @@ uint8_t Processor6502::BNE() { return BranchIf(GetFlag(Z) == 0); }
 
 uint8_t Processor6502::BPL() { return BranchIf(GetFlag(N) == 0); }
 
-uint8_t Processor6502::BRK() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::BRK() {
+  pc++;
+
+  SetFlag(I, 1);
+  WriteToStack(stackPointer, (pc >> 8) & 0x00FF);
+  stackPointer--;
+  WriteToStack(stackPointer, pc & 0x00FF);
+  stackPointer--;
+
+  SetFlag(B, 1);
+  WriteToStack(stackPointer, status);
+  stackPointer--;
+  SetFlag(B, 0);
+
+  pc = Read(0xFFFE) | (Read(0xFFFF) << 8);
+  return 0;
+}
 
 uint8_t Processor6502::BVC() { return BranchIf(GetFlag(V) == 0); }
 
@@ -417,7 +458,17 @@ uint8_t Processor6502::JMP() {
   return 0;
 }
 
-uint8_t Processor6502::JSR() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::JSR() {
+  pc--;
+
+  WriteToStack(stackPointer, (pc >> 8) & 0x00FF);
+  stackPointer--;
+  WriteToStack(stackPointer, pc & 0x00FF);
+  stackPointer--;
+
+  pc = addr_abs;
+  return 0;
+}
 
 uint8_t Processor6502::LDA() {
   Fetch();
@@ -526,11 +577,42 @@ uint8_t Processor6502::ROR() {
   return 0;
 }
 
-uint8_t Processor6502::RTI() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::RTI() {
+  stackPointer++;
+  status = ReadFromStack(stackPointer);
+  status &= ~B;
+  status &= ~U;
 
-uint8_t Processor6502::RTS() { throw NOT_IMPLEMENTED_EXCEPTION; }
+  stackPointer++;
+  pc = ReadFromStack(stackPointer);
+  stackPointer++;
+  pc |= static_cast<uint16_t>(ReadFromStack(stackPointer)) << 8;
+  return 0;
+}
 
-uint8_t Processor6502::SBC() { throw NOT_IMPLEMENTED_EXCEPTION; }
+uint8_t Processor6502::RTS() {
+  stackPointer++;
+  pc = ReadFromStack(stackPointer);
+  stackPointer++;
+  pc |= static_cast<uint16_t>(ReadFromStack(stackPointer)) << 8;
+
+  pc++;
+  return 0;
+}
+
+uint8_t Processor6502::SBC() {
+  Fetch();
+
+  uint16_t value = static_cast<uint16_t>(fetched) ^ 0x00FF;
+
+  auto temp = static_cast<uint16_t>(a) + value + static_cast<uint16_t>(GetFlag(C));
+  SetFlag(C, temp & 0xFF00);
+  SetFlag(Z, ((temp & 0x00FF) == 0));
+  SetFlag(V, (temp ^ static_cast<uint16_t>(a)) & (temp ^ value) & 0x0080);
+  SetFlag(N, temp & 0x0080);
+  a = temp & 0x00FF;
+  return 1;
+}
 
 uint8_t Processor6502::SEC() {
   SetFlag(C, true);
