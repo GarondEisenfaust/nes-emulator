@@ -9,9 +9,19 @@ class CMakeTemplateConan(ConanFile):
 
   def requirements(self):
     self.requires("gtest/1.8.1", private=True, override=False)
+    self.requires("imgui/1.88", private=True, override=False)
+    self.requires("glfw/3.3.8", private=True, override=False)
+    self.requires("glew/2.2.0", private=True, override=False)
 
   def build_requirements(self):
     pass
 
   def imports(self):
-    pass
+    source = self.deps_cpp_info["imgui"].resdirs[0] + "/bindings/"
+    destination = "bindings"
+
+    self.copy("imgui_impl_glfw.h", dst=destination, src=source)
+    self.copy("imgui_impl_opengl3.h", dst=destination, src=source)
+    self.copy("imgui_impl_opengl3_loader.h", dst=destination, src=source)
+    self.copy("imgui_impl_glfw.cpp", dst=destination, src=source)
+    self.copy("imgui_impl_opengl3.cpp", dst=destination, src=source)
