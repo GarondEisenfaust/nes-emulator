@@ -1,4 +1,4 @@
-#include "windows/MemoryReader.h"
+#include "MemoryReader.h"
 #include "Util.h"
 
 MemoryReader::MemoryReader(const RAM& ram, uint16_t offset, uint16_t lines)
