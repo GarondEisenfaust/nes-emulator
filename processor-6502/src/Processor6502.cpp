@@ -140,6 +140,8 @@ void Processor6502::Clock() {
     auto additionalCycle2 = (this->*lookup[opcode].operate)();
 
     cycles += (additionalCycle1 & additionalCycle2);
+
+    SetFlag(U, true);
   }
   cycles--;
 }

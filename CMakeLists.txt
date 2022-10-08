@@ -16,5 +16,6 @@ if(RUN_TESTS)
 endif()
 
 add_subdirectory(playground)
+add_subdirectory(cpu-tester)
 add_subdirectory(processor-6502)
 add_subdirectory(util)
