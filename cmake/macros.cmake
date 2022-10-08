@@ -22,7 +22,6 @@ endmacro()
 
 macro(create_executable)
   set_project_name()
-  set_defaults()
 
   # Project name
   project(${PROJECT_NAME})
@@ -37,7 +36,6 @@ endmacro()
 
 macro(create_library)
   set_project_name()
-  set_defaults()
 
   # Project name
   project(${PROJECT_NAME})
