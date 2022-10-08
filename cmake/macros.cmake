@@ -58,8 +58,7 @@ macro(create_tests)
     target_link_libraries(
       ${TEST_NAME}
       PRIVATE ${PROJECT_NAME}
-      PRIVATE GTest::gtest_main
-      PRIVATE GTest::gmock)
+      PRIVATE CONAN_PKG::gtest)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT 10)
   endif()

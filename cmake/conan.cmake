@@ -22,3 +22,5 @@ conan_cmake_run(
   missing
   SETTINGS
   ${settings})
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
