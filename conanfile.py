@@ -8,7 +8,7 @@ class CMakeTemplateConan(ConanFile):
   generators = "cmake"
 
   def requirements(self):
-    self.requires("gtest/cci.20210126", private=True, override=False)
+    self.requires("gtest/1.8.1", private=True, override=False)
 
   def build_requirements(self):
     pass
