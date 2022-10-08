@@ -18,6 +18,9 @@ jobs:
       - name: Install conan
         run: pip3 install conan
 
+      - name: Install OpenGL
+        run: sudo apt-get update && sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev -y
+
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.type }}
 
