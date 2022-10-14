@@ -17,6 +17,7 @@ target_link_libraries(
   PRIVATE util
   PRIVATE CONAN_PKG::imgui
   PRIVATE CONAN_PKG::glfw
-  PRIVATE CONAN_PKG::glew)
+  PRIVATE CONAN_PKG::glew
+  PRIVATE CONAN_PKG::fmt)
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
