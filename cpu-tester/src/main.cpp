@@ -2,8 +2,10 @@
 #include "GuiContext.h"
 #include "Header.h"
 #include "MemoryReader.h"
+#include "Processor6502.h"
 #include "windows/GuiWindow.h"
 #include "windows/MemoryWindow.h"
+#include "windows/RegisterWindow.h"
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -14,6 +16,9 @@ int main() {
   bus.ram->at(1) = 0x56;
   bus.ram->at(0x8000) = 0x77;
 
+  Processor6502 cpu;
+  cpu.ConnectBus(&bus);
+
   MemoryReader memoryReader1(*bus.ram);
   MemoryReader memoryReader2(*bus.ram, 0x8000);
 
@@ -21,7 +26,7 @@ int main() {
 
   guiContext.mClientWindows.push_back(std::make_unique<MemoryWindow>("Memory from 0 to 0x00f0", memoryReader1));
   guiContext.mClientWindows.push_back(std::make_unique<MemoryWindow>("Memory from 0x8000 to 0x80f0", memoryReader2));
-
+  guiContext.mClientWindows.push_back(std::make_unique<RegisterWindow>("Registers", cpu));
   guiContext.Loop();
 
   return 0;
