@@ -30,7 +30,7 @@ void GuiContext::Loop() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    for (auto& clientWindow : mClientWindows) {
+    for (auto* clientWindow : mClientWindows) {
       clientWindow->Render();
     }
 

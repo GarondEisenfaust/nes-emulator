@@ -24,9 +24,13 @@ int main() {
 
   GuiContext guiContext;
 
-  guiContext.mClientWindows.push_back(std::make_unique<MemoryWindow>("Memory from 0 to 0x00f0", memoryReader1));
-  guiContext.mClientWindows.push_back(std::make_unique<MemoryWindow>("Memory from 0x8000 to 0x80f0", memoryReader2));
-  guiContext.mClientWindows.push_back(std::make_unique<RegisterWindow>("Registers", cpu));
+  MemoryWindow memoryWindow1("Memory from 0 to 0x00f0", memoryReader1);
+  MemoryWindow memoryWindow2("Memory from 0x8000 to 0x80f0", memoryReader2);
+  RegisterWindow registerWindow("Registers", cpu);
+
+  guiContext.mClientWindows.push_back(&memoryWindow1);
+  guiContext.mClientWindows.push_back(&memoryWindow2);
+  guiContext.mClientWindows.push_back(&registerWindow);
   guiContext.Loop();
 
   return 0;

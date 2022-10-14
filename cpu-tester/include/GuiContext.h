@@ -13,7 +13,7 @@ class GuiContext {
   GuiContext();
   ~GuiContext();
   void Loop();
-  std::vector<std::unique_ptr<GuiWindow>> mClientWindows;
+  std::vector<GuiWindow*> mClientWindows;
 
  private:
   GLFWwindow* mWindow;
