@@ -1,4 +1,5 @@
 #pragma once
+#include "Cartridge.h"
 #include "Processor6502.h"
 #include "RAM.h"
 #include <cstdint>
@@ -9,8 +10,13 @@ class Bus {
   Bus();
   ~Bus();
   Processor6502 cpu;
+
   std::unique_ptr<RAM> ram;
 
+  void InsertCartridge(Cartridge* cartridge);
   void Write(uint16_t addr, uint8_t data);
   uint8_t Read(uint16_t addr, bool bReadOnly = false);
+
+ private:
+  Cartridge* mCartridge;
 };
