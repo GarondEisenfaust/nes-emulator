@@ -33,3 +33,5 @@ libxcb-xfixes0-dev
 libxcb-xinerama0-dev
 libxcb-dri3-dev
 libxcb-util-dev
+xtrans-dev
+xkb-data
