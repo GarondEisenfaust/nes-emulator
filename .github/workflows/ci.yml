@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install conan
-        run: pip3 install conan
+        run: pip3 install conan==1.53.0
 
       - name: Updates package list
         run: sudo apt-get update
