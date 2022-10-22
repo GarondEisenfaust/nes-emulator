@@ -20,6 +20,7 @@ class Processor6502 {
   virtual uint8_t Fetch();
 
   void Clock();
+  void Reset();
 
   void ConnectBus(Bus* bus);
 

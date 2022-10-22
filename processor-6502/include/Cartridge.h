@@ -19,8 +19,11 @@ class Cartridge {
   Cartridge(const std::string& path);
   virtual ~Cartridge() = default;
 
-  ReadResult Read(uint16_t address);
-  bool Write(uint16_t address, uint8_t data);
+  ReadResult CpuRead(uint16_t address);
+  bool CpuWrite(uint16_t address, uint8_t data);
+
+  ReadResult PpuRead(uint16_t address);
+  bool PpuWrite(uint16_t address, uint8_t data);
 
  private:
   std::vector<uint8_t> mProgramMemory;

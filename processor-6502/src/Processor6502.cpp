@@ -98,11 +98,11 @@ Processor6502::Processor6502() {
 
 void Processor6502::ConnectBus(Bus* bus) { mBus = bus; }
 
-uint8_t Processor6502::Read(uint16_t addr) { return mBus->Read(addr); }
-uint8_t Processor6502::ReadFromStack(uint16_t addr) { return mBus->Read(STACK_BEGIN + addr); }
+uint8_t Processor6502::Read(uint16_t addr) { return mBus->CpuRead(addr); }
+uint8_t Processor6502::ReadFromStack(uint16_t addr) { return mBus->CpuRead(STACK_BEGIN + addr); }
 
-void Processor6502::Write(uint16_t addr, uint8_t data) { mBus->Write(addr, data); }
-void Processor6502::WriteToStack(uint16_t addr, uint8_t data) { mBus->Write(STACK_BEGIN + addr, data); }
+void Processor6502::Write(uint16_t addr, uint8_t data) { mBus->CpuWrite(addr, data); }
+void Processor6502::WriteToStack(uint16_t addr, uint8_t data) { mBus->CpuWrite(STACK_BEGIN + addr, data); }
 
 uint8_t Processor6502::BranchIf(std::function<bool(void)> condition) {
   auto additionalCycle = uint8_t{0};
@@ -145,6 +145,8 @@ void Processor6502::Clock() {
   }
   cycles--;
 }
+
+void Processor6502::Reset() {}
 
 uint8_t Processor6502::GetFlag(FLAGS6502 flag) { return (status & flag) ? 1 : 0; }
 

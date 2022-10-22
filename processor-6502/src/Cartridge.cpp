@@ -54,7 +54,7 @@ Cartridge::Cartridge(const std::string& path) {
   romStream.close();
 }
 
-Cartridge::ReadResult Cartridge::Read(uint16_t address) {
+Cartridge::ReadResult Cartridge::CpuRead(uint16_t address) {
   auto mappingResult = mMapper->MapRead(address);
   if (mappingResult.mapped) {
     return {mProgramMemory[mappingResult.mappedAddress], true};
@@ -62,7 +62,7 @@ Cartridge::ReadResult Cartridge::Read(uint16_t address) {
   return {0, false};
 }
 
-bool Cartridge::Write(uint16_t address, uint8_t data) {
+bool Cartridge::CpuWrite(uint16_t address, uint8_t data) {
   auto mappingResult = mMapper->MapRead(address);
   if (mappingResult.mapped) {
     mProgramMemory[mappingResult.mappedAddress] = data;
@@ -70,3 +70,7 @@ bool Cartridge::Write(uint16_t address, uint8_t data) {
   }
   return false;
 }
+
+Cartridge::ReadResult Cartridge::PpuRead(uint16_t address) {}
+
+bool Cartridge::PpuWrite(uint16_t address, uint8_t data) {}
