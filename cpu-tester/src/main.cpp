@@ -14,18 +14,18 @@ int main() {
   Bus bus;
   bus.ram->at(0) = 0x55;
   bus.ram->at(1) = 0x56;
-  bus.ram->at(0x8000) = 0x77;
+  bus.ram->at(0x0700) = 0x77;
 
   Processor6502 cpu;
   cpu.ConnectBus(&bus);
 
   MemoryReader memoryReader1(*bus.ram);
-  MemoryReader memoryReader2(*bus.ram, 0x8000);
+  MemoryReader memoryReader2(*bus.ram, 0x0700);
 
   GuiContext guiContext;
 
-  MemoryWindow memoryWindow1("Memory from 0 to 0x00f0", memoryReader1);
-  MemoryWindow memoryWindow2("Memory from 0x8000 to 0x80f0", memoryReader2);
+  MemoryWindow memoryWindow1("Memory from 0 to 0x00F0", memoryReader1);
+  MemoryWindow memoryWindow2("Memory from 0x0700 to 0x0800", memoryReader2);
   RegisterWindow registerWindow("Registers", cpu);
 
   guiContext.mClientWindows.push_back(&memoryWindow1);
