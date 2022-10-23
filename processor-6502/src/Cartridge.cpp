@@ -1,4 +1,5 @@
 #include "Cartridge.h"
+#include "Definitions.h"
 #include "mapper/Mappers.h"
 #include <fstream>
 
@@ -55,15 +56,15 @@ Cartridge::Cartridge(const std::string& path) {
 }
 
 Cartridge::ReadResult Cartridge::CpuRead(uint16_t address) {
-  auto mappingResult = mMapper->MapRead(address);
+  auto mappingResult = mMapper->CpuMapRead(address);
   if (mappingResult.mapped) {
     return {mProgramMemory[mappingResult.mappedAddress], true};
   }
-  return {0, false};
+  return {UNDEFINED, false};
 }
 
 bool Cartridge::CpuWrite(uint16_t address, uint8_t data) {
-  auto mappingResult = mMapper->MapRead(address);
+  auto mappingResult = mMapper->CpuMapRead(address);
   if (mappingResult.mapped) {
     mProgramMemory[mappingResult.mappedAddress] = data;
     return true;
@@ -71,6 +72,19 @@ bool Cartridge::CpuWrite(uint16_t address, uint8_t data) {
   return false;
 }
 
-Cartridge::ReadResult Cartridge::PpuRead(uint16_t address) {}
+Cartridge::ReadResult Cartridge::PpuRead(uint16_t address) {
+  auto mappingResult = mMapper->CpuMapRead(address);
+  if (mappingResult.mapped) {
+    return {mCharacterMemory[mappingResult.mappedAddress], true};
+  }
+  return {UNDEFINED, false};
+}
 
-bool Cartridge::PpuWrite(uint16_t address, uint8_t data) {}
+bool Cartridge::PpuWrite(uint16_t address, uint8_t data) {
+  auto mappingResult = mMapper->CpuMapRead(address);
+  if (mappingResult.mapped) {
+    mCharacterMemory[mappingResult.mappedAddress] = data;
+    return true;
+  }
+  return false;
+}

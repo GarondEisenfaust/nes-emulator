@@ -1,16 +1,21 @@
 #pragma once
 #include <cstdint>
 
+#define MAPPER_START 0x8000
+#define MAPPER_END 0xFFFF
+
+struct MappingResult {
+  uint16_t mappedAddress;
+  bool mapped;
+};
+
 class IMapper {
  public:
-  struct MappingResult {
-    uint16_t mappedAddress;
-    bool mapped;
-  };
-
   virtual ~IMapper() = default;
 
- public:
-  virtual MappingResult MapRead(uint16_t address) = 0;
-  virtual MappingResult MapWrite(uint16_t address) = 0;
+  virtual MappingResult CpuMapRead(uint16_t address) = 0;
+  virtual MappingResult CpuMapWrite(uint16_t address) = 0;
+
+  virtual MappingResult PpuMapRead(uint16_t address) = 0;
+  virtual MappingResult PpuMapWrite(uint16_t address) = 0;
 };
