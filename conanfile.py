@@ -13,6 +13,7 @@ class CMakeTemplateConan(ConanFile):
     self.requires("glfw/3.3.8", private=True, override=False)
     self.requires("glew/2.2.0", private=True, override=False)
     self.requires("fmt/9.1.0", private=True, override=False)
+    self.requires("boost/1.80.0", private=True, override=False)
 
   def build_requirements(self):
     pass

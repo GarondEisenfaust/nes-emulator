@@ -8,6 +8,7 @@ macro(set_defaults)
 
   # Source files
   file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.h")
+  file(GLOB_RECURSE SHADERS "shaders/*.glsl")
 
   # include files
   set(INCLUDES ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -26,7 +27,7 @@ macro(create_executable)
   # Project name
   project(${PROJECT_NAME})
 
-  add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${INCLUDE_FILES})
+  add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${INCLUDE_FILES} ${SHADERS})
   target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDES})
 
   if(RUN_TESTS)
@@ -40,7 +41,7 @@ macro(create_library)
   # Project name
   project(${PROJECT_NAME})
 
-  add_library(${PROJECT_NAME} ${SOURCE_FILES} ${INCLUDE_FILES})
+  add_library(${PROJECT_NAME} ${SOURCE_FILES} ${INCLUDE_FILES} ${SHADERS})
   target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDES})
 
   if(RUN_TESTS)
