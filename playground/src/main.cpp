@@ -64,9 +64,9 @@ int main() {
   // We add a new set of vertices to form a second triangle (a total of 6 vertices); the vertex attribute configuration
   // remains the same (still one 3-float position vector per vertex)
 
-  Rectangle theRectangle(-0.5f, -0.5f, 0.5, 0.5);
+  Rectangle theRectangle(-0.5, 0, 0.5, 0.5);
 
-  auto vertices = theRectangle.CalculateTriangles().data();
+  auto vertices = theRectangle.CalculateTriangles();
 
   GLuint VBO, VAO;
   glGenVertexArrays(1, &VAO);
@@ -75,7 +75,7 @@ int main() {
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
   glEnableVertexAttribArray(0);
