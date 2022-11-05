@@ -1,19 +1,25 @@
 #include "Rectangle.h"
 #include "Definitions.h"
+#include "RenderContext.h"
 #include <cstring>
 
-std::tuple<float, float, float, float> CalculateScreenSpace(float x, float y, float width, float height) {
-  float screenX = ((2 * x / WIDTH) - 1);
-  float screenY = ((2 * y / HEIGHT) - 1);
-  float screenWidth = (2 * width / WIDTH);
-  float screenHeight = (2 * height / HEIGHT);
+std::tuple<float, float, float, float> CalculateScreenSpace(float x, float y, float width, float height,
+                                                            RenderContext& renderContext) {
+  float screenX = ((2 * x / renderContext.GetWidth()) - 1);
+  float screenY = ((2 * y / renderContext.GetHeight()) - 1);
+  float screenWidth = (2 * width / renderContext.GetWidth());
+  float screenHeight = (2 * height / renderContext.GetHeight());
   return {screenX, screenY, screenWidth, screenHeight};
 }
 
-Rectangle::Rectangle(float x, float y, float width, float height) : mX(x), mY(y), mWidth(width), mHeight(height) {}
+Rectangle::Rectangle(float x, float y, float width, float height, RenderContext& renderContext)
+    : mX(x), mY(y), mWidth(width), mHeight(height), mRenderContext(renderContext) {
+  auto triangles = CalculateTriangles();
+  mRenderContext.AddVertices(triangles);
+}
 
 Rectangle::TriangleVertices Rectangle::CalculateTriangles() {
-  auto [x, y, width, height] = CalculateScreenSpace(mX, mY, mWidth, mHeight);
+  auto [x, y, width, height] = CalculateScreenSpace(mX, mY, mWidth, mHeight, mRenderContext);
 
   Vertex topLeft{x, y, 0};
   Vertex topRight{x + width, y, 0};
