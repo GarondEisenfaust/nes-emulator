@@ -47,7 +47,6 @@ int main() {
   // Vertex shader
 
   auto workDir = GetExecutableDirectory();
-  auto v = (workDir + "/shaders/FragmentShader.glsl");
   Shader fragmentShader((workDir + "/shaders/FragmentShader.glsl").c_str(), GL_FRAGMENT_SHADER);
   Shader vertexShader((workDir + "/shaders/VertexShader.glsl").c_str(), GL_VERTEX_SHADER);
 
@@ -62,16 +61,14 @@ int main() {
   // We add a new set of vertices to form a second triangle (a total of 6 vertices); the vertex attribute configuration
   // remains the same (still one 3-float position vector per vertex)
 
-  Rectangle theRectangle1(0, 0, 50, 50);
-  Rectangle theRectangle2(50, 50, 50, 50);
-
-  auto verticesArray1 = theRectangle1.CalculateTriangles();
-  auto verticesArray2 = theRectangle2.CalculateTriangles();
+  std::array<Rectangle::TriangleVertices, 6> triangles = {
+      Rectangle(0, 0, 50, 50).CalculateTriangles(),     Rectangle(50, 50, 50, 50).CalculateTriangles(),
+      Rectangle(100, 100, 50, 50).CalculateTriangles(), Rectangle(100, 0, 50, 50).CalculateTriangles(),
+      Rectangle(0, 100, 50, 50).CalculateTriangles(),   Rectangle(0, 200, 50, 50).CalculateTriangles()};
 
   std::vector<float> vertices;
-
-  std::copy(verticesArray1.begin(), verticesArray1.end(), std::back_inserter(vertices));
-  std::copy(verticesArray2.begin(), verticesArray2.end(), std::back_inserter(vertices));
+  vertices.resize(triangles.size() * NUMBER_OF_VERTICES * NUMBER_OF_COORDINATES);
+  std::memcpy(vertices.data(), triangles.data(), sizeof(triangles));
 
   GLuint VBO, VAO;
   glGenVertexArrays(1, &VAO);
@@ -104,7 +101,7 @@ int main() {
     // Draw our first triangle
     glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);  // We set the count to 6 since we're drawing 6 vertices now (2 triangles); not 3!
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
     glBindVertexArray(0);
 
     // Swap the screen buffers

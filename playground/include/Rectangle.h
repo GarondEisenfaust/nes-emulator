@@ -9,7 +9,7 @@
 class Rectangle {
  public:
   using Vertex = std::array<float, NUMBER_OF_VERTICES>;
-  using TriangleVertices = std::array<Vertex, NUMBER_OF_VERTICES * NUMBER_OF_COORDINATES>;
+  using TriangleVertices = std::array<float, NUMBER_OF_VERTICES * NUMBER_OF_COORDINATES>;
 
   Rectangle(float x, float y, float width, float height);
 
