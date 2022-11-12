@@ -13,10 +13,7 @@ std::tuple<float, float, float, float> CalculateScreenSpace(float x, float y, fl
 }
 
 Rectangle::Rectangle(float x, float y, float width, float height, RenderContext& renderContext)
-    : mX(x), mY(y), mWidth(width), mHeight(height), mRenderContext(renderContext) {
-  auto triangles = CalculateTriangles();
-  mRenderContext.AddVertices(triangles);
-}
+    : mX(x), mY(y), mWidth(width), mHeight(height), mRenderContext(renderContext) {}
 
 Rectangle::TriangleVertices Rectangle::CalculateTriangles() {
   auto [x, y, width, height] = CalculateScreenSpace(mX, mY, mWidth, mHeight, mRenderContext);
