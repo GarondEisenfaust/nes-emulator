@@ -6,6 +6,7 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE CONAN_PKG::glfw
   PRIVATE CONAN_PKG::glew
+  PRIVATE CONAN_PKG::glm
   PRIVATE CONAN_PKG::boost)
 
 message(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)

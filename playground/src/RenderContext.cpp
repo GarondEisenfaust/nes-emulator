@@ -9,7 +9,9 @@ std::string GetExecutableDirectory() { return std::string(boost::dll::program_lo
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 RenderContext::RenderContext()
-    : mVertices(std::make_unique<std::vector<float>>()), mShapes(std::make_unique<std::vector<Rectangle>>()) {
+    : mVertices(std::make_unique<std::vector<float>>()),
+      mColors(std::make_unique<std::vector<float>>()),
+      mShapes(std::make_unique<std::vector<Rectangle>>()) {
   // Init GLFW
   glfwInit();
   // Set all the required options for GLFW
@@ -49,14 +51,18 @@ RenderContext::RenderContext()
 void RenderContext::Init() {  // Link shaders
   glGenVertexArrays(1, &mVAO);
   glGenBuffers(1, &mVBO);
-  // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
+  glGenBuffers(1, &mVBOColors);
 }
 
 void RenderContext::UpdateBuffers() {
   mVertices->clear();
+  mColors->clear();
   std::for_each(mShapes->begin(), mShapes->end(), [this](auto shape) {
     auto triangles = shape.CalculateTriangles();
     this->AddVertices(triangles);
+    mColors->push_back(shape.color.x);
+    mColors->push_back(shape.color.y);
+    mColors->push_back(shape.color.z);
   });
 
   glBindVertexArray(mVAO);
@@ -70,12 +76,21 @@ void RenderContext::UpdateBuffers() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);  // Note that this is allowed, the call to glVertexAttribPointer registered VBO as
                                      // the currently bound vertex buffer object so afterwards we can safely unbind
 
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOColors);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * mColors->size(), mColors->data(), GL_DYNAMIC_DRAW);
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+  glEnableVertexAttribArray(1);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   glBindVertexArray(0);  // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
 }
 
 RenderContext::~RenderContext() {  // Properly de-allocate all resources once they've outlived their purpose
   glDeleteVertexArrays(1, &mVAO);
   glDeleteBuffers(1, &mVBO);
+  glDeleteBuffers(1, &mVBOColors);
   // Terminate GLFW, clearing any resources allocated by GLFW.
   glfwTerminate();
 }
@@ -84,8 +99,11 @@ void RenderContext::AddVertices(Rectangle::TriangleVertices& verticesToAdd) {
   std::copy(verticesToAdd.begin(), verticesToAdd.end(), std::back_inserter(*mVertices));
 }
 
-void RenderContext::DrawRectangle(float x, float y, float width, float height) {
-  mShapes->emplace_back(x, y, width, height, *this);
+void RenderContext::DrawRectangle(float x, float y, float width, float height, glm::vec3 color) {
+  Rectangle rectangle(x, y, width, height, *this);
+  rectangle.color = color;
+
+  mShapes->push_back(rectangle);
 }
 
 void RenderContext::GameLoop(std::function<void()> loop) {  // Game loop
@@ -136,7 +154,9 @@ void RenderContext::DrawGrid() {
       const auto yPos = y * rectangleHeight;
 
       if (change * (num % 2 == 0)) {
-        DrawRectangle(xPos, yPos, rectangleWidth, rectangleHeight);
+        DrawRectangle(xPos, yPos, rectangleWidth, rectangleHeight, glm::vec3{1, 0, 0});
+      } else {
+        DrawRectangle(xPos, yPos, rectangleWidth, rectangleHeight, glm::vec3{0, 0, 1});
       }
       num++;
     }

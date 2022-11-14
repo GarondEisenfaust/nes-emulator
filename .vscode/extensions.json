@@ -3,6 +3,7 @@
     "ms-vscode.cmake-tools",
     "fredericbonnet.cmake-test-adapter",
     "xaver.clang-format",
-    "ms-vscode.cpptools"
+    "ms-vscode.cpptools",
+    "dtoplak.vscode-glsllint"
   ]
 }

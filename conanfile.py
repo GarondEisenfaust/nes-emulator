@@ -14,6 +14,7 @@ class CMakeTemplateConan(ConanFile):
     self.requires("glew/2.2.0", private=True, override=False)
     self.requires("fmt/9.1.0", private=True, override=False)
     self.requires("boost/1.80.0", private=True, override=False)
+    self.requires("glm/0.9.9.8", private=True, override=False)
 
   def build_requirements(self):
     pass
