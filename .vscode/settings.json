@@ -72,7 +72,10 @@
     "forward_list": "cpp",
     "source_location": "cpp",
     "valarray": "cpp",
-    "*.inc": "cpp"
+    "*.inc": "cpp",
+    "strstream": "cpp",
+    "complex": "cpp",
+    "typeindex": "cpp"
   },
   "cmake.configureOnOpen": false,
   "[cpp]": {

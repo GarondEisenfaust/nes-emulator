@@ -20,4 +20,6 @@ std::stringstream IntToHex(T num) {
 template <>
 std::stringstream IntToHex(uint8_t num);
 
+float GetRandomFloat();
+
 }  // namespace Util

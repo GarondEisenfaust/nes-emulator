@@ -23,9 +23,9 @@ Shader::Shader(const char* path, GLuint shaderType) {
 
 Shader::~Shader() { Delete(); }
 
-GLuint Shader::GetHandle() { return mHandle; }
+GLuint Shader::GetHandle() const { return mHandle; }
 
-bool Shader::WasSuccessful() { return mSuccessful; }
+bool Shader::WasSuccessful() const { return mSuccessful; }
 
 std::tuple<GLint, GLuint> Shader::Compile(const GLchar* shaderProgram, GLuint shaderType) {
   GLuint handle = glCreateShader(shaderType);
@@ -39,8 +39,6 @@ std::tuple<GLint, GLuint> Shader::Compile(const GLchar* shaderProgram, GLuint sh
   glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &logLength);
   std::vector<char> vertShaderError((logLength > 1) ? logLength : 1);
   glGetShaderInfoLog(handle, logLength, NULL, &vertShaderError[0]);
-  auto p = &vertShaderError[0];
-  std::string l = p;
   std::cout << &vertShaderError[0] << std::endl;
 
   return {success, handle};

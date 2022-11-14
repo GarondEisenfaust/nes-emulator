@@ -1,32 +1,29 @@
 #pragma once
 
+#include "Vertex.h"
 #include "glm/vec3.hpp"
 #include <GL/glew.h>
 #include <array>
 #include <memory>
-#define NUMBER_OF_COORDINATES 3
+
 #define NUMBER_OF_VERTICES 6
-#define VERTEX_SIZE sizeof(float) * NUMBER_OF_COORDINATES
 
 class RenderContext;
 
 class Rectangle {
  public:
-  using Vertex = std::array<float, NUMBER_OF_VERTICES>;
-  using TriangleVertices = std::array<float, NUMBER_OF_VERTICES * NUMBER_OF_COORDINATES>;
+  using TriangleVertices = std::array<Vertex, NUMBER_OF_VERTICES>;
 
-  Rectangle(float x, float y, float width, float height, RenderContext& renderContext);
+  Rectangle(float x, float y, float width, float height, glm::vec3 color, RenderContext& renderContext);
   ~Rectangle() = default;
-  Rectangle(Rectangle&& other) = default;
-  Rectangle(const Rectangle& other) = default;
 
   TriangleVertices CalculateTriangles();
-  glm::vec3 color;
 
  private:
   float mX;
   float mY;
   float mWidth;
   float mHeight;
+  glm::vec3 mColor;
   RenderContext& mRenderContext;
 };

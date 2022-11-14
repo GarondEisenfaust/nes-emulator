@@ -1,5 +1,6 @@
 #pragma once
 #include "Rectangle.h"
+#include "ShaderProgram.h"
 #include "glm/vec3.hpp"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -26,15 +27,15 @@ class RenderContext {
   int mWidth;
   int mHeight;
   GLFWwindow* mWindow;
-  GLuint mShaderProgram;
-  std::unique_ptr<std::vector<float>> mVertices;
-  std::unique_ptr<std::vector<float>> mColors;
+  std::vector<float> mVertices;
+  std::vector<float> mColors;
+  ShaderProgram mShaderProgram;
 
-  std::unique_ptr<std::vector<Rectangle>> mShapes;
-  GLuint mVBO;
-  GLuint mVBOColors;
+  std::vector<Rectangle> mShapes;
 
   GLuint mVAO;
+  GLuint mVBO;
+  GLuint mVBOColors;
 
   void UpdateBuffers();
 };

@@ -12,25 +12,24 @@ std::tuple<float, float, float, float> CalculateScreenSpace(float x, float y, fl
   return {screenX, screenY, screenWidth, screenHeight};
 }
 
-Rectangle::Rectangle(float x, float y, float width, float height, RenderContext& renderContext)
-    : mX(x), mY(y), mWidth(width), mHeight(height), mRenderContext(renderContext) {}
+Rectangle::Rectangle(float x, float y, float width, float height, glm::vec3 color, RenderContext& renderContext)
+    : mX(x), mY(y), mWidth(width), mHeight(height), mRenderContext(renderContext), mColor(color) {}
 
 Rectangle::TriangleVertices Rectangle::CalculateTriangles() {
   auto [x, y, width, height] = CalculateScreenSpace(mX, mY, mWidth, mHeight, mRenderContext);
 
-  Vertex topLeft{x, y, 0};
-  Vertex topRight{x + width, y, 0};
-  Vertex bottomLeft{x, y + height, 0};
-  Vertex bottomRight{x + width, y + height, 0};
+  Vertex topLeft{{x, y, 0}, mColor};
+  Vertex topRight{{x + width, y, 0}, mColor};
+  Vertex bottomLeft{{x, y + height, 0}, mColor};
+  Vertex bottomRight{{x + width, y + height, 0}, mColor};
 
   TriangleVertices triangleVertices;
-  std::memcpy(&(triangleVertices[0 * NUMBER_OF_COORDINATES]), bottomRight.data(), VERTEX_SIZE);
-  std::memcpy(&(triangleVertices[1 * NUMBER_OF_COORDINATES]), bottomLeft.data(), VERTEX_SIZE);
-  std::memcpy(&(triangleVertices[2 * NUMBER_OF_COORDINATES]), topLeft.data(), VERTEX_SIZE);
-
-  std::memcpy(&(triangleVertices[3 * NUMBER_OF_COORDINATES]), topLeft.data(), VERTEX_SIZE);
-  std::memcpy(&(triangleVertices[4 * NUMBER_OF_COORDINATES]), topRight.data(), VERTEX_SIZE);
-  std::memcpy(&(triangleVertices[5 * NUMBER_OF_COORDINATES]), bottomRight.data(), VERTEX_SIZE);
+  triangleVertices[0] = bottomRight;
+  triangleVertices[1] = bottomLeft;
+  triangleVertices[2] = topLeft;
+  triangleVertices[3] = topLeft;
+  triangleVertices[4] = topRight;
+  triangleVertices[5] = bottomRight;
 
   return triangleVertices;
 }

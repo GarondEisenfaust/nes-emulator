@@ -4,6 +4,7 @@ create_executable()
 
 target_link_libraries(
   ${PROJECT_NAME}
+  PRIVATE util
   PRIVATE CONAN_PKG::glfw
   PRIVATE CONAN_PKG::glew
   PRIVATE CONAN_PKG::glm
@@ -14,6 +15,6 @@ message(${PROJECT_BINARY_DIR}/shaders)
 
 add_custom_command(
   TARGET ${PROJECT_NAME}
-  POST_BUILD
+  PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/shaders
           ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)

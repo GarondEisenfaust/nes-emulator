@@ -7,8 +7,8 @@ class Shader {
  public:
   Shader(const char* path, GLuint shaderType);
   ~Shader();
-  GLuint GetHandle();
-  bool WasSuccessful();
+  GLuint GetHandle() const;
+  bool WasSuccessful() const;
   void Delete();
 
  private:
