@@ -1,11 +1,12 @@
 #pragma once
 #include "GL/glew.h"
 #include <string>
+#include <string_view>
 #include <tuple>
 
 class Shader {
  public:
-  Shader(const char* path, GLuint shaderType);
+  Shader(std::string_view path, GLuint shaderType);
   ~Shader();
   GLuint GetHandle() const;
   bool WasSuccessful() const;

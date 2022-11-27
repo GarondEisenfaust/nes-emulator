@@ -1,5 +1,5 @@
 #version 330 core
 
-in vec3 vColor;
+in vec4 vColor;
 
-void main() { gl_FragColor = vec4(vColor.r, vColor.g, vColor.b, 1.0f); };
+void main() { gl_FragColor = vec4(vColor.r, vColor.g, vColor.b, vColor.a); };

@@ -1,18 +1,18 @@
-#include "Shader.h"
+#include "rendering/Shader.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <tuple>
 #include <vector>
 
-std::string ReadFile(const char* path) {
-  std::ifstream fileStream(path);
+std::string ReadFile(std::string_view path) {
+  std::ifstream fileStream(path.begin());
   std::stringstream buffer;
   buffer << fileStream.rdbuf();
   return buffer.str();
 }
 
-Shader::Shader(const char* path, GLuint shaderType) {
+Shader::Shader(std::string_view path, GLuint shaderType) {
   mShaderCode = ReadFile(path);
   auto* codePointer = mShaderCode.c_str();
   mShaderType = shaderType;

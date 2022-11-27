@@ -1,4 +1,4 @@
-#include "ShaderProgram.h"
+#include "rendering/ShaderProgram.h"
 
 ShaderProgram::ShaderProgram() { mHandle.reset(); }
 
