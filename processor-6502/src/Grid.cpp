@@ -1,4 +1,4 @@
-#include "rendering/Grid.h"
+#include "Grid.h"
 #include "Util.h"
 
 Grid::Grid(int width, int height) : mWidth(width), mHeight(height) { mPixels.reserve(mWidth * mHeight); }

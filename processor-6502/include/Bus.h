@@ -8,12 +8,8 @@
 
 class Bus {
  public:
-  Bus();
+  Bus(RAM* ram);
   ~Bus();
-  Processor6502 cpu;
-  PixelProcessingUnit ppu;
-
-  std::unique_ptr<RAM> ram;
 
   void InsertCartridge(Cartridge* cartridge);
   void Reset();
@@ -22,7 +18,12 @@ class Bus {
   void CpuWrite(uint16_t addr, uint8_t data);
   uint8_t CpuRead(uint16_t addr, bool bReadOnly = false);
 
+  Processor6502* mCpu;
+  PixelProcessingUnit* mPpu;
+
  private:
   Cartridge* mCartridge;
   uint32_t mSystemClockCounter;
+
+  RAM* mRam;
 };

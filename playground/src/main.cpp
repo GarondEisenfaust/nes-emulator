@@ -1,5 +1,8 @@
+#include "Bus.h"
 #include "Definitions.h"
-#include "rendering/Grid.h"
+#include "Grid.h"
+#include "PixelProcessingUnit.h"
+#include "Processor6502.h"
 #include "rendering/RenderContext.h"
 #include <array>
 #include <iostream>
@@ -22,6 +25,14 @@ int main() {
   vertexArray->SetDrawBuffer(pixels);
 
   renderContext.AddVertexArray(vertexArray);
+
+  auto ram = std::make_unique<RAM>();
+  Bus bus(ram.get());
+  Processor6502 cpu;
+  PixelProcessingUnit ppu(&grid);
+
+  cpu.ConnectBus(&bus);
+  ppu.ConnectBus(&bus);
 
   renderContext.GameLoop([&grid, colors]() {
     grid.UpdateColor();

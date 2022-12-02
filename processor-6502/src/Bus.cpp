@@ -1,11 +1,7 @@
 #include "Bus.h"
 #include "Definitions.h"
 
-Bus::Bus() : mSystemClockCounter(0) {
-  cpu.ConnectBus(this);
-
-  ram = std::make_unique<RAM>();
-}
+Bus::Bus(RAM* ram) : mRam(ram), mSystemClockCounter(0) {}
 
 Bus::~Bus() {}
 
@@ -14,11 +10,11 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
     return;
   }
   if (addr >= RAM_START && addr <= RAM_END) {
-    ram->at(addr % RAM_SIZE) = data;
+    mRam->at(addr % RAM_SIZE) = data;
     return;
   }
   if (addr >= PPU_RAM_START && addr <= PPU_RAM_END) {
-    ppu.CpuWrite(addr % PPU_RAM_SIZE, data);
+    mPpu->CpuWrite(addr % PPU_RAM_SIZE, data);
     return;
   }
 }
@@ -28,10 +24,10 @@ uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
     return UNDEFINED;
   }
   if (addr >= RAM_START && addr <= RAM_END) {
-    return ram->at(addr % RAM_SIZE);
+    return mRam->at(addr % RAM_SIZE);
   }
   if (addr >= PPU_RAM_START && addr <= PPU_RAM_END) {
-    return ppu.CpuRead(addr % PPU_RAM_SIZE, bReadOnly);
+    return mPpu->CpuRead(addr % PPU_RAM_SIZE, bReadOnly);
   }
 
   return UNDEFINED;
@@ -39,11 +35,11 @@ uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
 
 void Bus::InsertCartridge(Cartridge* cartridge) {
   mCartridge = cartridge;
-  ppu.InsertCartridge(cartridge);
+  mPpu->InsertCartridge(cartridge);
 }
 
 void Bus::Reset() {
-  cpu.Reset();
+  mCpu->Reset();
   mSystemClockCounter = 0;
 }
 

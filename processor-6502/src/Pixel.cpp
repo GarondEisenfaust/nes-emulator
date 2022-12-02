@@ -1,4 +1,4 @@
-#include "rendering/Pixel.h"
+#include "Pixel.h"
 #include "Definitions.h"
 #include <cstring>
 #include <tuple>

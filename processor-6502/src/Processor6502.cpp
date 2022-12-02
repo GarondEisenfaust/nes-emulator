@@ -96,7 +96,10 @@ Processor6502::Processor6502() {
             {"???", &a::XXX, &a::IMP, 7}};
 }
 
-void Processor6502::ConnectBus(Bus* bus) { mBus = bus; }
+void Processor6502::ConnectBus(Bus* bus) {
+  mBus = bus;
+  mBus->mCpu = this;
+}
 
 uint8_t Processor6502::Read(uint16_t addr) { return mBus->CpuRead(addr); }
 uint8_t Processor6502::ReadFromStack(uint16_t addr) { return mBus->CpuRead(STACK_BEGIN + addr); }

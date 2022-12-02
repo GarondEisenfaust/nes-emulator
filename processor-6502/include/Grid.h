@@ -1,6 +1,5 @@
 #pragma once
 #include "Pixel.h"
-#include "RenderContext.h"
 #include <vector>
 
 class Grid {

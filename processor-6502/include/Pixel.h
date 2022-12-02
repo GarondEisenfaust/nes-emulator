@@ -1,5 +1,5 @@
 #pragma once
-#include "rendering/PixelColor.h"
+#include "PixelColor.h"
 #include <array>
 
 class Pixel {

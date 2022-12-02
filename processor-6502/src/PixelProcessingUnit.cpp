@@ -1,5 +1,11 @@
 #include "PixelProcessingUnit.h"
+#include "Bus.h"
+#include "ColorPalette.h"
 #include "Definitions.h"
+#include "Grid.h"
+
+PixelProcessingUnit::PixelProcessingUnit(Grid* grid)
+    : mCycle(0), mScanline(0), mFrameComplete(false), mColorPalette(std::move(MakePixelColors())), mGrid(grid) {}
 
 void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
   switch (addr) {
@@ -59,4 +65,21 @@ uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
 
 void PixelProcessingUnit::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
 
-void PixelProcessingUnit::Clock() {}
+void PixelProcessingUnit::Clock() {
+  mGrid->GetPixel(mCycle, mScanline).SetColor(PixelColor{88, 88, 88, 100});
+  mCycle++;
+
+  if (mCycle >= 341) {
+    mCycle = 0;
+    mScanline++;
+    if (mScanline >= 261) {
+      mScanline = -1;
+      mFrameComplete = true;
+    }
+  }
+}
+
+void PixelProcessingUnit::ConnectBus(Bus* bus) {
+  mBus = bus;
+  mBus->mPpu = this;
+}
