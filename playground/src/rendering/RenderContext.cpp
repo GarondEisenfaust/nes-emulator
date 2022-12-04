@@ -2,11 +2,9 @@
 #include "Definitions.h"
 #include "Util.h"
 #include "rendering/Shader.h"
-#include <boost/dll/runtime_symbol_info.hpp>
 #include <cstdlib>
 #include <iostream>
 
-std::string GetExecutableDirectory() { return std::string(boost::dll::program_location().parent_path().c_str()); }
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 RenderContext::RenderContext() : mShaderProgram() {
@@ -28,7 +26,7 @@ RenderContext::RenderContext() : mShaderProgram() {
   glfwGetFramebufferSize(mWindow, &mWidth, &mHeight);
   glViewport(0, 0, mWidth, mHeight);
 
-  auto workDir = GetExecutableDirectory();
+  auto workDir = Util::GetExecutableDirectory();
   Shader fragmentShader((workDir + "/shaders/FragmentShader.glsl").c_str(), GL_FRAGMENT_SHADER);
   Shader vertexShader((workDir + "/shaders/VertexShader.glsl").c_str(), GL_VERTEX_SHADER);
 

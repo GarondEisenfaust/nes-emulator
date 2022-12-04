@@ -1,11 +1,15 @@
 #include "Bus.h"
+#include "Cartridge.h"
 #include "Definitions.h"
 #include "Grid.h"
 #include "PixelProcessingUnit.h"
 #include "Processor6502.h"
+#include "Util.h"
+#include "fmt/format.h"
 #include "rendering/RenderContext.h"
 #include <array>
 #include <iostream>
+#include <string>
 
 int main() {
   RenderContext renderContext;
@@ -31,11 +35,15 @@ int main() {
   Processor6502 cpu;
   PixelProcessingUnit ppu(&grid);
 
+  auto workDir = Util::GetExecutableDirectory();
+  Cartridge cartridge(fmt::format("{}/color_test.nes", workDir));
+  bus.InsertCartridge(&cartridge);
+
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
 
-  renderContext.GameLoop([&grid, colors]() {
-    grid.UpdateColor();
+  renderContext.GameLoop([&grid, &bus, colors]() {
+    bus.Clock();
     auto colorData = grid.MakeColorData();
     colors->SetData(colorData);
   });

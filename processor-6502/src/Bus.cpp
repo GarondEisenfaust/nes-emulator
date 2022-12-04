@@ -1,5 +1,6 @@
 #include "Bus.h"
 #include "Definitions.h"
+#include "Grid.h"
 
 Bus::Bus(RAM* ram) : mRam(ram), mSystemClockCounter(0) {}
 
@@ -43,4 +44,10 @@ void Bus::Reset() {
   mSystemClockCounter = 0;
 }
 
-void Bus::Clock() {}
+void Bus::Clock() {
+  mPpu->Clock();
+  if (mSystemClockCounter % 3 == 0) {
+    mCpu->Clock();
+  }
+  mSystemClockCounter++;
+}

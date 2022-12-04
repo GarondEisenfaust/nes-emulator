@@ -1,5 +1,7 @@
 #include "Util.h"
+#include <boost/dll/runtime_symbol_info.hpp>
 #include <random>
+#include <string>
 
 namespace Util {
 
@@ -22,4 +24,7 @@ std::stringstream IntToHex(uint8_t num) {
 }
 
 float GetRandomFloat() { return rand() / static_cast<float>(RAND_MAX); }
+
+std::string GetExecutableDirectory() { return std::string(boost::dll::program_location().parent_path().c_str()); }
+
 }  // namespace Util
