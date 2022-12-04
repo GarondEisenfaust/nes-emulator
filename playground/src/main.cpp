@@ -36,7 +36,7 @@ int main() {
   PixelProcessingUnit ppu(&grid);
 
   auto workDir = Util::GetExecutableDirectory();
-  Cartridge cartridge(fmt::format("{}/color_test.nes", workDir));
+  Cartridge cartridge(fmt::format("{}/roms/color_test.nes", workDir));
   bus.InsertCartridge(&cartridge);
 
   cpu.ConnectBus(&bus);
