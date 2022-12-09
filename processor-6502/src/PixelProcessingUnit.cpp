@@ -3,6 +3,7 @@
 #include "ColorPalette.h"
 #include "Definitions.h"
 #include "Grid.h"
+#include <cstdlib>
 
 PixelProcessingUnit::PixelProcessingUnit(Grid* grid)
     : mCycle(0), mScanline(0), mFrameComplete(false), mColorPalette(std::move(MakePixelColors())), mGrid(grid) {}
@@ -66,7 +67,9 @@ uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
 void PixelProcessingUnit::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
 
 void PixelProcessingUnit::Clock() {
-  mGrid->GetPixel(mCycle, mScanline).SetColor(PixelColor{88, 88, 88, 100});
+  auto index = 0 + (rand() % mColorPalette->size());
+
+  mGrid->GetPixel(mCycle, mScanline).SetColor(mColorPalette->at(index));
   mCycle++;
 
   if (mCycle >= 341) {

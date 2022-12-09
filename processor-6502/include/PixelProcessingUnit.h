@@ -23,12 +23,12 @@ class PixelProcessingUnit {
   void ConnectBus(Bus* bus);
   void InsertCartridge(Cartridge* cartridge);
   void Clock();
+  bool mFrameComplete;
 
  private:
   Cartridge* mCartridge;
   int mCycle;
   int mScanline;
-  bool mFrameComplete;
   Bus* mBus;
   Grid* mGrid;
   std::unique_ptr<std::array<PixelColor, 56>> mColorPalette;
