@@ -1,7 +1,11 @@
 #pragma once
 #include "Cartridge.h"
+#include "ColorPalette.h"
 #include "PixelColor.h"
+#include "PixelProcessingUnitRegisterDefinitions.h"
+#include "Sprite.h"
 #include <cstdint>
+#include <utility>
 
 #define PPU_RAM_START 0x2000
 #define PPU_RAM_END 0x2000
@@ -9,6 +13,9 @@
 
 class Bus;
 class Grid;
+
+using PatternMemory = std::array<std::array<uint8_t, 128 * 128>, 2>;
+
 class PixelProcessingUnit {
  public:
   PixelProcessingUnit(Grid* grid);
@@ -23,7 +30,11 @@ class PixelProcessingUnit {
   void ConnectBus(Bus* bus);
   void InsertCartridge(Cartridge* cartridge);
   void Clock();
+
+  Sprite& GetPatternTable(uint8_t i, uint8_t palette);
+  PixelColor& GetColorFromPalette(uint8_t palette, uint8_t pixel);
   bool mFrameComplete;
+  bool nmi;
 
  private:
   Cartridge* mCartridge;
@@ -31,5 +42,17 @@ class PixelProcessingUnit {
   int mScanline;
   Bus* mBus;
   Grid* mGrid;
-  std::unique_ptr<std::array<PixelColor, 56>> mColorPalette;
+  std::unique_ptr<ColorPalette> mColorPalette;
+  std::unique_ptr<PatternMemory> mPatternMemory;
+  uint8_t tblName[2][1024];
+  uint8_t tblPattern[2][4096];
+  uint8_t tblPalette[32];
+
+  StatusRegister mStatusRegister;
+  MaskRegister mMaskRegister;
+  ControlRegister mControlRegister;
+
+  uint8_t mAddressLatch = 0x00;
+  uint8_t mPpuDataBuffer = 0x00;
+  uint16_t mPpuAddress = 0x0000;
 };

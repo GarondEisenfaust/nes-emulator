@@ -11,10 +11,7 @@ class Cartridge {
     bool hasRead;
   };
 
-  enum MIRROR {
-    HORIZONTAL,
-    VERTICAL,
-  };
+  enum MIRROR { HORIZONTAL, VERTICAL, ONESCREEN_LO, ONESCREEN_HI };
 
   Cartridge(const std::string& path);
   virtual ~Cartridge() = default;
@@ -24,6 +21,7 @@ class Cartridge {
 
   ReadResult PpuRead(uint16_t address);
   bool PpuWrite(uint16_t address, uint8_t data);
+  MIRROR mMirror;
 
  private:
   std::vector<uint8_t> mProgramMemory;
@@ -33,7 +31,6 @@ class Cartridge {
   uint8_t mProgramBanks;
   uint8_t mCharacterBanks;
   bool mImageValid;
-  MIRROR mMirror;
 
   std::unique_ptr<IMapper> mMapper;
 };

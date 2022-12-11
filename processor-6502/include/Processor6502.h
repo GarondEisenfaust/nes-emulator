@@ -17,6 +17,9 @@ class Processor6502 {
   virtual void Write(uint16_t addr, uint8_t data);
   virtual void WriteToStack(uint16_t addr, uint8_t data);
 
+  void Interrupt();
+  void NonMaskableInterrupt();
+
   virtual uint8_t Fetch();
 
   void Clock();
@@ -131,4 +134,6 @@ class Processor6502 {
   uint8_t opcode = 0x00;       // Is the instruction byte
   uint8_t cycles = 0;          // Counts how many cycles the instruction has remaining
   uint32_t clock_count = 0;    // A global accumulation of the number of clocks
+
+  void Interrupt(uint16_t address);
 };

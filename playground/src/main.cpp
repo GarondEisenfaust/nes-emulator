@@ -60,7 +60,8 @@ int main() {
 
     {
       using namespace std::chrono_literals;
-      auto end = now + (1s / 60);
+      auto diff = (1000ms / 60);
+      auto end = now + diff;
       std::this_thread::sleep_until(end);
     }
   });

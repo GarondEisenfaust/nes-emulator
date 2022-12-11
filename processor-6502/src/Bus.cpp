@@ -49,5 +49,11 @@ void Bus::Clock() {
   if (mSystemClockCounter % 3 == 0) {
     mCpu->Clock();
   }
+
+  if (mPpu->nmi) {
+    mPpu->nmi = false;
+    mCpu->NonMaskableInterrupt();
+  }
+
   mSystemClockCounter++;
 }

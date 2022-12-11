@@ -692,3 +692,29 @@ uint8_t Processor6502::TYA() {
 }
 
 uint8_t Processor6502::XXX() { return 0; }
+
+void Processor6502::Interrupt(uint16_t address) {
+  if (GetFlag(I) == 0) {
+    Write(0x0100 + stackPointer, (pc >> 8) & 0x00FF);
+    stackPointer--;
+    Write(0x0100 + stackPointer, pc & 0x00FF);
+    stackPointer--;
+
+    SetFlag(B, 0);
+    SetFlag(U, 1);
+    SetFlag(I, 1);
+    Write(0x0100 + stackPointer, status);
+    stackPointer--;
+
+    addr_abs = 0xFFFE;
+    uint16_t lo = Read(addr_abs + 0);
+    uint16_t hi = Read(addr_abs + 1);
+    pc = (hi << 8) | lo;
+
+    cycles = 7;
+  }
+}
+
+void Processor6502::Interrupt() { Interrupt(0xFFFE); }
+
+void Processor6502::NonMaskableInterrupt() { Interrupt(0xFFFA); }
