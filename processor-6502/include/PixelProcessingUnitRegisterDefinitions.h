@@ -36,6 +36,17 @@ union ControlRegister {
     uint8_t slaveMode : 1;
     uint8_t enableNmi : 1;
   };
-
   uint8_t reg;
+};
+
+union LoopyRegister {
+  struct {
+    uint16_t coarseX : 5;
+    uint16_t coarseY : 5;
+    uint16_t nameTableX;
+    uint16_t nameTableY;
+    uint16_t fineY : 3;
+    uint16_t unused;
+  };
+  uint16_t reg = 0x0000;
 };

@@ -9,7 +9,7 @@
 
 #define PPU_RAM_START 0x2000
 #define PPU_RAM_END 0x2000
-#define PPU_RAM_SIZE 0x0008
+#define PPU_RAM_SIZE 0x0007
 
 class Bus;
 class Grid;
@@ -54,5 +54,18 @@ class PixelProcessingUnit {
 
   uint8_t mAddressLatch = 0x00;
   uint8_t mPpuDataBuffer = 0x00;
-  uint16_t mPpuAddress = 0x0000;
+
+  LoopyRegister vRamAddr;
+  LoopyRegister tRamAddr;
+
+  uint8_t fineX = 0x00;
+
+  uint8_t mBgNextTileId = 0x00;
+  uint8_t mBgNextTileAttribute = 0x00;
+  uint8_t mBgNextTileLsb = 0x00;
+  uint8_t mBgNextTileMsb = 0x00;
+  uint16_t mBgShifterPatternLow = 0x0000;
+  uint16_t mBgShifterPatternHigh = 0x0000;
+  uint16_t mBgShifterAttributeLow = 0x0000;
+  uint16_t mBgShifterAttributeHigh = 0x0000;
 };

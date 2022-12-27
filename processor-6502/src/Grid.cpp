@@ -48,14 +48,3 @@ std::vector<float> Grid::MakeColorData() {
 
   return result;
 }
-
-void Grid::UpdateColor() {
-  for (auto& pixel : mPixels) {
-    auto r = Util::GetRandomFloat();
-    auto g = Util::GetRandomFloat();
-    auto b = Util::GetRandomFloat();
-    auto a = Util::GetRandomFloat();
-    PixelColor color{r, g, b, a};
-    pixel.SetColor(color);
-  }
-}

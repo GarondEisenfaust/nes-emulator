@@ -4,7 +4,7 @@
 
 #define RAM_START 0x0000
 #define RAM_END 0x1FFF
-#define RAM_SIZE 0x0800
+#define RAM_SIZE 0x07FF
 
 #define VRAM_SIZE 0x0400
 #define VRAM_NUMBER 2

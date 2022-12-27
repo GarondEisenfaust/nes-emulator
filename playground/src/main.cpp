@@ -48,22 +48,20 @@ int main() {
   ppu.ConnectBus(&bus);
 
   auto workDir = Util::GetExecutableDirectory();
-  Cartridge cartridge(fmt::format("{}/roms/color_test.nes", workDir));
+  Cartridge cartridge(fmt::format("{}/roms/nestest.nes", workDir));
   bus.InsertCartridge(&cartridge);
 
   renderContext.GameLoop([&grid, &bus, &ppu, colors]() {
+    using namespace std::chrono_literals;
+    auto diff = (1000ms / 60);
     auto now = std::chrono::system_clock::now();
+    auto next = now + diff;
 
     RenderCompleteFrame(bus, ppu);
     auto colorData = grid.MakeColorData();
     colors->SetData(colorData);
 
-    {
-      using namespace std::chrono_literals;
-      auto diff = (1000ms / 60);
-      auto end = now + diff;
-      std::this_thread::sleep_until(end);
-    }
+    std::this_thread::sleep_until(next);
   });
   return 0;
 }
