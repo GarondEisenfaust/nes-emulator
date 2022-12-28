@@ -5,7 +5,7 @@
 #define MAPPER_END 0xFFFF
 
 struct MappingResult {
-  uint16_t mappedAddress;
+  uint32_t mappedAddress;
   bool mapped;
 };
 

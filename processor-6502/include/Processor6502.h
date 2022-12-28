@@ -129,11 +129,11 @@ class Processor6502 {
   std::vector<Instruction> lookup;
   Bus* mBus;
 
-  uint16_t addr_abs = 0x0000;  // All used memory addresses end up in here
-  uint16_t addr_rel = 0x00;    // Represents absolute address following a branch
-  uint8_t opcode = 0x00;       // Is the instruction byte
-  uint8_t cycles = 0;          // Counts how many cycles the instruction has remaining
-  uint32_t clock_count = 0;    // A global accumulation of the number of clocks
+  uint16_t addrAbs = 0x0000;  // All used memory addresses end up in here
+  uint16_t addrRel = 0x00;    // Represents absolute address following a branch
+  uint8_t opcode = 0x00;      // Is the instruction byte
+  uint8_t cycles = 0;         // Counts how many cycles the instruction has remaining
+  uint32_t clock_count = 0;   // A global accumulation of the number of clocks
 
-  void Interrupt(uint16_t address);
+  void Interrupt(uint16_t address, uint8_t numCycles);
 };

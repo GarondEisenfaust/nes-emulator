@@ -2,8 +2,8 @@
 
 Processor6502Proxy::Processor6502Proxy() : Processor6502() {}
 
-uint16_t Processor6502Proxy::GetAddrAbs() { return addr_abs; }
-void Processor6502Proxy::SetAddrAbs(uint16_t theAddrAbs) { addr_abs = theAddrAbs; }
+uint16_t Processor6502Proxy::GetAddrAbs() { return addrAbs; }
+void Processor6502Proxy::SetAddrAbs(uint16_t theAddrAbs) { addrAbs = theAddrAbs; }
 void Processor6502Proxy::SetOpcode(uint8_t theOpcode) { opcode = theOpcode; }
 
 // Addressing Modes =============================================

@@ -27,7 +27,7 @@ Cartridge::Cartridge(const std::string& path) {
   mImageValid = false;
   std::ifstream romStream;
 
-  romStream.open(path, std::ifstream ::binary);
+  romStream.open(path, std::ifstream::binary);
 
   if (!romStream.is_open()) {
     return;
@@ -46,10 +46,11 @@ Cartridge::Cartridge(const std::string& path) {
   romStream.read(reinterpret_cast<char*>(mProgramMemory.data()), mProgramMemory.size());
 
   mCharacterBanks = header.characterRomChunks;
-  mCharacterMemory.resize(mCharacterBanks * 8192);
+  auto banksToAllocate = mCharacterBanks != 0 ? mCharacterBanks : 1;
+  mCharacterMemory.resize(banksToAllocate * 8192);
   romStream.read(reinterpret_cast<char*>(mCharacterMemory.data()), mCharacterMemory.size());
 
-  mMapper = std::make_unique<Mapper000>();
+  mMapper = std::make_unique<Mapper000>(mProgramBanks, mCharacterBanks);
 
   mImageValid = true;
   romStream.close();
@@ -64,7 +65,7 @@ Cartridge::ReadResult Cartridge::CpuRead(uint16_t address) {
 }
 
 bool Cartridge::CpuWrite(uint16_t address, uint8_t data) {
-  auto mappingResult = mMapper->CpuMapRead(address);
+  auto mappingResult = mMapper->CpuMapWrite(address);
   if (mappingResult.mapped) {
     mProgramMemory[mappingResult.mappedAddress] = data;
     return true;
@@ -73,7 +74,7 @@ bool Cartridge::CpuWrite(uint16_t address, uint8_t data) {
 }
 
 Cartridge::ReadResult Cartridge::PpuRead(uint16_t address) {
-  auto mappingResult = mMapper->CpuMapRead(address);
+  auto mappingResult = mMapper->PpuMapRead(address);
   if (mappingResult.mapped) {
     return {mCharacterMemory[mappingResult.mappedAddress], true};
   }
@@ -81,10 +82,12 @@ Cartridge::ReadResult Cartridge::PpuRead(uint16_t address) {
 }
 
 bool Cartridge::PpuWrite(uint16_t address, uint8_t data) {
-  auto mappingResult = mMapper->CpuMapRead(address);
+  auto mappingResult = mMapper->PpuMapWrite(address);
   if (mappingResult.mapped) {
     mCharacterMemory[mappingResult.mappedAddress] = data;
     return true;
   }
   return false;
 }
+
+void Cartridge::Reset() {}

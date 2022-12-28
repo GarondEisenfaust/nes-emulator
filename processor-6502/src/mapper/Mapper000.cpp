@@ -6,7 +6,7 @@ Mapper000::Mapper000(uint8_t programBanks, uint8_t characterBanks)
 
 MappingResult Mapper000::CpuMapRead(uint16_t address) {
   if ((MAPPER_START <= address) && (address <= MAPPER_END)) {
-    uint16_t mappedAddr = address & (mProgramBanks > 1 ? 0x7FFF : 0x3FFF);
+    uint32_t mappedAddr = address & (mProgramBanks > 1 ? 0x7FFF : 0x3FFF);
     return {mappedAddr, true};
   }
   return {UNDEFINED, false};

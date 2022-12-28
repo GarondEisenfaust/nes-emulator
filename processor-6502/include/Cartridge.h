@@ -21,6 +21,7 @@ class Cartridge {
 
   ReadResult PpuRead(uint16_t address);
   bool PpuWrite(uint16_t address, uint8_t data);
+  void Reset();
   MIRROR mMirror;
 
  private:

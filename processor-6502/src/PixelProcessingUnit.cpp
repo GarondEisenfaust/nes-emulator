@@ -15,10 +15,12 @@ PixelProcessingUnit::PixelProcessingUnit(Grid* grid)
 void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
   switch (addr) {
     case 0x0000:  // Control
+    {
       mControlRegister.reg = data;
       tRamAddr.nameTableX = mControlRegister.nametableX;
       tRamAddr.nameTableY = mControlRegister.nametableY;
       break;
+    }
     case 0x0001:  // Mask
       mMaskRegister.reg = data;
       break;
@@ -41,7 +43,7 @@ void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
       break;
     case 0x0006:  // PPU Address
       if (mAddressLatch == 0) {
-        tRamAddr.reg = (tRamAddr.reg & 0x00FF) | (data << 8);
+        tRamAddr.reg = ((data & 0x3F) << 8) | (tRamAddr.reg & 0x00FF);
         mAddressLatch = 1;
       } else {
         tRamAddr.reg = (tRamAddr.reg & 0xFF00) | data;
@@ -50,7 +52,7 @@ void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
       }
       break;
     case 0x0007:  // PPU Data
-      PpuWrite(addr, data);
+      PpuWrite(vRamAddr.reg, data);
       vRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
       break;
   }
@@ -90,37 +92,38 @@ uint8_t PixelProcessingUnit::CpuRead(uint16_t addr, bool bReadOnly) {
 
 void PixelProcessingUnit::PpuWrite(uint16_t addr, uint8_t data) {
   addr &= 0x3FFF;
-  if (mCartridge->CpuWrite(addr, data)) {
+  if (mCartridge->PpuWrite(addr, data)) {
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
     tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
+    addr &= 0x0FFF;
     if (mCartridge->mMirror == Cartridge::MIRROR::VERTICAL) {
       // Vertical
       if (addr >= 0x0000 && addr <= 0x03FF) {
-        data = tblName[0][addr & 0x03FF];
+        tblName[0][addr & 0x03FF] = data;
       }
       if (addr >= 0x0400 && addr <= 0x07FF) {
-        data = tblName[1][addr & 0x03FF];
+        tblName[1][addr & 0x03FF] = data;
       }
       if (addr >= 0x0800 && addr <= 0x0BFF) {
-        data = tblName[0][addr & 0x03FF];
+        tblName[0][addr & 0x03FF] = data;
       }
       if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        data = tblName[1][addr & 0x03FF];
+        tblName[1][addr & 0x03FF] = data;
       }
     } else if (mCartridge->mMirror == Cartridge::MIRROR::HORIZONTAL) {
       // Horizontal
       if (addr >= 0x0000 && addr <= 0x03FF) {
-        data = tblName[0][addr & 0x03FF];
+        tblName[0][addr & 0x03FF] = data;
       }
       if (addr >= 0x0400 && addr <= 0x07FF) {
-        data = tblName[0][addr & 0x03FF];
+        tblName[0][addr & 0x03FF] = data;
       }
       if (addr >= 0x0800 && addr <= 0x0BFF) {
-        data = tblName[1][addr & 0x03FF];
+        tblName[1][addr & 0x03FF] = data;
       }
       if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        data = tblName[1][addr & 0x03FF];
+        tblName[1][addr & 0x03FF] = data;
       }
     }
   } else if (0x3F00 <= addr && addr <= 0x3FFF) {
@@ -144,42 +147,44 @@ void PixelProcessingUnit::PpuWrite(uint16_t addr, uint8_t data) {
 uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
   addr &= 0x3FFF;
   uint8_t data = 0x00;
-
-  if (mCartridge->CpuRead(addr).hasRead) {
+  auto cartridgeResult = mCartridge->PpuRead(addr);
+  if (cartridgeResult.hasRead) {
+    data = cartridgeResult.readResult;
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
     data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
+    addr &= 0x0FFF;
     if (mCartridge->mMirror == Cartridge::MIRROR::VERTICAL) {
       // Vertical
       if (addr >= 0x0000 && addr <= 0x03FF) {
-        tblName[0][addr & 0x03FF] = data;
+        data = tblName[0][addr & 0x03FF];
       }
       if (addr >= 0x0400 && addr <= 0x07FF) {
-        tblName[1][addr & 0x03FF] = data;
+        data = tblName[1][addr & 0x03FF];
       }
       if (addr >= 0x0800 && addr <= 0x0BFF) {
-        tblName[0][addr & 0x03FF] = data;
+        data = tblName[0][addr & 0x03FF];
       }
       if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        tblName[1][addr & 0x03FF] = data;
+        data = tblName[1][addr & 0x03FF];
       }
     } else if (mCartridge->mMirror == Cartridge::MIRROR::HORIZONTAL) {
       // Horizontal
       if (addr >= 0x0000 && addr <= 0x03FF) {
-        tblName[0][addr & 0x03FF] = data;
+        data = tblName[0][addr & 0x03FF];
       }
       if (addr >= 0x0400 && addr <= 0x07FF) {
-        tblName[0][addr & 0x03FF] = data;
+        data = tblName[0][addr & 0x03FF];
       }
       if (addr >= 0x0800 && addr <= 0x0BFF) {
-        tblName[1][addr & 0x03FF] = data;
+        data = tblName[1][addr & 0x03FF];
       }
       if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        tblName[1][addr & 0x03FF] = data;
+        data = tblName[1][addr & 0x03FF];
       }
     }
   } else if (0x3F00 <= addr && addr <= 0x3FFF) {
-    addr &= 0x001f;
+    addr &= 0x001F;
     if (addr == 0x0010) {
       addr = 0x0000;
     }
@@ -262,7 +267,10 @@ void PixelProcessingUnit::Clock() {
     }
   };
 
-  if (mScanline == -1 && mCycle < 240) {
+  if (mScanline >= -1 && mCycle < 240) {
+    if (mScanline == 0 && mCycle == 0) {
+      mCycle = 1;
+    }
     if (mScanline == -1 && mCycle == 1) {
       mStatusRegister.verticalBlank = 0;
     }
@@ -270,13 +278,14 @@ void PixelProcessingUnit::Clock() {
     if ((mCycle >= 2 && mCycle < 258) || (mCycle >= 321 && mCycle < 338)) {
       UpdateShifters();
       switch ((mCycle - 1) % 8) {
-        case 0:
+        case 0: {
           LoadBackgroundShifters();
           mBgNextTileId = PpuRead(0x2000 | (vRamAddr.reg & 0x0FFF));
           break;
-        case 2:
-          mBgNextTileAttribute = PpuRead(0x23C0 | vRamAddr.nameTableY << 11) | (vRamAddr.nameTableX << 10) |
-                                 ((vRamAddr.coarseY >> 2) << 3) | (vRamAddr.coarseX >> 2);
+        }
+        case 2: {
+          mBgNextTileAttribute = PpuRead(0x23C0 | (vRamAddr.nameTableY << 11) | (vRamAddr.nameTableX << 10) |
+                                         ((vRamAddr.coarseY >> 2) << 3) | (vRamAddr.coarseX >> 2));
 
           if (vRamAddr.coarseY % 0x02) {
             mBgNextTileAttribute >>= 4;
@@ -285,18 +294,24 @@ void PixelProcessingUnit::Clock() {
             mBgNextTileAttribute >>= 2;
           }
           mBgNextTileAttribute &= 0x03;
-
-        case 4:
-          mBgNextTileLsb = PpuRead((mControlRegister.patternBackground << 12) + ((uint16_t)mBgNextTileId << 4) +
-                                   (vRamAddr.fineY + 0));
           break;
-        case 6:
-          mBgNextTileLsb = PpuRead((mControlRegister.patternBackground << 12) + ((uint16_t)mBgNextTileId << 4) +
-                                   (vRamAddr.fineY + 8));
+        }
+        case 4: {
+          auto toReadFrom =
+              (mControlRegister.patternBackground << 12) + ((uint16_t)mBgNextTileId << 4) + (vRamAddr.fineY + 0);
+          mBgNextTileLsb = PpuRead(toReadFrom);
           break;
-        case 7:
+        }
+        case 6: {
+          auto toReadFrom =
+              (mControlRegister.patternBackground << 12) + ((uint16_t)mBgNextTileId << 4) + (vRamAddr.fineY + 8);
+          mBgNextTileMsb = PpuRead(toReadFrom);
+          break;
+        }
+        case 7: {
           IncrementScrollX();
           break;
+        }
       }
     }
 
@@ -305,7 +320,12 @@ void PixelProcessingUnit::Clock() {
     }
 
     if (mCycle == 257) {
+      LoadBackgroundShifters();
       TransferAddressX();
+    }
+
+    if (mCycle == 338 || mCycle == 340) {
+      mBgNextTileId = PpuRead(0x2000 | (vRamAddr.reg & 0x0FFF));
     }
 
     if (mScanline == -1 && mCycle >= 280 && mCycle < 305) {
@@ -325,7 +345,7 @@ void PixelProcessingUnit::Clock() {
 
   uint8_t bgPixel = 0x00;
   uint8_t bgPalette = 0x00;
-  if (mMaskRegister.renderBackground) {
+  if (!mMaskRegister.renderBackground) {
     uint16_t bitMux = 0x8000 >> fineX;
 
     uint8_t p0Pixel = (mBgShifterPatternLow & bitMux) > 0;
@@ -338,7 +358,8 @@ void PixelProcessingUnit::Clock() {
     bgPalette = (bgPal1 << 1) | bgPal0;
   }
 
-  mGrid->GetPixel(mCycle - 1, mScanline).SetColor(GetColorFromPalette(bgPalette, bgPixel));
+  auto& color = GetColorFromPalette(bgPalette, bgPixel);
+  mGrid->GetPixel(mCycle - 1, mScanline).SetColor(color);
 
   mCycle++;
 
@@ -358,7 +379,27 @@ void PixelProcessingUnit::ConnectBus(Bus* bus) {
 }
 
 PixelColor& PixelProcessingUnit::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
-  auto index = PpuRead(0x3F00 + (palette << 2) + pixel) & 0x3F;
-  //  return mColorPalette->at(index);
-  return mColorPalette->at(18);
+  auto address = 0x3F00 + (palette << 2) + pixel;
+  auto index = PpuRead(address) & 0x3F;
+  return mColorPalette->at(index);
+}
+
+void PixelProcessingUnit::Reset() {
+  fineX = 0x00;
+  mAddressLatch = 0x00;
+  mScanline = 0;
+  mCycle = 0;
+  mBgNextTileId = 0x00;
+  mBgNextTileAttribute = 0x00;
+  mBgNextTileLsb = 0x00;
+  mBgNextTileMsb = 0x00;
+  mBgShifterPatternLow = 0x0000;
+  mBgShifterPatternHigh = 0x0000;
+  mBgShifterAttributeLow = 0x0000;
+  mBgShifterAttributeHigh = 0x0000;
+  mStatusRegister.reg = 0x00;
+  mMaskRegister.reg = 0x00;
+  mControlRegister.reg = 0x00;
+  vRamAddr.reg = 0x0000;
+  tRamAddr.reg = 0x0000;
 }

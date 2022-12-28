@@ -21,8 +21,9 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
 }
 
 uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
-  if (mCartridge->CpuRead(addr).hasRead) {
-    return UNDEFINED;
+  auto cartridgeResult = mCartridge->CpuRead(addr);
+  if (cartridgeResult.hasRead) {
+    return cartridgeResult.readResult;
   }
   if (addr >= RAM_START && addr <= RAM_END) {
     return mRam->at(addr % RAM_SIZE);
@@ -41,6 +42,8 @@ void Bus::InsertCartridge(Cartridge* cartridge) {
 
 void Bus::Reset() {
   mCpu->Reset();
+  mPpu->Reset();
+  mCartridge->Reset();
   mSystemClockCounter = 0;
 }
 

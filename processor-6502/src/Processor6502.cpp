@@ -120,15 +120,15 @@ uint8_t Processor6502::BranchIf(bool condition) {
 }
 
 uint8_t Processor6502::Branch() {
-  addr_abs = pc + addr_rel;
-  cycles += 1 + (addr_abs & 0xFF00 != pc & 0xFF00);
-  pc = addr_abs;
+  addrAbs = pc + addrRel;
+  cycles += 1 + (addrAbs & 0xFF00 != pc & 0xFF00);
+  pc = addrAbs;
   return 0;
 }
 
 uint8_t Processor6502::Fetch() {
   if (!(lookup[opcode].addrMode == &Processor6502::IMP)) {
-    fetched = Read(addr_abs);
+    fetched = Read(addrAbs);
   }
   return fetched;
 }
@@ -136,8 +136,11 @@ uint8_t Processor6502::Fetch() {
 void Processor6502::Clock() {
   if (cycles == 0) {
     opcode = Read(pc);
+    SetFlag(U, true);
     pc++;
     cycles = lookup[opcode].cycles;
+
+    auto instruction = lookup[opcode];
 
     auto additionalCycle1 = (this->*lookup[opcode].addrMode)();
     auto additionalCycle2 = (this->*lookup[opcode].operate)();
@@ -149,9 +152,28 @@ void Processor6502::Clock() {
   cycles--;
 }
 
-void Processor6502::Reset() {}
+void Processor6502::Reset() {
+  addrAbs = 0xFFFC;
+  uint16_t lo = Read(addrAbs + 0);
+  uint16_t hi = Read(addrAbs + 1);
 
-uint8_t Processor6502::GetFlag(FLAGS6502 flag) { return (status & flag) ? 1 : 0; }
+  auto u = (hi << 8);
+  pc = (hi << 8) | lo;
+
+  a = 0;
+  x = 0;
+  y = 0;
+  stackPointer = 0xFD;
+  status = 0x00 | U;
+
+  addrRel = 0x0000;
+  addrAbs = 0x0000;
+  fetched = 0x00;
+
+  cycles = 8;
+}
+
+uint8_t Processor6502::GetFlag(FLAGS6502 flag) { return ((status & flag) > 0) ? 1 : 0; }
 
 void Processor6502::SetFlag(FLAGS6502 flag, std::function<bool(void)> value) { Util::SetFlag(status, flag, value); }
 
@@ -164,36 +186,36 @@ uint8_t Processor6502::IMP() {
 }
 
 uint8_t Processor6502::IMM() {
-  addr_abs = pc++;
+  addrAbs = pc++;
   return 0;
 }
 
 uint8_t Processor6502::ZP0() {
-  addr_abs = Read(pc);
+  addrAbs = Read(pc);
   pc++;
-  addr_abs &= 0x00FF;
+  addrAbs &= 0x00FF;
   return 0;
 }
 
 uint8_t Processor6502::ZPX() {
-  addr_abs = (Read(pc) + x);
+  addrAbs = Read(pc) + x;
   pc++;
-  addr_abs &= 0x00FF;
+  addrAbs &= 0x00FF;
   return 0;
 }
 
 uint8_t Processor6502::ZPY() {
-  addr_abs = (Read(pc) + y);
+  addrAbs = Read(pc) + y;
   pc++;
-  addr_abs &= 0x00FF;
+  addrAbs &= 0x00FF;
   return 0;
 }
 
 uint8_t Processor6502::REL() {
-  addr_rel = Read(pc);
+  addrRel = Read(pc);
   pc++;
-  if (addr_rel & 0x80) {
-    addr_rel |= 0xFF00;
+  if (addrRel & 0x80) {
+    addrRel |= 0xFF00;
   }
   return 0;
 }
@@ -204,7 +226,7 @@ uint8_t Processor6502::ABS() {
   uint16_t high = Read(pc);
   pc++;
 
-  addr_abs = (high << 8) | low;
+  addrAbs = (high << 8) | low;
 
   return 0;
 }
@@ -215,9 +237,9 @@ uint8_t Processor6502::ABX() {
   uint16_t high = Read(pc);
   pc++;
 
-  addr_abs = ((high << 8) | low) + x;
+  addrAbs = ((high << 8) | low) + x;
 
-  if ((addr_abs & 0xFF00) != (high << 8)) {
+  if ((addrAbs & 0xFF00) != (high << 8)) {
     return 1;
   } else {
     return 0;
@@ -230,9 +252,9 @@ uint8_t Processor6502::ABY() {
   uint16_t high = Read(pc);
   pc++;
 
-  addr_abs = ((high << 8) | low) + y;
+  addrAbs = ((high << 8) | low) + y;
 
-  if ((addr_abs & 0xFF00) != (high << 8)) {
+  if ((addrAbs & 0xFF00) != (high << 8)) {
     return 1;
   } else {
     return 0;
@@ -245,12 +267,12 @@ uint8_t Processor6502::IND() {
   uint16_t ptrHigh = Read(pc);
   pc++;
 
-  auto ptr = (ptrHigh << 8) | ptrLow;
+  uint16_t ptr = (ptrHigh << 8) | ptrLow;
 
   if (ptrLow == 0x00FF) {
-    addr_abs = (Read(ptr & 0xFF00) << 8) | Read(ptr + 0);
+    addrAbs = (Read(ptr & 0xFF00) << 8) | Read(ptr + 0);
   } else {
-    addr_abs = (Read(ptr + 1) << 8) | Read(ptr + 0);
+    addrAbs = (Read(ptr + 1) << 8) | Read(ptr + 0);
   }
   return 0;
 }
@@ -262,7 +284,7 @@ uint8_t Processor6502::IZX() {
   uint16_t lo = Read(t + static_cast<uint16_t>(x) & 0x00FF);
   uint16_t hi = Read(t + static_cast<uint16_t>(x + 1) & 0x00FF);
 
-  addr_abs = (hi << 8) | lo;
+  addrAbs = (hi << 8) | lo;
 
   return 0;
 }
@@ -271,18 +293,23 @@ uint8_t Processor6502::IZY() {
   uint16_t t = Read(pc);
   pc++;
 
-  uint16_t lo = Read(t + static_cast<uint16_t>(y) & 0x00FF);
-  uint16_t hi = Read(t + static_cast<uint16_t>(y + 1) & 0x00FF);
+  uint16_t lo = Read(t & 0x00FF);
+  uint16_t hi = Read((t + 1) & 0x00FF);
 
-  addr_abs = (hi << 8) | lo;
+  addrAbs = (hi << 8) | lo;
+  addrAbs += y;
 
-  return 0;
+  if ((addrAbs & 0xFF00) != (hi << 8)) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 // Opcodes ======================================================
 uint8_t Processor6502::ADC() {
   Fetch();
-  uint16_t temp = a + fetched + GetFlag(C);
+  uint16_t temp = static_cast<uint16_t>(a) + static_cast<uint16_t>(fetched) + static_cast<uint16_t>(GetFlag(C));
   SetFlag(C, temp > 255);
   SetFlag(Z, (temp & 0x00FF) == 0);
 
@@ -296,21 +323,21 @@ uint8_t Processor6502::AND() {
   Fetch();
   a = a & fetched;
   SetFlag(Z, a == 0);
-  SetFlag(N, a & (1 << 6));
+  SetFlag(N, a & 0x80);
   return 1;
 }
 
 uint8_t Processor6502::ASL() {
   Fetch();
   const auto temp = static_cast<uint16_t>(fetched << 1);
-  SetFlag(N, temp & (1 << 6));
-  SetFlag(Z, temp == 0);
-  SetFlag(C, false);
+  SetFlag(C, (temp & 0xFF00) > 0);
+  SetFlag(Z, (temp & 0x00FF) == 0x00);
+  SetFlag(N, temp & 0x80);
 
   if (lookup[opcode].addrMode == &Processor6502::IMP) {
     a = temp & 0x00FF;
   } else {
-    Write(addr_abs, temp & 0x00FF);
+    Write(addrAbs, temp & 0x00FF);
   }
   return 0;
 }
@@ -323,10 +350,10 @@ uint8_t Processor6502::BEQ() { return BranchIf(GetFlag(Z) == 1); }
 
 uint8_t Processor6502::BIT() {
   Fetch();
-  const uint8_t temp = fetched & a;
-  SetFlag(N, fetched & (1 << 6));
-  SetFlag(V, fetched & (1 << 5));
-  SetFlag(Z, temp == 0);
+  const uint8_t temp = a & fetched;
+  SetFlag(N, fetched & (1 << 7));
+  SetFlag(V, fetched & (1 << 6));
+  SetFlag(Z, (temp & 0x00FF) == 0x00);
   return 0;
 }
 
@@ -350,7 +377,7 @@ uint8_t Processor6502::BRK() {
   stackPointer--;
   SetFlag(B, 0);
 
-  pc = Read(0xFFFE) | (Read(0xFFFF) << 8);
+  pc = static_cast<uint16_t>(Read(0xFFFE)) | (static_cast<uint16_t>(Read(0xFFFF)) << 8);
   return 0;
 }
 
@@ -380,100 +407,98 @@ uint8_t Processor6502::CLV() {
 
 uint8_t Processor6502::CMP() {
   Fetch();
-  const uint16_t temp = a - fetched;
+  const uint16_t temp = static_cast<uint16_t>(a) - static_cast<uint16_t>(fetched);
   SetFlag(C, a >= fetched);
-  SetFlag(N, (temp & (1 << 6)));
-  SetFlag(Z, x == fetched);
+  SetFlag(Z, (temp & 0x00FF) == 0x0000);
+  SetFlag(N, temp & 0x0080);
   return 1;
 }
 
 uint8_t Processor6502::CPX() {
   Fetch();
-  const uint16_t temp = x - fetched;
+  const uint16_t temp = static_cast<uint16_t>(x) - static_cast<uint16_t>(fetched);
   SetFlag(C, x >= fetched);
-  SetFlag(N, temp & (1 << 6));
-  SetFlag(Z, x == fetched);
+  SetFlag(Z, (temp & 0x00FF) == 0x0000);
+  SetFlag(N, temp & 0x0080);
   return 0;
 }
 
 uint8_t Processor6502::CPY() {
   Fetch();
-  const uint16_t temp = y - fetched;
+  const uint16_t temp = static_cast<uint16_t>(y) - static_cast<uint16_t>(fetched);
   SetFlag(C, y >= fetched);
-  SetFlag(N, temp & (1 << 6));
-  SetFlag(Z, y == fetched);
+  SetFlag(Z, (temp & 0x00FF) == 0x0000);
+  SetFlag(N, temp & 0x0080);
   return 0;
 }
 
 uint8_t Processor6502::DEC() {
   Fetch();
-  const auto temp = fetched - uint8_t{1};
-  Write(addr_abs, temp);
-  SetFlag(N, temp & (1 << 6));
-  SetFlag(Z, temp == 0);
+  const uint16_t temp = fetched - uint8_t{1};
+  Write(addrAbs, temp & 0x00FF);
+  SetFlag(Z, (temp & 0x00FF) == 0x0000);
+  SetFlag(N, temp & 0x0080);
   return 0;
 }
 
 uint8_t Processor6502::DEX() {
   x--;
-  SetFlag(N, x & (1 << 6));
-  SetFlag(Z, x == 0);
+  SetFlag(Z, x == 0x00);
+  SetFlag(N, x & 0x80);
   return 0;
 }
 
 uint8_t Processor6502::DEY() {
   y--;
-  SetFlag(N, y & (1 << 6));
-  SetFlag(Z, y == 0);
+  SetFlag(Z, y == 0x00);
+  SetFlag(N, y & 0x80);
   return 0;
 }
 
 uint8_t Processor6502::EOR() {
   Fetch();
   a = a ^ fetched;
-  SetFlag(Z, a == 0);
-  SetFlag(N, y & (1 << 6));
+  SetFlag(Z, a == 0x00);
+  SetFlag(N, a & 0x80);
   return 1;
 }
 
 uint8_t Processor6502::INC() {
   Fetch();
-  auto incremented = fetched;
-  incremented++;
-  Write(addr_abs, incremented);
-  SetFlag(Z, a == 0);
-  SetFlag(N, y & (1 << 6));
+  auto incremented = fetched + 1;
+  Write(addrAbs, incremented);
+  SetFlag(Z, (incremented & 0x00FF) == 0x0000);
+  SetFlag(N, incremented & 0x0080);
   return 0;
 }
 
 uint8_t Processor6502::INX() {
   x++;
-  SetFlag(Z, x == 0);
-  SetFlag(N, x & (1 << 6));
+  SetFlag(Z, x == 0x00);
+  SetFlag(N, x & 0x80);
   return 0;
 }
 
 uint8_t Processor6502::INY() {
   y++;
   SetFlag(Z, y == 0);
-  SetFlag(N, y & (1 << 6));
+  SetFlag(N, y & 0x80);
   return 0;
 }
 
 uint8_t Processor6502::JMP() {
-  pc = addr_abs;
+  pc = addrAbs;
   return 0;
 }
 
 uint8_t Processor6502::JSR() {
   pc--;
-
   WriteToStack(stackPointer, (pc >> 8) & 0x00FF);
   stackPointer--;
   WriteToStack(stackPointer, pc & 0x00FF);
   stackPointer--;
 
-  pc = addr_abs;
+  pc = addrAbs;
   return 0;
 }
 
@@ -481,7 +506,7 @@ uint8_t Processor6502::LDA() {
   Fetch();
   a = fetched;
   SetFlag(Z, a == 0);
-  SetFlag(N, a & (1 << 6));
+  SetFlag(N, a & 0x80);
   return 1;
 }
 
@@ -489,7 +514,7 @@ uint8_t Processor6502::LDX() {
   Fetch();
   x = fetched;
   SetFlag(Z, x == 0);
-  SetFlag(N, x & (1 << 6));
+  SetFlag(N, x & 0x80);
   return 1;
 }
 
@@ -497,32 +522,44 @@ uint8_t Processor6502::LDY() {
   Fetch();
   y = fetched;
   SetFlag(Z, y == 0);
-  SetFlag(N, y & (1 << 6));
+  SetFlag(N, y & 0x80);
   return 1;
 }
 
 uint8_t Processor6502::LSR() {
   Fetch();
-  SetFlag(C, fetched & 1);
+  SetFlag(C, fetched & 0x0001);
   uint8_t temp = fetched >> 1;
   SetFlag(Z, temp == 0);
-  SetFlag(N, temp & (1 << 6));
+  SetFlag(N, temp & 0x0080);
 
   if (lookup[opcode].addrMode == &Processor6502::IMP) {
     a = temp;
   } else {
-    Write(addr_abs, temp);
+    Write(addrAbs, temp);
   }
   return 0;
 }
 
-uint8_t Processor6502::NOP() { return 0; }
+uint8_t Processor6502::NOP() {
+  switch (opcode) {
+    case 0x1C:
+    case 0x3C:
+    case 0x5C:
+    case 0x7C:
+    case 0xDC:
+    case 0xFC:
+      return 1;
+      break;
+  }
+  return 0;
+}
 
 uint8_t Processor6502::ORA() {
   Fetch();
   a = a | fetched;
   SetFlag(Z, a == 0);
-  SetFlag(N, a & (1 << 6));
+  SetFlag(N, a & 0x80);
   return 1;
 }
 
@@ -533,15 +570,18 @@ uint8_t Processor6502::PHA() {
 }
 
 uint8_t Processor6502::PHP() {
-  WriteToStack(stackPointer, status);
+  WriteToStack(stackPointer, status | B | U);
+  SetFlag(B, 0);
+  SetFlag(U, 0);
+  stackPointer--;
   return 0;
 }
 
 uint8_t Processor6502::PLA() {
   stackPointer++;
   a = ReadFromStack(stackPointer);
-  SetFlag(Z, a == 0);
-  SetFlag(N, a & (1 << 6));
+  SetFlag(Z, a == 0x00);
+  SetFlag(N, a & 0x80);
   return 0;
 }
 
@@ -554,32 +594,31 @@ uint8_t Processor6502::PLP() {
 
 uint8_t Processor6502::ROL() {
   Fetch();
-  uint8_t tempCarry = fetched & (1 << 7);
-  uint8_t temp = (fetched << 1) | (GetFlag(C) << 0);
+  const uint16_t temp = static_cast<uint16_t>(fetched << 1) | GetFlag(C);
+  SetFlag(C, temp & 0xFF00);
+  SetFlag(Z, (temp & 0x00FF) == 0x0000);
+  SetFlag(N, temp & 0x0080);
 
-  SetFlag(C, tempCarry);
-  SetFlag(Z, temp == 0);
-  SetFlag(N, temp & (1 << 6));
   if (lookup[opcode].addrMode == &Processor6502::IMP) {
-    a = temp;
+    a = temp & 0x00FF;
   } else {
-    Write(addr_abs, temp);
+    Write(addrAbs, temp);
   }
   return 0;
 }
 
 uint8_t Processor6502::ROR() {
   Fetch();
-  uint8_t tempCarry = fetched & (1 << 0);
-  uint8_t temp = (fetched >> 1) | (GetFlag(C) << 7);
 
-  SetFlag(C, tempCarry);
-  SetFlag(Z, temp == 0);
-  SetFlag(N, temp & (1 << 6));
+  uint8_t temp = static_cast<uint16_t>(GetFlag(C) << 7) | (fetched >> 1);
+  SetFlag(C, fetched & 0x01);
+  SetFlag(Z, (temp & 0x00FF) == 0x00);
+  SetFlag(N, temp & 0x0080);
+
   if (lookup[opcode].addrMode == &Processor6502::IMP) {
-    a = temp;
+    a = temp & 0x00FF;
   } else {
-    Write(addr_abs, temp);
+    Write(addrAbs, temp & 0x00FF);
   }
   return 0;
 }
@@ -591,7 +630,7 @@ uint8_t Processor6502::RTI() {
   status &= ~U;
 
   stackPointer++;
-  pc = ReadFromStack(stackPointer);
+  pc = static_cast<uint16_t>(ReadFromStack(stackPointer));
   stackPointer++;
   pc |= static_cast<uint16_t>(ReadFromStack(stackPointer)) << 8;
   return 0;
@@ -599,7 +638,7 @@ uint8_t Processor6502::RTI() {
 
 uint8_t Processor6502::RTS() {
   stackPointer++;
-  pc = ReadFromStack(stackPointer);
+  pc = static_cast<uint16_t>(ReadFromStack(stackPointer));
   stackPointer++;
   pc |= static_cast<uint16_t>(ReadFromStack(stackPointer)) << 8;
 
@@ -637,45 +676,45 @@ uint8_t Processor6502::SEI() {
 }
 
 uint8_t Processor6502::STA() {
-  Write(addr_abs, a);
+  Write(addrAbs, a);
   return 0;
 }
 
 uint8_t Processor6502::STX() {
-  Write(addr_abs, x);
+  Write(addrAbs, x);
   return 0;
 }
 
 uint8_t Processor6502::STY() {
-  Write(addr_abs, y);
+  Write(addrAbs, y);
   return 0;
 }
 
 uint8_t Processor6502::TAX() {
   x = a;
-  SetFlag(Z, x == 0);
-  SetFlag(N, x & (1 << 6));
+  SetFlag(Z, x == 0x00);
+  SetFlag(N, x & 0x80);
   return 0;
 }
 
 uint8_t Processor6502::TAY() {
   y = a;
-  SetFlag(Z, y == 0);
-  SetFlag(N, y & (1 << 6));
+  SetFlag(Z, y == 0x00);
+  SetFlag(N, y & 0x80);
   return 0;
 }
 
 uint8_t Processor6502::TSX() {
   x = stackPointer;
-  SetFlag(Z, x == 0);
-  SetFlag(N, x & (1 << 6));
+  SetFlag(Z, x == 0x00);
+  SetFlag(N, x & 0x80);
   return 0;
 }
 
 uint8_t Processor6502::TXA() {
   a = x;
-  SetFlag(Z, a == 0);
-  SetFlag(N, a & (1 << 6));
+  SetFlag(Z, a == 0x00);
+  SetFlag(N, a & 0x80);
   return 0;
 }
 
@@ -686,35 +725,35 @@ uint8_t Processor6502::TXS() {
 
 uint8_t Processor6502::TYA() {
   a = y;
-  SetFlag(Z, a == 0);
-  SetFlag(N, a & (1 << 6));
+  SetFlag(Z, a == 0x00);
+  SetFlag(N, a & 0x80);
   return 0;
 }
 
 uint8_t Processor6502::XXX() { return 0; }
 
-void Processor6502::Interrupt(uint16_t address) {
+void Processor6502::Interrupt(uint16_t address, uint8_t numCycles) {
   if (GetFlag(I) == 0) {
-    Write(0x0100 + stackPointer, (pc >> 8) & 0x00FF);
+    WriteToStack(stackPointer, (pc >> 8) & 0x00FF);
     stackPointer--;
-    Write(0x0100 + stackPointer, pc & 0x00FF);
+    WriteToStack(stackPointer, pc & 0x00FF);
     stackPointer--;
 
     SetFlag(B, 0);
     SetFlag(U, 1);
     SetFlag(I, 1);
-    Write(0x0100 + stackPointer, status);
+    WriteToStack(stackPointer, status);
     stackPointer--;
 
-    addr_abs = 0xFFFE;
-    uint16_t lo = Read(addr_abs + 0);
-    uint16_t hi = Read(addr_abs + 1);
+    addrAbs = address;
+    uint16_t lo = Read(addrAbs + 0);
+    uint16_t hi = Read(addrAbs + 1);
     pc = (hi << 8) | lo;
 
-    cycles = 7;
+    cycles = numCycles;
   }
 }
 
-void Processor6502::Interrupt() { Interrupt(0xFFFE); }
+void Processor6502::Interrupt() { Interrupt(0xFFFE, 7); }
 
-void Processor6502::NonMaskableInterrupt() { Interrupt(0xFFFA); }
+void Processor6502::NonMaskableInterrupt() { Interrupt(0xFFFA, 8); }

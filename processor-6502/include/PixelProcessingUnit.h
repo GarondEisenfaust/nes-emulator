@@ -8,7 +8,7 @@
 #include <utility>
 
 #define PPU_RAM_START 0x2000
-#define PPU_RAM_END 0x2000
+#define PPU_RAM_END 0x3FFF
 #define PPU_RAM_SIZE 0x0007
 
 class Bus;
@@ -30,6 +30,7 @@ class PixelProcessingUnit {
   void ConnectBus(Bus* bus);
   void InsertCartridge(Cartridge* cartridge);
   void Clock();
+  void Reset();
 
   Sprite& GetPatternTable(uint8_t i, uint8_t palette);
   PixelColor& GetColorFromPalette(uint8_t palette, uint8_t pixel);
