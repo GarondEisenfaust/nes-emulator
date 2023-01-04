@@ -3,6 +3,7 @@
 #include "Definitions.h"
 #include "Grid.h"
 #include <cstdlib>
+#include <iostream>
 
 PixelProcessingUnit::PixelProcessingUnit(Grid* grid)
     : mCycle(0),
@@ -358,8 +359,13 @@ void PixelProcessingUnit::Clock() {
     bgPalette = (bgPal1 << 1) | bgPal0;
   }
 
+  auto width = mGrid->GetGridWidth();
+  auto height = mGrid->GetGridHeight();
   auto& color = GetColorFromPalette(bgPalette, bgPixel);
-  mGrid->GetPixel(mCycle - 1, mScanline).SetColor(color);
+  if ((0 <= mCycle - 1 && mCycle - 1 < width) && (0 <= mScanline && mScanline < height)) {
+    // std::cout << mCycle - 1 << " " << mScanline << "\n";
+    mGrid->GetPixel(mCycle - 1, mScanline).SetColor(PixelColor{0, 255, 0, 255});
+  }
 
   mCycle++;
 

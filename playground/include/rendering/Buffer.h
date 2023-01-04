@@ -10,7 +10,7 @@
 template <typename TYPE>
 class Buffer : public IBuffer, public OpenglObject {
  public:
-  Buffer(GLuint size, GLuint index, GLuint drawMode) : mSize(size), mIndex(index), mDrawMode(drawMode) {
+  Buffer(GLuint index, GLuint size, GLuint drawMode) : mIndex(index), mSize(size), mDrawMode(drawMode) {
     glGenBuffers(1, &mHandle);
   }
 
@@ -20,7 +20,7 @@ class Buffer : public IBuffer, public OpenglObject {
     glBindBuffer(GL_ARRAY_BUFFER, mHandle);
     glBufferData(GL_ARRAY_BUFFER, sizeof(TYPE) * mBuffer.size(), mBuffer.data(), mDrawMode);
 
-    glVertexAttribPointer(mIndex, mSize, GetGlEnumByType<TYPE>(), GL_FALSE, mSize * sizeof(TYPE), 0);
+    glVertexAttribPointer(mIndex, mSize, GetGlEnumByType<TYPE>(), GL_FALSE, mSize * sizeof(TYPE), (void*)0);
     glEnableVertexAttribArray(mIndex);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

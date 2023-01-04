@@ -23,11 +23,11 @@ void RenderCompleteFrame(Bus& bus, PixelProcessingUnit& ppu) {
 int main() {
   RenderContext renderContext;
 
-  Grid grid(WIDTH, HEIGHT);
+  Grid grid(WIDTH, HEIGHT, 256, 240);
   grid.Init();
 
-  auto pixels = std::make_shared<Buffer<GLfloat>>(3, 0, GL_STATIC_DRAW);
-  auto colors = std::make_shared<Buffer<GLfloat>>(4, 1, GL_DYNAMIC_DRAW);
+  auto pixels = std::make_shared<Buffer<GLfloat>>(0, 3, GL_STATIC_DRAW);
+  auto colors = std::make_shared<Buffer<GLfloat>>(1, 3, GL_DYNAMIC_DRAW);
   auto vertexArray = std::make_shared<VertexArray>();
 
   auto gridData = grid.MakePixelData();

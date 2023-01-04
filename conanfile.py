@@ -28,3 +28,4 @@ class CMakeTemplateConan(ConanFile):
     self.copy("imgui_impl_opengl3_loader.h", dst=destination, src=source)
     self.copy("imgui_impl_glfw.cpp", dst=destination, src=source)
     self.copy("imgui_impl_opengl3.cpp", dst=destination, src=source)
+
