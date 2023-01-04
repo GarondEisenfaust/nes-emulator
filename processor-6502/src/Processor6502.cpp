@@ -110,9 +110,9 @@ void Processor6502::WriteToStack(uint16_t addr, uint8_t data) { mBus->CpuWrite(S
 uint8_t Processor6502::BranchIf(std::function<bool(void)> condition) {
   auto additionalCycle = uint8_t{0};
   if (condition()) {
-    additionalCycle = Branch();
+    return Branch();
   }
-  return additionalCycle;
+  return 0;
 }
 
 uint8_t Processor6502::BranchIf(bool condition) {
@@ -296,8 +296,7 @@ uint8_t Processor6502::IZY() {
   uint16_t lo = Read(t & 0x00FF);
   uint16_t hi = Read((t + 1) & 0x00FF);
 
-  addrAbs = (hi << 8) | lo;
-  addrAbs += y;
+  addrAbs = ((hi << 8) | lo) + y;
 
   if ((addrAbs & 0xFF00) != (hi << 8)) {
     return 1;
@@ -309,11 +308,13 @@ uint8_t Processor6502::IZY() {
 // Opcodes ======================================================
 uint8_t Processor6502::ADC() {
   Fetch();
-  uint16_t temp = static_cast<uint16_t>(a) + static_cast<uint16_t>(fetched) + static_cast<uint16_t>(GetFlag(C));
+  temp = static_cast<uint16_t>(a) + static_cast<uint16_t>(fetched) + static_cast<uint16_t>(GetFlag(C));
   SetFlag(C, temp > 255);
   SetFlag(Z, (temp & 0x00FF) == 0);
 
-  SetFlag(V, (~(a ^ fetched) & (a ^ temp)) & 0x0080);
+  SetFlag(V, (~(static_cast<uint16_t>(a) ^ static_cast<uint16_t>(fetched)) &
+              (static_cast<uint16_t>(a) ^ static_cast<uint16_t>(temp))) &
+                 0x0080);
   SetFlag(N, temp & 0x80);
   a = temp & 0x00FF;
   return 1;
@@ -322,14 +323,14 @@ uint8_t Processor6502::ADC() {
 uint8_t Processor6502::AND() {
   Fetch();
   a = a & fetched;
-  SetFlag(Z, a == 0);
+  SetFlag(Z, a == 0x00);
   SetFlag(N, a & 0x80);
   return 1;
 }
 
 uint8_t Processor6502::ASL() {
   Fetch();
-  const auto temp = static_cast<uint16_t>(fetched << 1);
+  const auto temp = static_cast<uint16_t>(fetched) << 1;
   SetFlag(C, (temp & 0xFF00) > 0);
   SetFlag(Z, (temp & 0x00FF) == 0x00);
   SetFlag(N, temp & 0x80);
@@ -350,10 +351,10 @@ uint8_t Processor6502::BEQ() { return BranchIf(GetFlag(Z) == 1); }
 
 uint8_t Processor6502::BIT() {
   Fetch();
-  const uint8_t temp = a & fetched;
+  temp = a & fetched;
+  SetFlag(Z, (temp & 0x00FF) == 0x00);
   SetFlag(N, fetched & (1 << 7));
   SetFlag(V, fetched & (1 << 6));
-  SetFlag(Z, (temp & 0x00FF) == 0x00);
   return 0;
 }
 
@@ -366,16 +367,16 @@ uint8_t Processor6502::BPL() { return BranchIf(GetFlag(N) == 0); }
 uint8_t Processor6502::BRK() {
   pc++;
 
-  SetFlag(I, 1);
+  SetFlag(I, true);
   WriteToStack(stackPointer, (pc >> 8) & 0x00FF);
   stackPointer--;
   WriteToStack(stackPointer, pc & 0x00FF);
   stackPointer--;
 
-  SetFlag(B, 1);
+  SetFlag(B, true);
   WriteToStack(stackPointer, status);
   stackPointer--;
-  SetFlag(B, 0);
+  SetFlag(B, false);
 
   pc = static_cast<uint16_t>(Read(0xFFFE)) | (static_cast<uint16_t>(Read(0xFFFF)) << 8);
   return 0;
@@ -407,7 +408,7 @@ uint8_t Processor6502::CLV() {
 
 uint8_t Processor6502::CMP() {
   Fetch();
-  const uint16_t temp = static_cast<uint16_t>(a) - static_cast<uint16_t>(fetched);
+  temp = static_cast<uint16_t>(a) - static_cast<uint16_t>(fetched);
   SetFlag(C, a >= fetched);
   SetFlag(Z, (temp & 0x00FF) == 0x0000);
   SetFlag(N, temp & 0x0080);
@@ -416,7 +417,7 @@ uint8_t Processor6502::CMP() {
 
 uint8_t Processor6502::CPX() {
   Fetch();
-  const uint16_t temp = static_cast<uint16_t>(x) - static_cast<uint16_t>(fetched);
+  temp = static_cast<uint16_t>(x) - static_cast<uint16_t>(fetched);
   SetFlag(C, x >= fetched);
   SetFlag(Z, (temp & 0x00FF) == 0x0000);
   SetFlag(N, temp & 0x0080);
@@ -425,7 +426,7 @@ uint8_t Processor6502::CPX() {
 
 uint8_t Processor6502::CPY() {
   Fetch();
-  const uint16_t temp = static_cast<uint16_t>(y) - static_cast<uint16_t>(fetched);
+  temp = static_cast<uint16_t>(y) - static_cast<uint16_t>(fetched);
   SetFlag(C, y >= fetched);
   SetFlag(Z, (temp & 0x00FF) == 0x0000);
   SetFlag(N, temp & 0x0080);
@@ -434,7 +435,7 @@ uint8_t Processor6502::CPY() {
 
 uint8_t Processor6502::DEC() {
   Fetch();
-  const uint16_t temp = fetched - uint8_t{1};
+  temp = fetched - uint8_t{1};
   Write(addrAbs, temp & 0x00FF);
   SetFlag(Z, (temp & 0x00FF) == 0x0000);
   SetFlag(N, temp & 0x0080);
@@ -529,14 +530,14 @@ uint8_t Processor6502::LDY() {
 uint8_t Processor6502::LSR() {
   Fetch();
   SetFlag(C, fetched & 0x0001);
-  uint8_t temp = fetched >> 1;
-  SetFlag(Z, temp == 0);
+  temp = fetched >> 1;
+  SetFlag(Z, (temp & 0x00FF) == 0x0000);
   SetFlag(N, temp & 0x0080);
 
   if (lookup[opcode].addrMode == &Processor6502::IMP) {
-    a = temp;
+    a = temp & 0x00FF;
   } else {
-    Write(addrAbs, temp);
+    Write(addrAbs, temp & 0x00FF);
   }
   return 0;
 }
@@ -558,7 +559,7 @@ uint8_t Processor6502::NOP() {
 uint8_t Processor6502::ORA() {
   Fetch();
   a = a | fetched;
-  SetFlag(Z, a == 0);
+  SetFlag(Z, a == 0x00);
   SetFlag(N, a & 0x80);
   return 1;
 }
@@ -571,9 +572,9 @@ uint8_t Processor6502::PHA() {
 
 uint8_t Processor6502::PHP() {
   WriteToStack(stackPointer, status | B | U);
-  SetFlag(B, 0);
-  SetFlag(U, 0);
   stackPointer--;
+  SetFlag(B, false);
+  SetFlag(U, false);
   return 0;
 }
 
@@ -588,13 +589,13 @@ uint8_t Processor6502::PLA() {
 uint8_t Processor6502::PLP() {
   stackPointer++;
   status = ReadFromStack(stackPointer);
-  SetFlag(U, 1);
+  SetFlag(U, true);
   return 0;
 }
 
 uint8_t Processor6502::ROL() {
   Fetch();
-  const uint16_t temp = static_cast<uint16_t>(fetched << 1) | GetFlag(C);
+  temp = static_cast<uint16_t>(fetched << 1) | GetFlag(C);
   SetFlag(C, temp & 0xFF00);
   SetFlag(Z, (temp & 0x00FF) == 0x0000);
   SetFlag(N, temp & 0x0080);
@@ -602,7 +603,7 @@ uint8_t Processor6502::ROL() {
   if (lookup[opcode].addrMode == &Processor6502::IMP) {
     a = temp & 0x00FF;
   } else {
-    Write(addrAbs, temp);
+    Write(addrAbs, temp & 0x00FF);
   }
   return 0;
 }
@@ -651,7 +652,7 @@ uint8_t Processor6502::SBC() {
 
   uint16_t value = static_cast<uint16_t>(fetched) ^ 0x00FF;
 
-  auto temp = static_cast<uint16_t>(a) + value + static_cast<uint16_t>(GetFlag(C));
+  temp = static_cast<uint16_t>(a) + value + static_cast<uint16_t>(GetFlag(C));
   SetFlag(C, temp & 0xFF00);
   SetFlag(Z, ((temp & 0x00FF) == 0));
   SetFlag(V, (temp ^ static_cast<uint16_t>(a)) & (temp ^ value) & 0x0080);
@@ -739,9 +740,9 @@ void Processor6502::Interrupt(uint16_t address, uint8_t numCycles) {
     WriteToStack(stackPointer, pc & 0x00FF);
     stackPointer--;
 
-    SetFlag(B, 0);
-    SetFlag(U, 1);
-    SetFlag(I, 1);
+    SetFlag(B, false);
+    SetFlag(U, true);
+    SetFlag(I, true);
     WriteToStack(stackPointer, status);
     stackPointer--;
 

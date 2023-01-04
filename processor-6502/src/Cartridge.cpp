@@ -90,4 +90,8 @@ bool Cartridge::PpuWrite(uint16_t address, uint8_t data) {
   return false;
 }
 
-void Cartridge::Reset() {}
+void Cartridge::Reset() {
+  if (mMapper) {
+    mMapper->Reset();
+  }
+}

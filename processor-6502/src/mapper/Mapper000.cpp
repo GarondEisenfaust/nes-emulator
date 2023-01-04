@@ -25,3 +25,5 @@ MappingResult Mapper000::PpuMapRead(uint16_t address) {
 MappingResult Mapper000::PpuMapWrite(uint16_t address) {
   return mCharacterBanks == 0 ? PpuMapRead(address) : MappingResult{UNDEFINED, false};
 }
+
+void Mapper000::Reset() {}

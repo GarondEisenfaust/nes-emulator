@@ -18,4 +18,6 @@ class IMapper {
 
   virtual MappingResult PpuMapRead(uint16_t address) = 0;
   virtual MappingResult PpuMapWrite(uint16_t address) = 0;
+
+  virtual void Reset() = 0;
 };

@@ -1,3 +1,4 @@
+#pragma once
 #include "IMapper.h"
 
 class Mapper000 : public IMapper {
@@ -11,6 +12,8 @@ class Mapper000 : public IMapper {
 
   virtual MappingResult PpuMapRead(uint16_t address) override;
   virtual MappingResult PpuMapWrite(uint16_t address) override;
+
+  virtual void Reset();
 
  private:
   uint8_t mProgramBanks;
