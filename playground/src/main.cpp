@@ -27,7 +27,7 @@ int main() {
   grid.Init();
 
   auto pixels = std::make_shared<Buffer<GLfloat>>(0, 3, GL_STATIC_DRAW);
-  auto colors = std::make_shared<Buffer<GLfloat>>(1, 3, GL_DYNAMIC_DRAW);
+  auto colors = std::make_shared<Buffer<GLfloat>>(1, 4, GL_DYNAMIC_DRAW);
   auto vertexArray = std::make_shared<VertexArray>();
 
   auto gridData = grid.MakePixelData();

@@ -27,8 +27,8 @@ RenderContext::RenderContext() : mShaderProgram() {
   glViewport(0, 0, mWidth, mHeight);
 
   auto workDir = Util::GetExecutableDirectory();
-  Shader fragmentShader(workDir + "/shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
-  Shader vertexShader(workDir + "/shaders/VertexShader.glsl", GL_VERTEX_SHADER);
+  Shader fragmentShader(workDir + "/shaders/FragmentShader.frag", GL_FRAGMENT_SHADER);
+  Shader vertexShader(workDir + "/shaders/VertexShader.vert", GL_VERTEX_SHADER);
 
   mShaderProgram.AttachShader(fragmentShader);
   mShaderProgram.AttachShader(vertexShader);
@@ -59,7 +59,6 @@ void RenderContext::GameLoop(std::function<void()> loop) {
     }
 
     glfwSwapBuffers(mWindow);
-
     loop();
   }
 }

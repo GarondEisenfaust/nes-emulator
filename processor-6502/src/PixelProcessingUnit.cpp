@@ -361,10 +361,9 @@ void PixelProcessingUnit::Clock() {
 
   auto width = mGrid->GetGridWidth();
   auto height = mGrid->GetGridHeight();
-  auto& color = GetColorFromPalette(bgPalette, bgPixel);
   if ((0 <= mCycle - 1 && mCycle - 1 < width) && (0 <= mScanline && mScanline < height)) {
-    // std::cout << mCycle - 1 << " " << mScanline << "\n";
-    mGrid->GetPixel(mCycle - 1, mScanline).SetColor(PixelColor{0, 255, 0, 255});
+    auto& color = GetColorFromPalette(bgPalette, bgPixel);
+    mGrid->GetPixel(mCycle - 1, mScanline).SetColor(color);
   }
 
   mCycle++;
