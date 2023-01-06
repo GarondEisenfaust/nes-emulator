@@ -8,7 +8,7 @@ macro(set_defaults)
 
   # Source files
   file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.h")
-  file(GLOB_RECURSE SHADERS "shaders/*.glsl")
+  file(GLOB_RECURSE SHADERS "shaders/*.vert" "shaders/*.frag")
 
   # include files
   set(INCLUDES ${CMAKE_CURRENT_LIST_DIR}/include)
