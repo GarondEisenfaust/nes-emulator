@@ -42,10 +42,10 @@ std::vector<float> Grid::MakeColorData() {
   for (auto& pixel : mPixels) {
     auto color = pixel.GetColor();
     for (auto i = 0; i < 6; i++) {
-      result.push_back(color.r / 255.0f);
-      result.push_back(color.g / 255.0f);
-      result.push_back(color.b / 255.0f);
-      result.push_back(color.a / 255.0f);
+      result.push_back(color.r);
+      result.push_back(color.g);
+      result.push_back(color.b);
+      result.push_back(color.a);
     }
   }
 

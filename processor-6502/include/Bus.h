@@ -20,10 +20,11 @@ class Bus {
 
   Processor6502* mCpu;
   PixelProcessingUnit* mPpu;
+  uint8_t controller[2];
 
  private:
   Cartridge* mCartridge;
   uint32_t mSystemClockCounter;
-
+  uint8_t controller_state[2];
   RAM* mRam;
 };

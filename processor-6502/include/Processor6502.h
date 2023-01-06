@@ -122,10 +122,6 @@ class Processor6502 {
   void SetFlag(FLAGS6502 flag, bool value);
   void SetFlag(FLAGS6502 flag, std::function<bool(void)> value);
 
-  uint8_t BranchIf(bool condition);
-  uint8_t BranchIf(std::function<bool(void)> condition);
-  uint8_t Branch();
-
   std::vector<Instruction> lookup;
   Bus* mBus;
 

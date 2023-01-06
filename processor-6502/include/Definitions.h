@@ -1,7 +1,7 @@
 #pragma once
 #include <stdexcept>
 
-#define STACK_BEGIN 0x100
+#define STACK_BEGIN 0x0100
 #define UNDEFINED 0x00
 #define WIDTH 1024
 #define HEIGHT 960

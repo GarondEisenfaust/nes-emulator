@@ -102,29 +102,10 @@ void Processor6502::ConnectBus(Bus* bus) {
 }
 
 uint8_t Processor6502::Read(uint16_t addr) { return mBus->CpuRead(addr); }
-uint8_t Processor6502::ReadFromStack(uint16_t addr) { return mBus->CpuRead(STACK_BEGIN + addr); }
+uint8_t Processor6502::ReadFromStack(uint16_t addr) { return Read(STACK_BEGIN + addr); }
 
 void Processor6502::Write(uint16_t addr, uint8_t data) { mBus->CpuWrite(addr, data); }
-void Processor6502::WriteToStack(uint16_t addr, uint8_t data) { mBus->CpuWrite(STACK_BEGIN + addr, data); }
-
-uint8_t Processor6502::BranchIf(std::function<bool(void)> condition) {
-  auto additionalCycle = uint8_t{0};
-  if (condition()) {
-    return Branch();
-  }
-  return 0;
-}
-
-uint8_t Processor6502::BranchIf(bool condition) {
-  return BranchIf([condition]() { return condition; });
-}
-
-uint8_t Processor6502::Branch() {
-  addrAbs = pc + addrRel;
-  cycles += 1 + (addrAbs & 0xFF00 != pc & 0xFF00);
-  pc = addrAbs;
-  return 0;
-}
+void Processor6502::WriteToStack(uint16_t addr, uint8_t data) { Write(STACK_BEGIN + addr, data); }
 
 uint8_t Processor6502::Fetch() {
   if (!(lookup[opcode].addrMode == &Processor6502::IMP)) {
@@ -135,12 +116,13 @@ uint8_t Processor6502::Fetch() {
 
 void Processor6502::Clock() {
   if (cycles == 0) {
+    std::cout << pc << "\n";
     opcode = Read(pc);
     SetFlag(U, true);
     pc++;
-    cycles = lookup[opcode].cycles;
 
     auto instruction = lookup[opcode];
+    cycles = lookup[opcode].cycles;
 
     auto additionalCycle1 = (this->*lookup[opcode].addrMode)();
     auto additionalCycle2 = (this->*lookup[opcode].operate)();
@@ -157,14 +139,13 @@ void Processor6502::Reset() {
   uint16_t lo = Read(addrAbs + 0);
   uint16_t hi = Read(addrAbs + 1);
 
-  auto u = (hi << 8);
   pc = (hi << 8) | lo;
 
   a = 0;
   x = 0;
   y = 0;
   stackPointer = 0xFD;
-  status = 0x00 | U;
+  status = U;
 
   addrRel = 0x0000;
   addrAbs = 0x0000;
@@ -281,8 +262,8 @@ uint8_t Processor6502::IZX() {
   uint16_t t = Read(pc);
   pc++;
 
-  uint16_t lo = Read(t + static_cast<uint16_t>(x) & 0x00FF);
-  uint16_t hi = Read(t + static_cast<uint16_t>(x + 1) & 0x00FF);
+  uint16_t lo = Read((t + static_cast<uint16_t>(x)) & 0x00FF);
+  uint16_t hi = Read((t + static_cast<uint16_t>(x) + 1) & 0x00FF);
 
   addrAbs = (hi << 8) | lo;
 
@@ -330,7 +311,7 @@ uint8_t Processor6502::AND() {
 
 uint8_t Processor6502::ASL() {
   Fetch();
-  const auto temp = static_cast<uint16_t>(fetched) << 1;
+  temp = static_cast<uint16_t>(fetched) << 1;
   SetFlag(C, (temp & 0xFF00) > 0);
   SetFlag(Z, (temp & 0x00FF) == 0x00);
   SetFlag(N, temp & 0x80);
@@ -343,11 +324,47 @@ uint8_t Processor6502::ASL() {
   return 0;
 }
 
-uint8_t Processor6502::BCC() { return BranchIf(GetFlag(C) == 0); }
+uint8_t Processor6502::BCC() {
+  if (GetFlag(C) == 0) {
+    cycles++;
+    addrAbs = pc + addrRel;
 
-uint8_t Processor6502::BCS() { return BranchIf(GetFlag(C) == 1); }
+    if ((addrAbs & 0xFF00) != (pc & 0xFF00)) {
+      cycles++;
+    }
 
-uint8_t Processor6502::BEQ() { return BranchIf(GetFlag(Z) == 1); }
+    pc = addrAbs;
+  }
+  return 0;
+}
+
+uint8_t Processor6502::BCS() {
+  if (GetFlag(C) == 1) {
+    cycles++;
+    addrAbs = pc + addrRel;
+
+    if ((addrAbs & 0xFF00) != (pc & 0xFF00)) {
+      cycles++;
+    }
+
+    pc = addrAbs;
+  }
+  return 0;
+}
+
+uint8_t Processor6502::BEQ() {
+  if (GetFlag(Z) == 1) {
+    cycles++;
+    addrAbs = pc + addrRel;
+
+    if ((addrAbs & 0xFF00) != (pc & 0xFF00)) {
+      cycles++;
+    }
+
+    pc = addrAbs;
+  }
+  return 0;
+}
 
 uint8_t Processor6502::BIT() {
   Fetch();
@@ -358,11 +375,47 @@ uint8_t Processor6502::BIT() {
   return 0;
 }
 
-uint8_t Processor6502::BMI() { return BranchIf(GetFlag(N) == 1); }
+uint8_t Processor6502::BMI() {
+  if (GetFlag(N) == 1) {
+    cycles++;
+    addrAbs = pc + addrRel;
 
-uint8_t Processor6502::BNE() { return BranchIf(GetFlag(Z) == 0); }
+    if ((addrAbs & 0xFF00) != (pc & 0xFF00)) {
+      cycles++;
+    }
 
-uint8_t Processor6502::BPL() { return BranchIf(GetFlag(N) == 0); }
+    pc = addrAbs;
+  }
+  return 0;
+}
+
+uint8_t Processor6502::BNE() {
+  if (GetFlag(Z) == 0) {
+    cycles++;
+    addrAbs = pc + addrRel;
+
+    if ((addrAbs & 0xFF00) != (pc & 0xFF00)) {
+      cycles++;
+    }
+
+    pc = addrAbs;
+  }
+  return 0;
+}
+
+uint8_t Processor6502::BPL() {
+  if (GetFlag(N) == 0) {
+    cycles++;
+    addrAbs = pc + addrRel;
+
+    if ((addrAbs & 0xFF00) != (pc & 0xFF00)) {
+      cycles++;
+    }
+
+    pc = addrAbs;
+  }
+  return 0;
+}
 
 uint8_t Processor6502::BRK() {
   pc++;
@@ -382,9 +435,33 @@ uint8_t Processor6502::BRK() {
   return 0;
 }
 
-uint8_t Processor6502::BVC() { return BranchIf(GetFlag(V) == 0); }
+uint8_t Processor6502::BVC() {
+  if (GetFlag(V) == 0) {
+    cycles++;
+    addrAbs = pc + addrRel;
 
-uint8_t Processor6502::BVS() { return BranchIf(GetFlag(V) == 1); }
+    if ((addrAbs & 0xFF00) != (pc & 0xFF00)) {
+      cycles++;
+    }
+
+    pc = addrAbs;
+  }
+  return 0;
+}
+
+uint8_t Processor6502::BVS() {
+  if (GetFlag(V) == 1) {
+    cycles++;
+    addrAbs = pc + addrRel;
+
+    if ((addrAbs & 0xFF00) != (pc & 0xFF00)) {
+      cycles++;
+    }
+
+    pc = addrAbs;
+  }
+  return 0;
+}
 
 uint8_t Processor6502::CLC() {
   SetFlag(C, false);
@@ -435,7 +512,7 @@ uint8_t Processor6502::CPY() {
 
 uint8_t Processor6502::DEC() {
   Fetch();
-  temp = fetched - uint8_t{1};
+  temp = fetched - 1;
   Write(addrAbs, temp & 0x00FF);
   SetFlag(Z, (temp & 0x00FF) == 0x0000);
   SetFlag(N, temp & 0x0080);
@@ -466,10 +543,10 @@ uint8_t Processor6502::EOR() {
 
 uint8_t Processor6502::INC() {
   Fetch();
-  auto incremented = fetched + 1;
-  Write(addrAbs, incremented);
-  SetFlag(Z, (incremented & 0x00FF) == 0x0000);
-  SetFlag(N, incremented & 0x0080);
+  temp = fetched + 1;
+  Write(addrAbs, temp);
+  SetFlag(Z, (temp & 0x00FF) == 0x0000);
+  SetFlag(N, temp & 0x0080);
   return 0;
 }
 
@@ -506,7 +583,7 @@ uint8_t Processor6502::JSR() {
 uint8_t Processor6502::LDA() {
   Fetch();
   a = fetched;
-  SetFlag(Z, a == 0);
+  SetFlag(Z, a == 0x00);
   SetFlag(N, a & 0x80);
   return 1;
 }
@@ -514,7 +591,7 @@ uint8_t Processor6502::LDA() {
 uint8_t Processor6502::LDX() {
   Fetch();
   x = fetched;
-  SetFlag(Z, x == 0);
+  SetFlag(Z, x == 0x00);
   SetFlag(N, x & 0x80);
   return 1;
 }
@@ -522,7 +599,7 @@ uint8_t Processor6502::LDX() {
 uint8_t Processor6502::LDY() {
   Fetch();
   y = fetched;
-  SetFlag(Z, y == 0);
+  SetFlag(Z, y == 0x00);
   SetFlag(N, y & 0x80);
   return 1;
 }
@@ -611,7 +688,7 @@ uint8_t Processor6502::ROL() {
 uint8_t Processor6502::ROR() {
   Fetch();
 
-  uint8_t temp = static_cast<uint16_t>(GetFlag(C) << 7) | (fetched >> 1);
+  temp = static_cast<uint16_t>(GetFlag(C) << 7) | (fetched >> 1);
   SetFlag(C, fetched & 0x01);
   SetFlag(Z, (temp & 0x00FF) == 0x00);
   SetFlag(N, temp & 0x0080);
@@ -654,7 +731,7 @@ uint8_t Processor6502::SBC() {
 
   temp = static_cast<uint16_t>(a) + value + static_cast<uint16_t>(GetFlag(C));
   SetFlag(C, temp & 0xFF00);
-  SetFlag(Z, ((temp & 0x00FF) == 0));
+  SetFlag(Z, (temp & 0x00FF) == 0);
   SetFlag(V, (temp ^ static_cast<uint16_t>(a)) & (temp ^ value) & 0x0080);
   SetFlag(N, temp & 0x0080);
   a = temp & 0x00FF;
@@ -734,27 +811,31 @@ uint8_t Processor6502::TYA() {
 uint8_t Processor6502::XXX() { return 0; }
 
 void Processor6502::Interrupt(uint16_t address, uint8_t numCycles) {
-  if (GetFlag(I) == 0) {
-    WriteToStack(stackPointer, (pc >> 8) & 0x00FF);
-    stackPointer--;
-    WriteToStack(stackPointer, pc & 0x00FF);
-    stackPointer--;
+  WriteToStack(stackPointer, (pc >> 8) & 0x00FF);
+  stackPointer--;
+  WriteToStack(stackPointer, pc & 0x00FF);
+  stackPointer--;
 
-    SetFlag(B, false);
-    SetFlag(U, true);
-    SetFlag(I, true);
-    WriteToStack(stackPointer, status);
-    stackPointer--;
+  SetFlag(B, false);
+  SetFlag(U, true);
+  SetFlag(I, true);
+  WriteToStack(stackPointer, status);
+  stackPointer--;
 
-    addrAbs = address;
-    uint16_t lo = Read(addrAbs + 0);
-    uint16_t hi = Read(addrAbs + 1);
-    pc = (hi << 8) | lo;
+  addrAbs = address;
+  uint16_t lo = Read(addrAbs + 0);
+  uint16_t hi = Read(addrAbs + 1);
+  pc = (hi << 8) | lo;
 
-    cycles = numCycles;
-  }
+  cycles = numCycles;
 }
 
-void Processor6502::Interrupt() { Interrupt(0xFFFE, 7); }
+void Processor6502::Interrupt() {
+  if (GetFlag(I) != 0) {
+    return;
+  }
+
+  Interrupt(0xFFFE, 7);
+}
 
 void Processor6502::NonMaskableInterrupt() { Interrupt(0xFFFA, 8); }

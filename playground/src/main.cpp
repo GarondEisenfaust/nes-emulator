@@ -13,11 +13,12 @@
 #include <string>
 #include <thread>
 
-void RenderCompleteFrame(Bus& bus, PixelProcessingUnit& ppu) {
-  while (!ppu.mFrameComplete) {
+void RenderCompleteFrame(Bus& bus) {
+  auto* ppu = bus.mPpu;
+  while (!ppu->mFrameComplete) {
     bus.Clock();
   }
-  ppu.mFrameComplete = false;
+  ppu->mFrameComplete = false;
 }
 
 int main() {
@@ -48,7 +49,7 @@ int main() {
   ppu.ConnectBus(&bus);
 
   auto workDir = Util::GetExecutableDirectory();
-  Cartridge cartridge(fmt::format("{}/roms/color_test.nes", workDir));
+  Cartridge cartridge(fmt::format("{}/roms/donkey-kong.nes", workDir));
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
@@ -58,7 +59,7 @@ int main() {
     auto now = std::chrono::system_clock::now();
     auto next = now + diff;
 
-    RenderCompleteFrame(bus, ppu);
+    RenderCompleteFrame(bus);
     auto colorData = grid.MakeColorData();
     colors->SetData(colorData);
 
