@@ -30,7 +30,12 @@ RenderContext::RenderContext() : mShaderProgram() {
   ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
   ImGui_ImplOpenGL3_Init();
 
-  glfwSetKeyCallback(mWindow, key_callback);
+  glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+    auto* callback = (KeyCallback*)glfwGetWindowUserPointer(window);
+    if (callback) {
+      (*callback)(window, key, scancode, action, mods);
+    }
+  });
 
   glewExperimental = GL_TRUE;
   glewInit();
@@ -92,8 +97,6 @@ void RenderContext::GameLoop(std::function<void()> loop) {
 int RenderContext::GetHeight() { return mHeight; }
 int RenderContext::GetWidth() { return mWidth; }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
-}
+void RenderContext::SetKeyCallback(KeyCallback* keyCallback) { glfwSetWindowUserPointer(mWindow, keyCallback); }
 
 void RenderContext::AddVertexArray(std::shared_ptr<VertexArray> vertexArray) { mVertexArrays.push_back(vertexArray); }

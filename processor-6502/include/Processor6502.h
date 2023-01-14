@@ -36,6 +36,7 @@ class Processor6502 {
   uint8_t stackPointer = 0x00;  // Stack Pointer (points to location on bus)
   uint16_t pc = 0x0000;         // Program Counter
   uint8_t status = 0x00;        // Status Register
+  uint8_t cycles = 0;           // Counts how many cycles the instruction has remaining
 
  protected:
   // Addressing Modes =============================================
@@ -130,7 +131,6 @@ class Processor6502 {
   uint16_t addrAbs = 0x0000;  // All used memory addresses end up in here
   uint16_t addrRel = 0x00;    // Represents absolute address following a branch
   uint8_t opcode = 0x00;      // Is the instruction byte
-  uint8_t cycles = 0;         // Counts how many cycles the instruction has remaining
   uint16_t temp = 0x0000;     // temp register
 
   void Interrupt(uint16_t address, uint8_t numCycles);

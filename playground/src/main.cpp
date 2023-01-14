@@ -25,9 +25,20 @@ void RenderCompleteFrame(Bus& bus) {
   ppu->mFrameComplete = false;
 }
 
+void MakeOneStep(Bus& bus) {
+  auto finished = false;
+
+  do {
+    bus.Clock();
+  } while (bus.mCpu->cycles > 0);
+
+  do {
+    bus.Clock();
+  } while (bus.mCpu->cycles <= 0);
+}
+
 int main() {
   RenderContext renderContext;
-
   Grid grid(WIDTH, HEIGHT, 256, 240);
   grid.Init();
 
@@ -57,6 +68,19 @@ int main() {
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
+  auto stepMode = true;
+  auto shouldStep = false;
+  RenderContext::KeyCallback keyCallback = [&](GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+      stepMode = !stepMode;
+    }
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS && stepMode) {
+      shouldStep = true;
+    }
+  };
+
+  renderContext.SetKeyCallback(&keyCallback);
+
   {
     using namespace std::chrono_literals;
     auto diff = (1000ms / 60);
@@ -64,13 +88,19 @@ int main() {
     renderContext.GameLoop([&]() {
       auto next = std::chrono::system_clock::now() + diff;
 
-      disassamblerWindow.Render();
-      RenderCompleteFrame(bus);
-
       auto colorData = grid.MakeColorData();
       colors->SetData(colorData);
+      disassamblerWindow.Render();
 
-      std::this_thread::sleep_until(next);
+      if (stepMode) {
+        if (shouldStep) {
+          MakeOneStep(bus);
+          shouldStep = false;
+        }
+      } else {
+        RenderCompleteFrame(bus);
+        std::this_thread::sleep_until(next);
+      }
     });
   }
   return 0;

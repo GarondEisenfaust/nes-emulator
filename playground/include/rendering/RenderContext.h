@@ -13,6 +13,7 @@
 
 class RenderContext {
  public:
+  using KeyCallback = std::function<void(GLFWwindow* window, int key, int scancode, int action, int mods)>;
   RenderContext();
   ~RenderContext();
 
@@ -20,6 +21,7 @@ class RenderContext {
   int GetHeight();
   int GetWidth();
   void AddVertexArray(std::shared_ptr<VertexArray> vertexArray);
+  void SetKeyCallback(KeyCallback* keyCallback);
 
  private:
   int mWidth;
