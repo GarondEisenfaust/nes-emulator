@@ -6,7 +6,11 @@
 #include "Processor6502.h"
 #include "Util.h"
 #include "fmt/format.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "rendering/RenderContext.h"
+#include "windows/DisassamblerWindow.h"
 #include <array>
 #include <chrono>
 #include <iostream>
@@ -53,17 +57,21 @@ int main() {
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
-  renderContext.GameLoop([&grid, &bus, &ppu, colors]() {
+  {
     using namespace std::chrono_literals;
     auto diff = (1000ms / 60);
-    auto now = std::chrono::system_clock::now();
-    auto next = now + diff;
+    DisassamblerWindow disassamblerWindow(&cpu);
+    renderContext.GameLoop([&]() {
+      auto next = std::chrono::system_clock::now() + diff;
 
-    RenderCompleteFrame(bus);
-    auto colorData = grid.MakeColorData();
-    colors->SetData(colorData);
+      disassamblerWindow.Render();
+      RenderCompleteFrame(bus);
 
-    std::this_thread::sleep_until(next);
-  });
+      auto colorData = grid.MakeColorData();
+      colors->SetData(colorData);
+
+      std::this_thread::sleep_until(next);
+    });
+  }
   return 0;
 }

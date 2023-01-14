@@ -2,6 +2,7 @@
 #include "FLAGS6502.h"
 #include <cstdint>
 #include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -26,6 +27,7 @@ class Processor6502 {
   void Reset();
 
   void ConnectBus(Bus* bus);
+  std::map<uint16_t, std::string> Disassemble(uint16_t begin, uint16_t end);
 
   uint8_t fetched = 0x00;       // Represents the working input value to the ALU
   uint8_t a = 0x00;             // Accumulator Register

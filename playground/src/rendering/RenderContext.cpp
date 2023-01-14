@@ -1,9 +1,14 @@
 #include "rendering/RenderContext.h"
 #include "Definitions.h"
 #include "Util.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "rendering/Shader.h"
+#include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include <thread>
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
@@ -17,6 +22,13 @@ RenderContext::RenderContext() : mShaderProgram() {
 
   mWindow = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
   glfwMakeContextCurrent(mWindow);
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+
+  ImGui::StyleColorsDark();
+  ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
+  ImGui_ImplOpenGL3_Init();
 
   glfwSetKeyCallback(mWindow, key_callback);
 
@@ -41,13 +53,24 @@ void RenderContext::UpdateBuffers() {
   }
 }
 
-RenderContext::~RenderContext() { glfwTerminate(); }
+RenderContext::~RenderContext() {
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+
+  glfwDestroyWindow(mWindow);
+  glfwTerminate();
+}
 
 void RenderContext::GameLoop(std::function<void()> loop) {
   while (!glfwWindowShouldClose(mWindow)) {
     UpdateBuffers();
 
     glfwPollEvents();
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -58,8 +81,11 @@ void RenderContext::GameLoop(std::function<void()> loop) {
       vertexArray->Draw();
     }
 
-    glfwSwapBuffers(mWindow);
     loop();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    glfwSwapBuffers(mWindow);
   }
 }
 
