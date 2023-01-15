@@ -23,6 +23,9 @@ void DisassamblerWindow::Content() {
   std::array<std::string, 10> nextTen;
   for (auto i = 0; i < 10; i++) {
     iterator++;
+    if (iterator->first >= 0xFFFF) {
+      break;
+    }
     nextTen[i] = iterator->second;
   }
 

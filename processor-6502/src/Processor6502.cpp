@@ -140,6 +140,8 @@ void Processor6502::Reset() {
   uint16_t hi = Read(addrAbs + 1);
 
   pc = (hi << 8) | lo;
+  // nestest
+  // pc = 0xC000;
 
   a = 0;
   x = 0;

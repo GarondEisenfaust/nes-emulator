@@ -37,6 +37,12 @@ class Processor6502 {
   uint16_t pc = 0x0000;         // Program Counter
   uint8_t status = 0x00;        // Status Register
   uint8_t cycles = 0;           // Counts how many cycles the instruction has remaining
+  uint16_t addrAbs = 0x0000;    // All used memory addresses end up in here
+  uint16_t addrRel = 0x00;      // Represents absolute address following a branch
+  uint8_t opcode = 0x00;        // Is the instruction byte
+  uint16_t temp = 0x0000;       // temp register
+
+  Bus* mBus;
 
  protected:
   // Addressing Modes =============================================
@@ -126,12 +132,6 @@ class Processor6502 {
   void SetFlag(FLAGS6502 flag, std::function<bool(void)> value);
 
   std::vector<Instruction> lookup;
-  Bus* mBus;
-
-  uint16_t addrAbs = 0x0000;  // All used memory addresses end up in here
-  uint16_t addrRel = 0x00;    // Represents absolute address following a branch
-  uint8_t opcode = 0x00;      // Is the instruction byte
-  uint16_t temp = 0x0000;     // temp register
 
   void Interrupt(uint16_t address, uint8_t numCycles);
 };

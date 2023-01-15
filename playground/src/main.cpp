@@ -11,6 +11,7 @@
 #include "imgui_impl_opengl3.h"
 #include "rendering/RenderContext.h"
 #include "windows/DisassamblerWindow.h"
+#include "windows/RegisterWindow.h"
 #include <array>
 #include <chrono>
 #include <iostream>
@@ -64,7 +65,7 @@ int main() {
   ppu.ConnectBus(&bus);
 
   auto workDir = Util::GetExecutableDirectory();
-  Cartridge cartridge(fmt::format("{}/roms/donkey-kong.nes", workDir));
+  Cartridge cartridge(fmt::format("{}/roms/nestest.nes", workDir));
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
@@ -80,17 +81,18 @@ int main() {
   };
 
   renderContext.SetKeyCallback(&keyCallback);
-
+  DisassamblerWindow disassamblerWindow(&cpu);
+  RegisterWindow registerWindow(cpu);
   {
     using namespace std::chrono_literals;
     auto diff = (1000ms / 60);
-    DisassamblerWindow disassamblerWindow(&cpu);
     renderContext.GameLoop([&]() {
       auto next = std::chrono::system_clock::now() + diff;
 
       auto colorData = grid.MakeColorData();
       colors->SetData(colorData);
       disassamblerWindow.Render();
+      registerWindow.Render();
 
       if (stepMode) {
         if (shouldStep) {
