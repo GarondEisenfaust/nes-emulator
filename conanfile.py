@@ -15,6 +15,7 @@ class CMakeTemplateConan(ConanFile):
     self.requires("fmt/9.1.0", private=True, override=False)
     self.requires("boost/1.80.0", private=True, override=False)
     self.requires("glm/0.9.9.8", private=True, override=False)
+    self.requires("lodepng/cci.20200615", private=True, override=False)
 
   def build_requirements(self):
     pass
@@ -28,4 +29,3 @@ class CMakeTemplateConan(ConanFile):
     self.copy("imgui_impl_opengl3_loader.h", dst=destination, src=source)
     self.copy("imgui_impl_glfw.cpp", dst=destination, src=source)
     self.copy("imgui_impl_opengl3.cpp", dst=destination, src=source)
-

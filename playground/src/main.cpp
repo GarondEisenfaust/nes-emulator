@@ -78,6 +78,11 @@ int main() {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS && stepMode) {
       shouldStep = true;
     }
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+      const auto palette = 1;
+      ppu.WritePatternTableToImage("table-1.png", 1, palette);
+      ppu.WritePatternTableToImage("table-2.png", 1, palette);
+    }
   };
 
   renderContext.SetKeyCallback(&keyCallback);

@@ -2,8 +2,10 @@
 #include "Bus.h"
 #include "Definitions.h"
 #include "Grid.h"
+#include "lodepng.h"
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 
 PixelProcessingUnit::PixelProcessingUnit(Grid* grid)
     : mCycle(0),
@@ -413,6 +415,10 @@ void PixelProcessingUnit::ConnectBus(Bus* bus) {
 }
 
 PixelColor& PixelProcessingUnit::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
+  if (palette != 0 || pixel != 0) {
+    auto i = 0;
+  }
+
   auto address = 0x3F00 + (palette << 2) + pixel;
   auto index = PpuRead(address) & 0x3F;
   return mColorPalette->at(index);
@@ -437,4 +443,38 @@ void PixelProcessingUnit::Reset() {
   mControlRegister.reg = 0x00;
   vRamAddr.reg = 0x0000;
   tRamAddr.reg = 0x0000;
+}
+
+void PixelProcessingUnit::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette) {
+  const int width = 128;
+  const int height = 128;
+  const int channels = 3;
+  constexpr auto size = width * height * channels;
+  std::array<unsigned char, size> image;
+
+  for (uint16_t nTileY = 0; nTileY < 16; nTileY++) {
+    for (uint16_t nTileX = 0; nTileX < 16; nTileX++) {
+      const uint16_t nOffset = nTileY * 256 + nTileX * 16;
+      for (uint16_t row = 0; row < 8; row++) {
+        uint8_t tile_lsb = PpuRead(i * 0x1000 + nOffset + row + 0x0000);
+        uint8_t tile_msb = PpuRead(i * 0x1000 + nOffset + row + 0x0008);
+
+        for (uint16_t col = 0; col < 8; col++) {
+          const uint8_t pixel = (tile_lsb & 0x01) + (tile_msb & 0x01);
+          tile_lsb >>= 1;
+          tile_msb >>= 1;
+
+          const auto x = nTileX * 8 + (7 - col);
+          const auto y = nTileY * 8 + row;
+
+          const auto index = (y * width + x) * 3;
+          const auto& color = GetColorFromPalette(palette, pixel);
+          image[index + 0] = color.r;
+          image[index + 1] = color.g;
+          image[index + 2] = color.b;
+        }
+      }
+    }
+  }
+  unsigned error = lodepng::encode(path, image.data(), width, height, LCT_RGB);
 }

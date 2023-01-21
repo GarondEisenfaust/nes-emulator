@@ -32,8 +32,9 @@ class PixelProcessingUnit {
   void Clock();
   void Reset();
 
-  Sprite& GetPatternTable(uint8_t i, uint8_t palette);
   PixelColor& GetColorFromPalette(uint8_t palette, uint8_t pixel);
+  void WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette);
+
   bool mFrameComplete;
   bool nmi;
 
