@@ -7,11 +7,11 @@ class Mapper000 : public IMapper {
   Mapper000(uint8_t programBanks, uint8_t characterBanks);
   virtual ~Mapper000() = default;
 
-  virtual MappingResult CpuMapRead(uint16_t address) override;
-  virtual MappingResult CpuMapWrite(uint16_t address) override;
+  virtual bool CpuMapRead(uint16_t address, uint32_t& mappedAddr);
+  virtual bool CpuMapWrite(uint16_t address, uint32_t& mappedAddr, uint8_t data);
 
-  virtual MappingResult PpuMapRead(uint16_t address) override;
-  virtual MappingResult PpuMapWrite(uint16_t address) override;
+  virtual bool PpuMapRead(uint16_t address, uint32_t& mappedAddr);
+  virtual bool PpuMapWrite(uint16_t address, uint32_t& mappedAddr);
 
   virtual void Reset();
 

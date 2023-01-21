@@ -46,8 +46,8 @@ class PixelProcessingUnit {
   std::unique_ptr<ColorPalette> mColorPalette;
   std::unique_ptr<PatternMemory> mPatternMemory;
   uint8_t tblName[2][1024];
-  uint8_t tblPattern[2][4096];
   uint8_t tblPalette[32];
+  uint8_t tblPattern[2][4096];
 
   StatusRegister mStatusRegister;
   MaskRegister mMaskRegister;

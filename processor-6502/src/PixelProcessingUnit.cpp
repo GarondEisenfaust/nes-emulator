@@ -33,6 +33,9 @@ void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
       break;
     case 0x0005:  // Scroll
       if (mAddressLatch == 0) {
+        if (data != 0) {
+          auto g = 0;
+        }
         fineX = data & 0x07;
         tRamAddr.coarseX = data >> 3;
         mAddressLatch = 1;
@@ -44,7 +47,7 @@ void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
       break;
     case 0x0006:  // PPU Address
       if (mAddressLatch == 0) {
-        tRamAddr.reg = static_cast<uint16_t>((data & 0x3F) << 8) | (tRamAddr.reg & 0x00FF);
+        tRamAddr.reg = (tRamAddr.reg & 0x00FF) | (data << 8);
         mAddressLatch = 1;
       } else {
         tRamAddr.reg = (tRamAddr.reg & 0xFF00) | data;
@@ -172,9 +175,8 @@ void PixelProcessingUnit::PpuWrite(uint16_t addr, uint8_t data) {
 uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
   addr &= 0x3FFF;
   uint8_t data = 0x00;
-  auto cartridgeResult = mCartridge->PpuRead(addr);
-  if (cartridgeResult.hasRead) {
-    data = cartridgeResult.readResult;
+
+  if (mCartridge->PpuRead(addr, data)) {
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
     data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
@@ -361,18 +363,17 @@ void PixelProcessingUnit::Clock() {
   if (mScanline == 240) {
   }
 
-  if (241 <= mScanline && mScanline < 261) {
-    if (mScanline == 241 && mCycle == 1) {
-      mStatusRegister.verticalBlank = 1;
-      if (mControlRegister.enableNmi) {
-        nmi = true;
-      }
+  if (mScanline == 241 && mCycle == 1) {
+    mStatusRegister.verticalBlank = 1;
+    if (mControlRegister.enableNmi) {
+      nmi = true;
     }
   }
 
   uint8_t bgPixel = 0x00;
   uint8_t bgPalette = 0x00;
-  if (!mMaskRegister.renderBackground) {
+
+  if (mMaskRegister.renderBackground) {
     uint16_t bitMux = 0x8000 >> fineX;
 
     uint8_t p0Pixel = (mBgShifterPatternLow & bitMux) > 0;

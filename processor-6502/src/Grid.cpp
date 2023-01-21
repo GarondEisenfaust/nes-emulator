@@ -21,9 +21,6 @@ void Grid::Init() {
 
 Pixel& Grid::GetPixel(int x, int y) {
   auto position = y * mGridWidth + x;
-  if (y >= 1) {
-    int u = 9;
-  }
   return mPixels[position];
 }
 

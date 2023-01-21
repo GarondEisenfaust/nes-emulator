@@ -16,10 +16,10 @@ class Cartridge {
   Cartridge(const std::string& path);
   virtual ~Cartridge() = default;
 
-  ReadResult CpuRead(uint16_t address);
+  bool CpuRead(uint16_t address, uint8_t& data);
   bool CpuWrite(uint16_t address, uint8_t data);
 
-  ReadResult PpuRead(uint16_t address);
+  bool PpuRead(uint16_t address, uint8_t& data);
   bool PpuWrite(uint16_t address, uint8_t data);
   void Reset();
   MIRROR mMirror;

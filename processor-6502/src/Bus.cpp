@@ -8,37 +8,28 @@ Bus::~Bus() {}
 
 void Bus::CpuWrite(uint16_t addr, uint8_t data) {
   if (mCartridge->CpuWrite(addr, data)) {
-    return;
-  }
-  if (RAM_START <= addr && addr <= RAM_END) {
+  } else if (RAM_START <= addr && addr <= RAM_END) {
     mRam->at(addr & RAM_SIZE) = data;
-    return;
-  }
-  if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
+  } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     mPpu->CpuWrite(addr & PPU_RAM_SIZE, data);
-    return;
-  }
-  if (addr >= 0x4016 && addr <= 0x4017) {
-    controller_state[addr & 0x0001] = controller[addr & 0x0001];
+  } else if (addr >= 0x4016 && addr <= 0x4017) {
+    controllerState[addr & 0x0001] = controller[addr & 0x0001];
   }
 }
 
 uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
-  auto cartridgeResult = mCartridge->CpuRead(addr);
-  if (cartridgeResult.hasRead) {
-    return cartridgeResult.readResult;
-  }
-  if (RAM_START <= addr && addr <= RAM_END) {
-    return mRam->at(addr & RAM_SIZE);
-  }
-  if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
-    return mPpu->CpuRead(addr & PPU_RAM_SIZE, bReadOnly);
+  uint8_t data = 0x00;
+
+  if (mCartridge->CpuRead(addr, data)) {
+  } else if (RAM_START <= addr && addr <= RAM_END) {
+    data = mRam->at(addr & RAM_SIZE);
+  } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
+    data = mPpu->CpuRead(addr & PPU_RAM_SIZE, bReadOnly);
   } else if (addr >= 0x4016 && addr <= 0x4017) {
-    auto data = (controller_state[addr & 0x0001] & 0x80) > 0;
-    controller_state[addr & 0x0001] <<= 1;
-    return data;
+    data = (controllerState[addr & 0x0001] & 0x80) > 0;
+    controllerState[addr & 0x0001] <<= 1;
   }
-  return UNDEFINED;
+  return data;
 }
 
 void Bus::InsertCartridge(Cartridge* cartridge) {
