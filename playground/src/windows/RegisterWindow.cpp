@@ -34,15 +34,15 @@ void RegisterWindow::Content() {
   CompareUpdateOldAndDisplay<uint8_t, "opcode:           {:#04x}">(mOldOpcode, mProcessor6502.opcode);
   CompareUpdateOldAndDisplay<uint16_t, "addrAbs:          {:#06x}">(mOldAddrAbs, mProcessor6502.addrAbs);
   CompareUpdateOldAndDisplay<uint16_t, "addrRel:          {:#06x}">(mOldAddrRel, mProcessor6502.addrRel);
-  CompareUpdateOldAndDisplay<uint8_t, "cycles:           {:#04x}">(mOldCycles, mProcessor6502.cycles);
+  CompareUpdateOldAndDisplay<uint8_t, "cycles:           {}">(mOldCycles, mProcessor6502.cycles);
   CompareUpdateOldAndDisplay<uint8_t, "fetched:          {:#04x}">(mOldFetched, mProcessor6502.fetched);
 
   ImGui::Text("");
-  CompareUpdateOldAndDisplay<uint8_t, "accumulator:      {:#04x}">(mOldA, mProcessor6502.a);
-  CompareUpdateOldAndDisplay<uint8_t, "x:                {:#04x}">(mOldX, mProcessor6502.x);
-  CompareUpdateOldAndDisplay<uint8_t, "y:                {:#04x}">(mOldY, mProcessor6502.y);
+  CompareUpdateOldAndDisplay<uint8_t, "accumulator:      {0:#04x} {0}">(mOldA, mProcessor6502.a);
+  CompareUpdateOldAndDisplay<uint8_t, "x:                {0:#04x} {0}">(mOldX, mProcessor6502.x);
+  CompareUpdateOldAndDisplay<uint8_t, "y:                {0:#04x} {0}">(mOldY, mProcessor6502.y);
   ImGui::Text("");
-  CompareUpdateOldAndDisplay<uint16_t, "temp:             {:#06x}">(mOldTemp, mProcessor6502.temp);
+  CompareUpdateOldAndDisplay<uint16_t, "temp:             {0:#06x} {0}">(mOldTemp, mProcessor6502.temp);
   ImGui::Text("");
   ImGui::Text("nes test memory locations:");
   CompareUpdateOldAndDisplay<uint8_t, "0x02:             {:#04x}">(mOldNestest02,
