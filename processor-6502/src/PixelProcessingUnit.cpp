@@ -311,7 +311,7 @@ void PixelProcessingUnit::Clock() {
     }
   };
 
-  if (mScanline >= -1 && mCycle < 240) {
+  if (mScanline >= -1 && mScanline < 240) {
     if (mScanline == 0 && mCycle == 0) {
       mCycle = 1;
     }
