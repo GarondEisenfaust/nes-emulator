@@ -12,8 +12,8 @@ PixelProcessingUnit::PixelProcessingUnit(Grid* grid)
       mScanline(0),
       mFrameComplete(false),
       mColorPalette(std::move(MakePixelColors())),
-      mPatternMemory(std::make_unique<PatternMemory>()),
-      mGrid(grid) {}
+      mGrid(grid),
+      nmi(false) {}
 
 void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
   switch (addr) {
@@ -35,9 +35,6 @@ void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
       break;
     case 0x0005:  // Scroll
       if (mAddressLatch == 0) {
-        if (data != 0) {
-          auto g = 0;
-        }
         fineX = data & 0x07;
         tRamAddr.coarseX = data >> 3;
         mAddressLatch = 1;
@@ -49,10 +46,10 @@ void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
       break;
     case 0x0006:  // PPU Address
       if (mAddressLatch == 0) {
-        tRamAddr.reg = (tRamAddr.reg & 0x00FF) | (data << 8);
+        tRamAddr.reg = static_cast<uint16_t>(tRamAddr.reg & 0x00FF) | (static_cast<uint16_t>(data & 0x3F) << 8);
         mAddressLatch = 1;
       } else {
-        tRamAddr.reg = (tRamAddr.reg & 0xFF00) | data;
+        tRamAddr.reg = static_cast<uint16_t>(tRamAddr.reg & 0xFF00) | static_cast<uint16_t>(data);
         vRamAddr = tRamAddr;
         mAddressLatch = 0;
       }
@@ -68,53 +65,69 @@ uint8_t PixelProcessingUnit::CpuRead(uint16_t addr, bool bReadOnly) {
   uint8_t data = 0x00;
   if (bReadOnly) {
     switch (addr) {
-      case 0x0000:  // Control
+      case 0x0000: {  // Control
         data = mControlRegister.reg;
         break;
-      case 0x0001:  // Mask
+      }
+      case 0x0001: {  // Mask
         data = mMaskRegister.reg;
         break;
-      case 0x0002:  // Status
+      }
+      case 0x0002: {  // Status
         data = mStatusRegister.reg;
         break;
-      case 0x0003:  // OAM Address
+      }
+      case 0x0003: {  // OAM Address
         break;
-      case 0x0004:  // OAM Data
+      }
+      case 0x0004: {  // OAM Data
         break;
-      case 0x0005:  // Scroll
+      }
+      case 0x0005: {  // Scroll
         break;
-      case 0x0006:  // PPU Address
+      }
+      case 0x0006: {  // PPU Address
         break;
-      case 0x0007:  // PPU Data
+      }
+      case 0x0007: {  // PPU Data
         break;
+      }
     }
   } else {
     switch (addr) {
-      case 0x0000:  // Control
+      case 0x0000: {  // Control
         break;
-      case 0x0001:  // Mask
+      }
+      case 0x0001: {  // Mask
         break;
-      case 0x0002:  // Status
+      }
+      case 0x0002: {  // Status
         data = (mStatusRegister.reg & 0xE0) | (mPpuDataBuffer & 0x1F);
         mStatusRegister.verticalBlank = 0;
         mAddressLatch = 0;
         break;
-      case 0x0003:  // OAM Address
+      }
+      case 0x0003: {  // OAM Address
         break;
-      case 0x0004:  // OAM Data
+      }
+      case 0x0004: {  // OAM Data
         break;
-      case 0x0005:  // Scroll
+      }
+      case 0x0005: {  // Scroll
         break;
-      case 0x0006:  // PPU Address
+      }
+      case 0x0006: {  // PPU Address
         break;
-      case 0x0007:  // PPU Data
+      }
+      case 0x0007: {  // PPU Data
         data = mPpuDataBuffer;
         mPpuDataBuffer = PpuRead(vRamAddr.reg);
-        if (vRamAddr.reg > 0x3F00) {
+        if (vRamAddr.reg >= 0x3F00) {
           data = mPpuDataBuffer;
         }
         vRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
         break;
+      }
     }
   }
   return data;
@@ -123,6 +136,7 @@ uint8_t PixelProcessingUnit::CpuRead(uint16_t addr, bool bReadOnly) {
 void PixelProcessingUnit::PpuWrite(uint16_t addr, uint8_t data) {
   addr &= 0x3FFF;
   if (mCartridge->PpuWrite(addr, data)) {
+    //
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
     tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
@@ -175,10 +189,11 @@ void PixelProcessingUnit::PpuWrite(uint16_t addr, uint8_t data) {
 }
 
 uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
-  addr &= 0x3FFF;
   uint8_t data = 0x00;
+  addr &= 0x3FFF;
 
   if (mCartridge->PpuRead(addr, data)) {
+    //
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
     data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
   } else if (0x2000 <= addr && addr <= 0x3EFF) {

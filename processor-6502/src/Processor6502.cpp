@@ -147,7 +147,7 @@ void Processor6502::Reset() {
   x = 0;
   y = 0;
   stackPointer = 0xFD;
-  status = U;
+  status = 0x00 | U;
 
   addrRel = 0x0000;
   addrAbs = 0x0000;
@@ -156,7 +156,10 @@ void Processor6502::Reset() {
   cycles = 8;
 }
 
-uint8_t Processor6502::GetFlag(FLAGS6502 flag) { return ((status & flag) > 0) ? 1 : 0; }
+uint8_t Processor6502::GetFlag(FLAGS6502 flag) {
+  auto p = (status & flag);
+  return ((status & flag) > 0) ? 1 : 0;
+}
 
 void Processor6502::SetFlag(FLAGS6502 flag, std::function<bool(void)> value) { Util::SetFlag(status, flag, value); }
 

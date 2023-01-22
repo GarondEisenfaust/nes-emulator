@@ -12,7 +12,7 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
     mRam->at(addr & RAM_SIZE) = data;
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     mPpu->CpuWrite(addr & PPU_RAM_SIZE, data);
-  } else if (addr >= 0x4016 && addr <= 0x4017) {
+  } else if (0x4016 <= addr && addr <= 0x4017) {
     controllerState[addr & 0x0001] = controller[addr & 0x0001];
   }
 }
@@ -25,7 +25,7 @@ uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
     data = mRam->at(addr & RAM_SIZE);
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     data = mPpu->CpuRead(addr & PPU_RAM_SIZE, bReadOnly);
-  } else if (addr >= 0x4016 && addr <= 0x4017) {
+  } else if (0x4016 <= addr && addr <= 0x4017) {
     data = (controllerState[addr & 0x0001] & 0x80) > 0;
     controllerState[addr & 0x0001] <<= 1;
   }
@@ -38,9 +38,9 @@ void Bus::InsertCartridge(Cartridge* cartridge) {
 }
 
 void Bus::Reset() {
+  mCartridge->Reset();
   mCpu->Reset();
   mPpu->Reset();
-  mCartridge->Reset();
   mSystemClockCounter = 0;
 }
 

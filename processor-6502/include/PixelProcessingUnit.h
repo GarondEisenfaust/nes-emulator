@@ -21,11 +21,11 @@ class PixelProcessingUnit {
   PixelProcessingUnit(Grid* grid);
   ~PixelProcessingUnit() = default;
 
-  void CpuWrite(uint16_t addr, uint8_t data);
   uint8_t CpuRead(uint16_t addr, bool bReadOnly = false);
+  void CpuWrite(uint16_t addr, uint8_t data);
 
-  void PpuWrite(uint16_t addr, uint8_t data);
   uint8_t PpuRead(uint16_t addr, bool bReadOnly = false);
+  void PpuWrite(uint16_t addr, uint8_t data);
 
   void ConnectBus(Bus* bus);
   void InsertCartridge(Cartridge* cartridge);
@@ -41,15 +41,15 @@ class PixelProcessingUnit {
 
  private:
   Cartridge* mCartridge;
-  int mCycle;
-  int mScanline;
+  int16_t mCycle;
+  int16_t mScanline;
   Bus* mBus;
   Grid* mGrid;
   std::unique_ptr<ColorPalette> mColorPalette;
-  std::unique_ptr<PatternMemory> mPatternMemory;
+
   uint8_t tblName[2][1024];
-  uint8_t tblPalette[32];
   uint8_t tblPattern[2][4096];
+  uint8_t tblPalette[32];
 
   StatusRegister mStatusRegister;
   MaskRegister mMaskRegister;

@@ -41,17 +41,21 @@ Cartridge::Cartridge(const std::string& path) {
   mMapperId = DetermineMapperId(header);
   mMirror = DetermineMirror(header);
 
+  uint8_t nFileType = 1;
+  if ((header.mapper2 & 0x0C) == 0x08) {
+    nFileType = 2;
+  }
+
   mProgramBanks = header.programRomChunks;
   mProgramMemory.resize(mProgramBanks * 16384);
-  romStream.read(reinterpret_cast<char*>(mProgramMemory.data()), mProgramMemory.size());
+  romStream.read((char*)mProgramMemory.data(), mProgramMemory.size());
 
   mCharacterBanks = header.characterRomChunks;
-  auto banksToAllocate = mCharacterBanks != 0 ? mCharacterBanks : 1;
+  auto banksToAllocate = mCharacterBanks > 0 ? mCharacterBanks : 1;
   mCharacterMemory.resize(banksToAllocate * 8192);
-  romStream.read(reinterpret_cast<char*>(mCharacterMemory.data()), mCharacterMemory.size());
+  romStream.read((char*)mCharacterMemory.data(), mCharacterMemory.size());
 
   mMapper = std::make_unique<Mapper000>(mProgramBanks, mCharacterBanks);
-
   mImageValid = true;
   romStream.close();
 }
