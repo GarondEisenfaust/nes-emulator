@@ -415,10 +415,6 @@ void PixelProcessingUnit::ConnectBus(Bus* bus) {
 }
 
 PixelColor& PixelProcessingUnit::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
-  if (palette != 0 || pixel != 0) {
-    auto i = 0;
-  }
-
   auto address = 0x3F00 + (palette << 2) + pixel;
   auto index = PpuRead(address) & 0x3F;
   return mColorPalette->at(index);
@@ -469,12 +465,29 @@ void PixelProcessingUnit::WritePatternTableToImage(const char* path, uint8_t i, 
 
           const auto index = (y * width + x) * 3;
           const auto& color = GetColorFromPalette(palette, pixel);
-          image[index + 0] = color.r;
-          image[index + 1] = color.g;
-          image[index + 2] = color.b;
+          image[index + 0] = static_cast<unsigned char>(color.r);
+          image[index + 1] = static_cast<unsigned char>(color.g);
+          image[index + 2] = static_cast<unsigned char>(color.b);
         }
       }
     }
   }
-  unsigned error = lodepng::encode(path, image.data(), width, height, LCT_RGB);
+
+  lodepng::encode(path, image.data(), width, height, LCT_RGB);
+}
+
+void PixelProcessingUnit::WriteColorPaletteToImage(const char* path) {
+  const int numPalettes = 8;
+  const int paletteSize = 4;
+
+  std::vector<unsigned char> image;
+  for (auto p = 0; p < numPalettes; p++) {
+    for (auto s = 0; s < paletteSize; s++) {
+      const auto& color = GetColorFromPalette(p, s);
+      const auto values = {color.r, color.g, color.b};
+      std::copy(values.begin(), values.end(), std::back_inserter(image));
+    }
+  }
+
+  lodepng::encode(path, image.data(), paletteSize, numPalettes, LCT_RGB);
 }

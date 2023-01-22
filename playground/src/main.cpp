@@ -81,7 +81,8 @@ int main() {
     if (key == GLFW_KEY_P && action == GLFW_PRESS) {
       const auto palette = 1;
       ppu.WritePatternTableToImage("table-1.png", 1, palette);
-      ppu.WritePatternTableToImage("table-2.png", 1, palette);
+      ppu.WritePatternTableToImage("table-2.png", 2, palette);
+      ppu.WriteColorPaletteToImage("color-palette.png");
     }
   };
 

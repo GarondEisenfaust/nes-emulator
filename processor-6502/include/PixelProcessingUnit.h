@@ -34,6 +34,7 @@ class PixelProcessingUnit {
 
   PixelColor& GetColorFromPalette(uint8_t palette, uint8_t pixel);
   void WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette);
+  void WriteColorPaletteToImage(const char* path);
 
   bool mFrameComplete;
   bool nmi;
