@@ -13,7 +13,7 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     mPpu->CpuWrite(addr & PPU_RAM_SIZE, data);
   } else if (0x4016 <= addr && addr <= 0x4017) {
-    controllerState[addr & 0x0001] = controller[addr & 0x0001];
+    mController->Write(addr);
   }
 }
 
@@ -26,11 +26,12 @@ uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     data = mPpu->CpuRead(addr & PPU_RAM_SIZE, bReadOnly);
   } else if (0x4016 <= addr && addr <= 0x4017) {
-    data = (controllerState[addr & 0x0001] & 0x80) > 0;
-    controllerState[addr & 0x0001] <<= 1;
+    data = mController->Read(addr);
   }
   return data;
 }
+
+void Bus::ConnectController(Controller* controller) { mController = controller; }
 
 void Bus::InsertCartridge(Cartridge* cartridge) {
   mCartridge = cartridge;

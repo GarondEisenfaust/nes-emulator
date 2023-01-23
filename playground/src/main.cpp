@@ -1,5 +1,6 @@
 #include "Bus.h"
 #include "Cartridge.h"
+#include "Controller.h"
 #include "Definitions.h"
 #include "Grid.h"
 #include "PixelProcessingUnit.h"
@@ -60,7 +61,9 @@ int main() {
   Bus bus(ram.get());
   Processor6502 cpu;
   PixelProcessingUnit ppu(&grid);
+  Controller controller;
 
+  bus.ConnectController(&controller);
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
 
@@ -84,6 +87,7 @@ int main() {
       ppu.WritePatternTableToImage("table-2.png", 2, palette);
       ppu.WriteColorPaletteToImage("color-palette.png");
     }
+    controller.SetControllerBitBasedOnInput(key, action);
   };
 
   renderContext.SetKeyCallback(&keyCallback);
@@ -109,6 +113,7 @@ int main() {
         RenderCompleteFrame(bus);
         std::this_thread::sleep_until(next);
       }
+      controller.Reset();
     });
   }
   return 0;
