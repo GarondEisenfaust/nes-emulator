@@ -16,7 +16,7 @@ std::tuple<float, float, float, float> CalculateScreenSpace(float x, float y, fl
   float screenX = (2 * x / WIDTH) - 1;
   float screenY = -((2 * y / HEIGHT) - 1);
   float screenWidth = 2 * width / WIDTH;
-  float screenHeight = 2 * height / HEIGHT;
+  float screenHeight = -2 * height / HEIGHT;
   return {screenX, screenY, screenWidth, screenHeight};
 }
 
