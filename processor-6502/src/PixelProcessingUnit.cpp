@@ -4,6 +4,7 @@
 #include "Grid.h"
 #include "lodepng.h"
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <vector>
 
@@ -30,8 +31,10 @@ void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
     case 0x0002:  // Status
       break;
     case 0x0003:  // OAM Address
+      mOamAddr = data;
       break;
     case 0x0004:  // OAM Data
+      mOamPtr[mOamAddr] = data;
       break;
     case 0x0005:  // Scroll
       if (mAddressLatch == 0) {
@@ -111,6 +114,7 @@ uint8_t PixelProcessingUnit::CpuRead(uint16_t addr, bool bReadOnly) {
         break;
       }
       case 0x0004: {  // OAM Data
+        data = mOamPtr[mOamAddr];
         break;
       }
       case 0x0005: {  // Scroll
@@ -309,6 +313,16 @@ void PixelProcessingUnit::Clock() {
       mBgShifterAttributeLow <<= 1;
       mBgShifterAttributeHigh <<= 1;
     }
+    if (mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258) {
+      for (int i = 0; i < mSpriteCount; i++) {
+        if (mSpriteOnScanline[i].x > 0) {
+          mSpriteOnScanline[i].x--;
+        } else {
+          mSpriteShifterPatternLo[i] <<= 1;
+          mSpriteShifterPatternHi[i] <<= 1;
+        }
+      }
+    }
   };
 
   if (mScanline >= -1 && mScanline < 240) {
@@ -317,6 +331,14 @@ void PixelProcessingUnit::Clock() {
     }
     if (mScanline == -1 && mCycle == 1) {
       mStatusRegister.verticalBlank = 0;
+      mStatusRegister.spriteOverflow = 0;
+
+      mStatusRegister.spriteZeroHit = 0;
+
+      for (int i = 0; i < 8; i++) {
+        mSpriteShifterPatternLo[i] = 0;
+        mSpriteShifterPatternHi[i] = 0;
+      }
     }
 
     if ((mCycle >= 2 && mCycle < 258) || (mCycle >= 321 && mCycle < 338)) {
@@ -375,6 +397,97 @@ void PixelProcessingUnit::Clock() {
     if (mScanline == -1 && mCycle >= 280 && mCycle < 305) {
       TransferAddressY();
     }
+    if (mCycle == 257 && mScanline >= 0) {
+      std::memset(mSpriteOnScanline, 0xFF, 8 * sizeof(ObjectAttributeEntry));
+      mSpriteCount = 0;
+
+      for (uint8_t i = 0; i < 8; i++) {
+        mSpriteShifterPatternLo[i] = 0;
+        mSpriteShifterPatternHi[i] = 0;
+      }
+      uint8_t nOAMEntry = 0;
+
+      bSpriteZeroHitPossible = false;
+
+      while (nOAMEntry < 64 && mSpriteCount < 9) {
+        int16_t diff = ((int16_t)mScanline - (int16_t)mOam[nOAMEntry].y);
+
+        if (diff >= 0 && diff < (mControlRegister.spriteSize ? 16 : 8)) {
+          if (mSpriteCount < 8) {
+            if (nOAMEntry == 0) {
+              bSpriteZeroHitPossible = true;
+            }
+
+            memcpy(&mSpriteOnScanline[mSpriteCount], &mOam[nOAMEntry], sizeof(ObjectAttributeEntry));
+            mSpriteCount++;
+          }
+        }
+
+        nOAMEntry++;
+      }
+
+      mStatusRegister.spriteOverflow = (mSpriteCount > 8);
+    }
+
+    if (mCycle == 340) {
+      for (uint8_t i = 0; i < mSpriteCount; i++) {
+        uint8_t spritePatternBitsLo;
+        uint8_t spritePatternBitsHi;
+        uint16_t spritePatternAddrLo;
+        uint16_t spritePatternAddrHi;
+
+        if (!mControlRegister.spriteSize) {
+          if (!(mSpriteOnScanline[i].attribute & 0x80)) {
+            spritePatternAddrLo = (mControlRegister.patternSprite << 12) | (mSpriteOnScanline[i].id << 4) |
+                                  (mScanline - mSpriteOnScanline[i].y);
+
+          } else {
+            spritePatternAddrLo = (mControlRegister.patternSprite << 12) | (mSpriteOnScanline[i].id << 4) |
+                                  (7 - (mScanline - mSpriteOnScanline[i].y));
+          }
+
+        } else {
+          if (!(mSpriteOnScanline[i].attribute & 0x80)) {
+            if (mScanline - mSpriteOnScanline[i].y < 8) {
+              spritePatternAddrLo = ((mSpriteOnScanline[i].id & 0x01) << 12) | ((mSpriteOnScanline[i].id & 0xFE) << 4) |
+                                    ((mScanline - mSpriteOnScanline[i].y) & 0x07);
+            } else {
+              spritePatternAddrLo = ((mSpriteOnScanline[i].id & 0x01) << 12) |
+                                    (((mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
+                                    ((mScanline - mSpriteOnScanline[i].y) & 0x07);
+            }
+          } else {
+            if (mScanline - mSpriteOnScanline[i].y < 8) {
+              spritePatternAddrLo = ((mSpriteOnScanline[i].id & 0x01) << 12) |
+                                    (((mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
+                                    (7 - (mScanline - mSpriteOnScanline[i].y) & 0x07);
+            } else {
+              spritePatternAddrLo = ((mSpriteOnScanline[i].id & 0x01) << 12) | ((mSpriteOnScanline[i].id & 0xFE) << 4) |
+                                    (7 - (mScanline - mSpriteOnScanline[i].y) & 0x07);
+            }
+          }
+        }
+
+        spritePatternAddrHi = spritePatternAddrLo + 8;
+
+        spritePatternBitsLo = PpuRead(spritePatternAddrLo);
+        spritePatternBitsHi = PpuRead(spritePatternAddrHi);
+
+        if (mSpriteOnScanline[i].attribute & 0x40) {
+          auto flipbyte = [](uint8_t b) {
+            b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+            b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+            b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+            return b;
+          };
+
+          spritePatternBitsLo = flipbyte(spritePatternBitsLo);
+          spritePatternBitsHi = flipbyte(spritePatternBitsHi);
+        }
+        mSpriteShifterPatternLo[i] = spritePatternBitsLo;
+        mSpriteShifterPatternHi[i] = spritePatternBitsHi;
+      }
+    }
   }
 
   if (mScanline == 240) {
@@ -403,12 +516,75 @@ void PixelProcessingUnit::Clock() {
     bgPalette = (bgPal1 << 1) | bgPal0;
   }
 
+  uint8_t fgPixel = 0x00;
+  uint8_t fgPalette = 0x00;
+  uint8_t fgPriority = 0x00;
+
+  if (mMaskRegister.renderSprites) {
+    bSpriteZeroBeingRendered = false;
+
+    for (uint8_t i = 0; i < mSpriteCount; i++) {
+      if (mSpriteOnScanline[i].x == 0) {
+        uint8_t fgPixelLo = (mSpriteShifterPatternLo[i] & 0x80) > 0;
+        uint8_t fgPixelHi = (mSpriteShifterPatternHi[i] & 0x80) > 0;
+        fgPixel = (fgPixelHi << 1) | fgPixelLo;
+
+        fgPalette = (mSpriteOnScanline[i].attribute & 0x03) + 0x04;
+        fgPriority = (mSpriteOnScanline[i].attribute & 0x20) == 0;
+
+        if (fgPixel != 0) {
+          if (i == 0) {
+            bSpriteZeroBeingRendered = true;
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
+  uint8_t pixel = 0x00;
+  uint8_t palette = 0x00;
+
+  if (bgPixel == 0 && fgPixel == 0) {
+    pixel = 0x00;
+    palette = 0x00;
+  } else if (bgPixel == 0 && fgPixel > 0) {
+    pixel = fgPixel;
+    palette = fgPalette;
+  } else if (bgPixel > 0 && fgPixel == 0) {
+    pixel = bgPixel;
+    palette = bgPalette;
+  } else if (bgPixel > 0 && fgPixel > 0) {
+    if (fgPriority) {
+      pixel = fgPixel;
+      palette = fgPalette;
+    } else {
+      pixel = bgPixel;
+      palette = bgPalette;
+    }
+
+    if (bSpriteZeroHitPossible && bSpriteZeroBeingRendered) {
+      if (mMaskRegister.renderBackground & mMaskRegister.renderSprites) {
+        if (~(mMaskRegister.renderBackgroundLeft | mMaskRegister.renderSpritesLeft)) {
+          if (mCycle >= 9 && mCycle < 258) {
+            mStatusRegister.spriteZeroHit = 1;
+          }
+        } else {
+          if (mCycle >= 1 && mCycle < 258) {
+            mStatusRegister.spriteZeroHit = 1;
+          }
+        }
+      }
+    }
+  }
+
   auto width = mGrid->GetGridWidth();
   auto height = mGrid->GetGridHeight();
   auto xPos = mCycle - 1;
   auto yPos = mScanline;
   if ((0 <= xPos && xPos < width) && (0 <= yPos && yPos < height)) {
-    auto& color = GetColorFromPalette(bgPalette, bgPixel);
+    auto& color = GetColorFromPalette(palette, pixel);
     mGrid->GetPixel(xPos, yPos).SetColor(color);
   }
 

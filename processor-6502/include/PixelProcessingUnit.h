@@ -39,6 +39,11 @@ class PixelProcessingUnit {
   bool mFrameComplete;
   bool nmi;
 
+  uint8_t* mOamPtr = (uint8_t*)mOam;
+  uint8_t mOamAddr = 0x00;
+  uint8_t mSpriteShifterPatternLo[8];
+  uint8_t mSpriteShifterPatternHi[8];
+
  private:
   Cartridge* mCartridge;
   int16_t mCycle;
@@ -71,4 +76,17 @@ class PixelProcessingUnit {
   uint16_t mBgShifterPatternHigh = 0x0000;
   uint16_t mBgShifterAttributeLow = 0x0000;
   uint16_t mBgShifterAttributeHigh = 0x0000;
+
+  struct ObjectAttributeEntry {
+    uint8_t y;
+    uint8_t id;
+    uint8_t attribute;
+    uint8_t x;
+  } mOam[64];
+
+  ObjectAttributeEntry mSpriteOnScanline[8];
+  uint8_t mSpriteCount;
+
+  bool bSpriteZeroHitPossible = false;
+  bool bSpriteZeroBeingRendered = false;
 };
