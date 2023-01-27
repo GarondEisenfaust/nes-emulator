@@ -81,6 +81,8 @@ void RenderContext::GameLoop(std::function<void()> loop) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     mShaderProgram.Use();
+    mShaderProgram.SetUniform("height", 960);
+    mShaderProgram.SetUniform("width", 1024);
 
     for (auto vertexArray : mVertexArrays) {
       vertexArray->Draw();

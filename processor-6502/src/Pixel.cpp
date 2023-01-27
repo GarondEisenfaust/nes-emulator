@@ -27,12 +27,10 @@ std::array<float, 18> Pixel::CalculateVertexCoordinates() {
     float z;
   };
 
-  auto [x, y, width, height] = CalculateScreenSpace(mXPos, mYPos, mWidth, mHeight);
-
-  Vertex topLeft{x, y, 0};
-  Vertex topRight{x + width, y, 0};
-  Vertex bottomLeft{x, y + height, 0};
-  Vertex bottomRight{x + width, y + height, 0};
+  Vertex topLeft{mXPos, mYPos, 0};
+  Vertex topRight{mXPos + mWidth, mYPos, 0};
+  Vertex bottomLeft{mXPos, mYPos + mHeight, 0};
+  Vertex bottomRight{mXPos + mWidth, mYPos + mHeight, 0};
 
   std::array<float, 18> result;
   std::memcpy(result.begin() + 3 * 0, &bottomRight, sizeof(Vertex));
