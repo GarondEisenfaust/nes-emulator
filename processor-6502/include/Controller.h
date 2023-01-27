@@ -1,13 +1,15 @@
 #pragma once
 #include <cstdint>
 
+class GLFWwindow;
 class Controller {
  public:
+  Controller(GLFWwindow* window);
   void Write(uint16_t address);
   uint8_t Read(uint16_t address);
 
   void Reset();
-  void SetControllerBitBasedOnInput(int key, int action);
+  void SetControllerBitBasedOnInput();
 
  private:
   union ControllerRegister {
@@ -24,6 +26,9 @@ class Controller {
     uint8_t reg = 0x00;
   };
 
+  GLFWwindow* mWindow;
   uint8_t controllerBuffer[2];
   ControllerRegister mControllerRegister[2];
+
+  bool Pressed(int keyToCheck);
 };

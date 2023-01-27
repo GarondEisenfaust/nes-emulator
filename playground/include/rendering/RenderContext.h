@@ -20,6 +20,7 @@ class RenderContext {
   void GameLoop(std::function<void()> loop);
   int GetHeight();
   int GetWidth();
+  GLFWwindow* GetWindow();
   void AddVertexArray(std::shared_ptr<VertexArray> vertexArray);
   void SetKeyCallback(KeyCallback* keyCallback);
 

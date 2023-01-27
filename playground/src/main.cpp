@@ -61,7 +61,7 @@ int main() {
   Bus bus(ram.get());
   Processor6502 cpu;
   PixelProcessingUnit ppu(&grid);
-  Controller controller;
+  Controller controller(renderContext.GetWindow());
 
   bus.ConnectController(&controller);
   cpu.ConnectBus(&bus);
@@ -72,7 +72,7 @@ int main() {
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
-  auto stepMode = true;
+  auto stepMode = false;
   auto shouldStep = false;
   RenderContext::KeyCallback keyCallback = [&](GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_M && action == GLFW_PRESS) {
@@ -87,7 +87,6 @@ int main() {
       ppu.WritePatternTableToImage("table-2.png", 2, palette);
       ppu.WriteColorPaletteToImage("color-palette.png");
     }
-    controller.SetControllerBitBasedOnInput(key, action);
   };
 
   renderContext.SetKeyCallback(&keyCallback);
@@ -97,6 +96,7 @@ int main() {
     using namespace std::chrono_literals;
     auto diff = (1000ms / 60);
     renderContext.GameLoop([&]() {
+      controller.SetControllerBitBasedOnInput();
       auto next = std::chrono::system_clock::now() + diff;
 
       auto colorData = grid.MakeColorData();
@@ -113,7 +113,6 @@ int main() {
         RenderCompleteFrame(bus);
         std::this_thread::sleep_until(next);
       }
-      controller.Reset();
     });
   }
   return 0;
