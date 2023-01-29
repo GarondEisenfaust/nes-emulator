@@ -19,7 +19,7 @@ if(RUN_TESTS)
   enable_testing()
 endif()
 
-add_subdirectory(playground)
+add_subdirectory(nes)
 add_subdirectory(cpu-playground)
 add_subdirectory(processor-6502)
 add_subdirectory(util)

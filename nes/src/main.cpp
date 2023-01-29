@@ -68,7 +68,7 @@ int main() {
   ppu.ConnectBus(&bus);
 
   auto workDir = Util::GetExecutableDirectory();
-  Cartridge cartridge(fmt::format("{}/roms/nestest.nes", workDir));
+  Cartridge cartridge(fmt::format("{}/roms/smb.nes", workDir));
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
