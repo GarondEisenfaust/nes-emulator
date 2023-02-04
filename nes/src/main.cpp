@@ -15,6 +15,7 @@
 #include "windows/RegisterWindow.h"
 #include <array>
 #include <chrono>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -67,8 +68,8 @@ int main() {
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
 
-  auto workDir = Util::GetExecutableDirectory();
-  Cartridge cartridge(fmt::format("{}/roms/smb.nes", workDir));
+  auto workDir = std::filesystem::current_path().string();
+  Cartridge cartridge(fmt::format("{}/roms/nestest.nes", workDir));
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 

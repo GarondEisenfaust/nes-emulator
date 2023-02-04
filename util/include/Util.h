@@ -8,8 +8,6 @@
 #include <string>
 
 namespace Util {
-uint8_t SetFlag(uint8_t& toSetIn, FLAGS6502 flag, bool value);
-uint8_t SetFlag(uint8_t& toSetIn, FLAGS6502 flag, std::function<bool(void)> value);
 
 template <typename T>
 std::stringstream IntToHex(T num) {
@@ -22,7 +20,4 @@ template <>
 std::stringstream IntToHex(uint8_t num);
 
 float GetRandomFloat();
-
-std::string GetExecutableDirectory();
-
 }  // namespace Util

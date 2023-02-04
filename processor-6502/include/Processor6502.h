@@ -14,9 +14,9 @@ class Processor6502 {
   virtual ~Processor6502() = default;
 
   uint8_t Read(uint16_t addr);
-  uint8_t ReadFromStack(uint16_t addr);
+  uint8_t PopFromStack();
   virtual void Write(uint16_t addr, uint8_t data);
-  virtual void WriteToStack(uint16_t addr, uint8_t data);
+  virtual void PushToStack(uint8_t data);
 
   void Interrupt();
   void NonMaskableInterrupt();
@@ -35,101 +35,110 @@ class Processor6502 {
   uint8_t y = 0x00;             // Y Register
   uint8_t stackPointer = 0x00;  // Stack Pointer (points to location on bus)
   uint16_t pc = 0x0000;         // Program Counter
-  uint8_t status = 0x00;        // Status Register
   uint8_t cycles = 0;           // Counts how many cycles the instruction has remaining
   uint16_t addrAbs = 0x0000;    // All used memory addresses end up in here
   uint16_t addrRel = 0x00;      // Represents absolute address following a branch
   uint8_t opcode = 0x00;        // Is the instruction byte
-  uint16_t temp = 0x0000;       // temp register
 
   Bus* mBus;
 
+  union StatusRegister {
+    struct {
+      bool c : 1;
+      bool z : 1;
+      bool i : 1;
+      bool d : 1;
+      bool b : 1;
+      bool u : 1;
+      bool v : 1;
+      bool n : 1;
+    };
+    uint8_t reg;
+  } status;
+
  protected:
   // Addressing Modes =============================================
-  uint8_t IMP();
-  uint8_t IMM();
-  uint8_t ZP0();
-  uint8_t ZPX();
-  uint8_t ZPY();
-  uint8_t REL();
-  uint8_t ABS();
-  uint8_t ABX();
-  uint8_t ABY();
-  uint8_t IND();
-  uint8_t IZX();
-  uint8_t IZY();
+  bool IMP();
+  bool IMM();
+  bool ZP0();
+  bool ZPX();
+  bool ZPY();
+  bool REL();
+  bool ABS();
+  bool ABX();
+  bool ABY();
+  bool IND();
+  bool IZX();
+  bool IZY();
 
   // Opcodes ======================================================
-  uint8_t ADC();
-  uint8_t AND();
-  uint8_t ASL();
-  uint8_t BCC();
-  uint8_t BCS();
-  uint8_t BEQ();
-  uint8_t BIT();
-  uint8_t BMI();
-  uint8_t BNE();
-  uint8_t BPL();
-  uint8_t BRK();
-  uint8_t BVC();
-  uint8_t BVS();
-  uint8_t CLC();
-  uint8_t CLD();
-  uint8_t CLI();
-  uint8_t CLV();
-  uint8_t CMP();
-  uint8_t CPX();
-  uint8_t CPY();
-  uint8_t DEC();
-  uint8_t DEX();
-  uint8_t DEY();
-  uint8_t EOR();
-  uint8_t INC();
-  uint8_t INX();
-  uint8_t INY();
-  uint8_t JMP();
-  uint8_t JSR();
-  uint8_t LDA();
-  uint8_t LDX();
-  uint8_t LDY();
-  uint8_t LSR();
-  uint8_t NOP();
-  uint8_t ORA();
-  uint8_t PHA();
-  uint8_t PHP();
-  uint8_t PLA();
-  uint8_t PLP();
-  uint8_t ROL();
-  uint8_t ROR();
-  uint8_t RTI();
-  uint8_t RTS();
-  uint8_t SBC();
-  uint8_t SEC();
-  uint8_t SED();
-  uint8_t SEI();
-  uint8_t STA();
-  uint8_t STX();
-  uint8_t STY();
-  uint8_t TAX();
-  uint8_t TAY();
-  uint8_t TSX();
-  uint8_t TXA();
-  uint8_t TXS();
-  uint8_t TYA();
-  uint8_t XXX();
+  bool ADC();
+  bool AND();
+  bool ASL();
+  bool BCC();
+  bool BCS();
+  bool BEQ();
+  bool BIT();
+  bool BMI();
+  bool BNE();
+  bool BPL();
+  bool BRK();
+  bool BVC();
+  bool BVS();
+  bool CLC();
+  bool CLD();
+  bool CLI();
+  bool CLV();
+  bool CMP();
+  bool CPX();
+  bool CPY();
+  bool DEC();
+  bool DEX();
+  bool DEY();
+  bool EOR();
+  bool INC();
+  bool INX();
+  bool INY();
+  bool JMP();
+  bool JSR();
+  bool LDA();
+  bool LDX();
+  bool LDY();
+  bool LSR();
+  bool NOP();
+  bool ORA();
+  bool PHA();
+  bool PHP();
+  bool PLA();
+  bool PLP();
+  bool ROL();
+  bool ROR();
+  bool RTI();
+  bool RTS();
+  bool SBC();
+  bool SEC();
+  bool SED();
+  bool SEI();
+  bool STA();
+  bool STX();
+  bool STY();
+  bool TAX();
+  bool TAY();
+  bool TSX();
+  bool TXA();
+  bool TXS();
+  bool TYA();
+  bool XXX();
+
+  bool BranchIf(bool condition);
 
  protected:
   struct Instruction {
     std::string name;
-    uint8_t (Processor6502::*operate)(void) = nullptr;
-    uint8_t (Processor6502::*addrMode)(void) = nullptr;
+    bool (Processor6502::*operate)(void) = nullptr;
+    bool (Processor6502::*addrMode)(void) = nullptr;
     uint8_t cycles = 0;
   };
-
-  uint8_t GetFlag(FLAGS6502 flag);
-
-  void SetFlag(FLAGS6502 flag, bool value);
-  void SetFlag(FLAGS6502 flag, std::function<bool(void)> value);
 
   std::vector<Instruction> lookup;
 

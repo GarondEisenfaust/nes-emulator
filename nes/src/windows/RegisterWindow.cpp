@@ -26,7 +26,7 @@ void CompareUpdateOldAndDisplay(TYPE& oldValue, TYPE newValue) {
 
 void RegisterWindow::Content() {
   ImGui::Text("status:           NVUBDIZC");
-  CompareUpdateOldAndDisplay<uint8_t, "                  {:0>8b}">(mOldStatus, mProcessor6502.status);
+  CompareUpdateOldAndDisplay<uint8_t, "                  {:0>8b}">(mOldStatus, mProcessor6502.status.reg);
   ImGui::Text("");
 
   CompareUpdateOldAndDisplay<uint16_t, "program counter:  {:#06x}">(mOldPc, mProcessor6502.pc);
@@ -41,8 +41,8 @@ void RegisterWindow::Content() {
   CompareUpdateOldAndDisplay<uint8_t, "accumulator:      {0:#04x} {0}">(mOldA, mProcessor6502.a);
   CompareUpdateOldAndDisplay<uint8_t, "x:                {0:#04x} {0}">(mOldX, mProcessor6502.x);
   CompareUpdateOldAndDisplay<uint8_t, "y:                {0:#04x} {0}">(mOldY, mProcessor6502.y);
-  ImGui::Text("");
-  CompareUpdateOldAndDisplay<uint16_t, "temp:             {0:#06x} {0}">(mOldTemp, mProcessor6502.temp);
+  // ImGui::Text("");
+  // CompareUpdateOldAndDisplay<uint16_t, "temp:             {0:#06x} {0}">(mOldTemp, mProcessor6502.temp);
   ImGui::Text("");
   ImGui::Text("nes test memory locations:");
   CompareUpdateOldAndDisplay<uint8_t, "0x02:             {:#04x}">(mOldNestest02,
