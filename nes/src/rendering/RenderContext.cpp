@@ -7,6 +7,7 @@
 #include "rendering/Shader.h"
 #include <chrono>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <thread>
 
@@ -43,7 +44,7 @@ RenderContext::RenderContext() : mShaderProgram() {
   glfwGetFramebufferSize(mWindow, &mWidth, &mHeight);
   glViewport(0, 0, mWidth, mHeight);
 
-  auto workDir = Util::GetExecutableDirectory();
+  auto workDir = std::filesystem::current_path().string();
   Shader fragmentShader(workDir + "/shaders/FragmentShader.frag", GL_FRAGMENT_SHADER);
   Shader vertexShader(workDir + "/shaders/VertexShader.vert", GL_VERTEX_SHADER);
 

@@ -1,4 +1,6 @@
 #pragma once
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
 #include <cstdint>
 
 class GLFWwindow;
@@ -30,5 +32,9 @@ class Controller {
   uint8_t controllerBuffer[2];
   ControllerRegister mControllerRegister[2];
 
-  bool Pressed(int keyToCheck);
+  GLFWgamepadstate mGamepadState;
+
+  bool PressedKeyboard(int keyToCheck);
+  bool PressedGamepad(int buttonToCheck);
+  bool JoystickPositionBetween(int buttonToCheck, float lower, float upper);
 };

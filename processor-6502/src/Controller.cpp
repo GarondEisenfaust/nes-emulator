@@ -1,5 +1,4 @@
 #include "Controller.h"
-#include <GLFW/glfw3.h>
 
 Controller::Controller(GLFWwindow* window) : mWindow(window) {}
 
@@ -22,17 +21,30 @@ void Controller::Reset() {
 
 void Controller::SetControllerBitBasedOnInput() {
   Reset();
-  mControllerRegister[0].up = Pressed(GLFW_KEY_W);
-  mControllerRegister[0].left = Pressed(GLFW_KEY_A);
-  mControllerRegister[0].down = Pressed(GLFW_KEY_S);
-  mControllerRegister[0].right = Pressed(GLFW_KEY_D);
-  mControllerRegister[0].select = Pressed(GLFW_KEY_F);
-  mControllerRegister[0].start = Pressed(GLFW_KEY_G);
-  mControllerRegister[0].b = Pressed(GLFW_KEY_H);
-  mControllerRegister[0].a = Pressed(GLFW_KEY_J);
+  glfwGetGamepadState(GLFW_JOYSTICK_1, &mGamepadState);
+
+  mControllerRegister[0].up = PressedKeyboard(GLFW_KEY_W) || PressedGamepad(GLFW_GAMEPAD_BUTTON_DPAD_UP) ||
+                              JoystickPositionBetween(GLFW_GAMEPAD_AXIS_LEFT_Y, -1, -0.4);
+  mControllerRegister[0].left = PressedKeyboard(GLFW_KEY_A) || PressedGamepad(GLFW_GAMEPAD_BUTTON_DPAD_LEFT) ||
+                                JoystickPositionBetween(GLFW_GAMEPAD_AXIS_LEFT_X, -1, -0.4);
+  mControllerRegister[0].down = PressedKeyboard(GLFW_KEY_S) || PressedGamepad(GLFW_GAMEPAD_BUTTON_DPAD_DOWN) ||
+                                JoystickPositionBetween(GLFW_GAMEPAD_AXIS_LEFT_Y, 0.4, 1);
+  mControllerRegister[0].right = PressedKeyboard(GLFW_KEY_D) || PressedGamepad(GLFW_GAMEPAD_BUTTON_DPAD_RIGHT) ||
+                                 JoystickPositionBetween(GLFW_GAMEPAD_AXIS_LEFT_X, 0.4, 1);
+  mControllerRegister[0].select = PressedKeyboard(GLFW_KEY_F) || PressedGamepad(GLFW_GAMEPAD_BUTTON_BACK);
+  mControllerRegister[0].start = PressedKeyboard(GLFW_KEY_G) || PressedGamepad(GLFW_GAMEPAD_BUTTON_START);
+  mControllerRegister[0].b = PressedKeyboard(GLFW_KEY_H) || PressedGamepad(GLFW_GAMEPAD_BUTTON_X);
+  mControllerRegister[0].a = PressedKeyboard(GLFW_KEY_J) || PressedGamepad(GLFW_GAMEPAD_BUTTON_A);
 }
 
-bool Controller::Pressed(int keyToCheck) {
+bool Controller::PressedKeyboard(int keyToCheck) {
   auto currentState = glfwGetKey(mWindow, keyToCheck);
   return currentState == GLFW_PRESS || currentState == GLFW_REPEAT;
+}
+
+bool Controller::PressedGamepad(int buttonToCheck) { return mGamepadState.buttons[buttonToCheck] == GLFW_PRESS; }
+
+bool Controller::JoystickPositionBetween(int joystickAxis, float lower, float upper) {
+  auto position = mGamepadState.axes[joystickAxis];
+  return lower <= position && position <= upper;
 }
