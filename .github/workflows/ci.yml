@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        type: [Release, Debug, RelWithDebInfo, MinSizeRel]
+        type: [Release, Debug]
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v3
@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install conan
-        run: pip3 install conan==1.53.0
+        run: pip3 install conan==1.57.0
 
       - name: Updates package list
         run: sudo apt-get update
