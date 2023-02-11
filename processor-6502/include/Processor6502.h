@@ -1,11 +1,11 @@
 #pragma once
 #include "FLAGS6502.h"
+#include "addressing-modes/AddressingModeContainer.h"
 #include <cstdint>
 #include <functional>
 #include <map>
 #include <string>
 #include <vector>
-
 class Bus;
 
 class Processor6502 {
@@ -127,6 +127,7 @@ class Processor6502 {
   };
 
   std::vector<Instruction> lookup;
+  AddressingModeContainer addressingModes;
 
   void Interrupt(uint16_t address, uint8_t numCycles);
 };

@@ -1,4 +1,4 @@
-#include "IND.h"
+#include "addressing-modes/IND.h"
 #include "Processor6502.h"
 
 IND::IND(Processor6502* cpu) : IAddressingMode(cpu) {}

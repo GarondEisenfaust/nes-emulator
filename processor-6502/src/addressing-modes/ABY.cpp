@@ -1,4 +1,4 @@
-#include "ABY.h"
+#include "addressing-modes/ABY.h"
 #include "Processor6502.h"
 
 ABY::ABY(Processor6502* cpu) : IAddressingMode(cpu) {}

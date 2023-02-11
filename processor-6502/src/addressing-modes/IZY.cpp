@@ -1,4 +1,4 @@
-#include "IZY.h"
+#include "addressing-modes/IZY.h"
 #include "Processor6502.h"
 
 IZY::IZY(Processor6502* cpu) : IAddressingMode(cpu) {}

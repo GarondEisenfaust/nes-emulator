@@ -1,4 +1,4 @@
-#include "ABX.h"
+#include "addressing-modes/ABX.h"
 #include "Processor6502.h"
 
 ABX::ABX(Processor6502* cpu) : IAddressingMode(cpu) {}

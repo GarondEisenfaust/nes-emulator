@@ -1,4 +1,4 @@
-#include "REL.h"
+#include "addressing-modes/REL.h"
 #include "Processor6502.h"
 
 REL::REL(Processor6502* cpu) : IAddressingMode(cpu) {}

@@ -1,4 +1,4 @@
-#include "ZPY.h"
+#include "addressing-modes/ZPY.h"
 #include "Processor6502.h"
 
 ZPY::ZPY(Processor6502* cpu) : IAddressingMode(cpu) {}

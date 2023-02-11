@@ -1,4 +1,4 @@
-#include "ZPX.h"
+#include "addressing-modes/ZPX.h"
 #include "Processor6502.h"
 
 ZPX::ZPX(Processor6502* cpu) : IAddressingMode(cpu) {}

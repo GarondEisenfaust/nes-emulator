@@ -1,4 +1,4 @@
-#include "ABS.h"
+#include "addressing-modes/ABS.h"
 #include "Processor6502.h"
 
 ABS::ABS(Processor6502* cpu) : IAddressingMode(cpu) {}

@@ -1,4 +1,4 @@
-#include "IMP.h"
+#include "addressing-modes/IMP.h"
 #include "Processor6502.h"
 
 IMP::IMP(Processor6502* cpu) : IAddressingMode(cpu) {}

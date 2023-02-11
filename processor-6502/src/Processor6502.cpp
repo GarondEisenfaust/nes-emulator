@@ -2,91 +2,100 @@
 #include "Bus.h"
 #include "Definitions.h"
 #include "Util.h"
-#include "addressing-modes/AddressingModes.h"
 #include "fmt/format.h"
 #include <cstdint>
 #include <iostream>
 
-ABS abs;
-ABX abx;
-ABY aby;
-IMM imm;
-IMP imp;
-IND ind;
-IZX izx;
-IZY izy;
-REL rel;
-ZP0 zp0;
-ZPX zpx;
-ZPY zpy;
-
 // Constructor
-Processor6502::Processor6502() {
+Processor6502::Processor6502() : addressingModes(this) {
+  auto& addrM = addressingModes;
   using a = Processor6502;
-  lookup = {{"BRK", &a::BRK, imm, 7}, {"ORA", &a::ORA, izx, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 3}, {"ORA", &a::ORA, zp0, 3}, {"ASL", &a::ASL, zp0, 5}, {"???", &a::XXX, imp, 5},
-            {"PHP", &a::PHP, imp, 3}, {"ORA", &a::ORA, imm, 2}, {"ASL", &a::ASL, imp, 2}, {"???", &a::XXX, imp, 2},
-            {"???", &a::NOP, imp, 4}, {"ORA", &a::ORA, abs, 4}, {"ASL", &a::ASL, abs, 6}, {"???", &a::XXX, imp, 6},
-            {"BPL", &a::BPL, rel, 2}, {"ORA", &a::ORA, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 4}, {"ORA", &a::ORA, zpx, 4}, {"ASL", &a::ASL, zpx, 6}, {"???", &a::XXX, imp, 6},
-            {"CLC", &a::CLC, imp, 2}, {"ORA", &a::ORA, aby, 4}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
-            {"???", &a::NOP, imp, 4}, {"ORA", &a::ORA, abx, 4}, {"ASL", &a::ASL, abx, 7}, {"???", &a::XXX, imp, 7},
-            {"JSR", &a::JSR, abs, 6}, {"AND", &a::AND, izx, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"BIT", &a::BIT, zp0, 3}, {"AND", &a::AND, zp0, 3}, {"ROL", &a::ROL, zp0, 5}, {"???", &a::XXX, imp, 5},
-            {"PLP", &a::PLP, imp, 4}, {"AND", &a::AND, imm, 2}, {"ROL", &a::ROL, imp, 2}, {"???", &a::XXX, imp, 2},
-            {"BIT", &a::BIT, abs, 4}, {"AND", &a::AND, abs, 4}, {"ROL", &a::ROL, abs, 6}, {"???", &a::XXX, imp, 6},
-            {"BMI", &a::BMI, rel, 2}, {"AND", &a::AND, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 4}, {"AND", &a::AND, zpx, 4}, {"ROL", &a::ROL, zpx, 6}, {"???", &a::XXX, imp, 6},
-            {"SEC", &a::SEC, imp, 2}, {"AND", &a::AND, aby, 4}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
-            {"???", &a::NOP, imp, 4}, {"AND", &a::AND, abx, 4}, {"ROL", &a::ROL, abx, 7}, {"???", &a::XXX, imp, 7},
-            {"RTI", &a::RTI, imp, 6}, {"EOR", &a::EOR, izx, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 3}, {"EOR", &a::EOR, zp0, 3}, {"LSR", &a::LSR, zp0, 5}, {"???", &a::XXX, imp, 5},
-            {"PHA", &a::PHA, imp, 3}, {"EOR", &a::EOR, imm, 2}, {"LSR", &a::LSR, imp, 2}, {"???", &a::XXX, imp, 2},
-            {"JMP", &a::JMP, abs, 3}, {"EOR", &a::EOR, abs, 4}, {"LSR", &a::LSR, abs, 6}, {"???", &a::XXX, imp, 6},
-            {"BVC", &a::BVC, rel, 2}, {"EOR", &a::EOR, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 4}, {"EOR", &a::EOR, zpx, 4}, {"LSR", &a::LSR, zpx, 6}, {"???", &a::XXX, imp, 6},
-            {"CLI", &a::CLI, imp, 2}, {"EOR", &a::EOR, aby, 4}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
-            {"???", &a::NOP, imp, 4}, {"EOR", &a::EOR, abx, 4}, {"LSR", &a::LSR, abx, 7}, {"???", &a::XXX, imp, 7},
-            {"RTS", &a::RTS, imp, 6}, {"ADC", &a::ADC, izx, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 3}, {"ADC", &a::ADC, zp0, 3}, {"ROR", &a::ROR, zp0, 5}, {"???", &a::XXX, imp, 5},
-            {"PLA", &a::PLA, imp, 4}, {"ADC", &a::ADC, imm, 2}, {"ROR", &a::ROR, imp, 2}, {"???", &a::XXX, imp, 2},
-            {"JMP", &a::JMP, ind, 5}, {"ADC", &a::ADC, abs, 4}, {"ROR", &a::ROR, abs, 6}, {"???", &a::XXX, imp, 6},
-            {"BVS", &a::BVS, rel, 2}, {"ADC", &a::ADC, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 4}, {"ADC", &a::ADC, zpx, 4}, {"ROR", &a::ROR, zpx, 6}, {"???", &a::XXX, imp, 6},
-            {"SEI", &a::SEI, imp, 2}, {"ADC", &a::ADC, aby, 4}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
-            {"???", &a::NOP, imp, 4}, {"ADC", &a::ADC, abx, 4}, {"ROR", &a::ROR, abx, 7}, {"???", &a::XXX, imp, 7},
-            {"???", &a::NOP, imp, 2}, {"STA", &a::STA, izx, 6}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 6},
-            {"STY", &a::STY, zp0, 3}, {"STA", &a::STA, zp0, 3}, {"STX", &a::STX, zp0, 3}, {"???", &a::XXX, imp, 3},
-            {"DEY", &a::DEY, imp, 2}, {"???", &a::NOP, imp, 2}, {"TXA", &a::TXA, imp, 2}, {"???", &a::XXX, imp, 2},
-            {"STY", &a::STY, abs, 4}, {"STA", &a::STA, abs, 4}, {"STX", &a::STX, abs, 4}, {"???", &a::XXX, imp, 4},
-            {"BCC", &a::BCC, rel, 2}, {"STA", &a::STA, izy, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 6},
-            {"STY", &a::STY, zpx, 4}, {"STA", &a::STA, zpx, 4}, {"STX", &a::STX, zpy, 4}, {"???", &a::XXX, imp, 4},
-            {"TYA", &a::TYA, imp, 2}, {"STA", &a::STA, aby, 5}, {"TXS", &a::TXS, imp, 2}, {"???", &a::XXX, imp, 5},
-            {"???", &a::NOP, imp, 5}, {"STA", &a::STA, abx, 5}, {"???", &a::XXX, imp, 5}, {"???", &a::XXX, imp, 5},
-            {"LDY", &a::LDY, imm, 2}, {"LDA", &a::LDA, izx, 6}, {"LDX", &a::LDX, imm, 2}, {"???", &a::XXX, imp, 6},
-            {"LDY", &a::LDY, zp0, 3}, {"LDA", &a::LDA, zp0, 3}, {"LDX", &a::LDX, zp0, 3}, {"???", &a::XXX, imp, 3},
-            {"TAY", &a::TAY, imp, 2}, {"LDA", &a::LDA, imm, 2}, {"TAX", &a::TAX, imp, 2}, {"???", &a::XXX, imp, 2},
-            {"LDY", &a::LDY, abs, 4}, {"LDA", &a::LDA, abs, 4}, {"LDX", &a::LDX, abs, 4}, {"???", &a::XXX, imp, 4},
-            {"BCS", &a::BCS, rel, 2}, {"LDA", &a::LDA, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 5},
-            {"LDY", &a::LDY, zpx, 4}, {"LDA", &a::LDA, zpx, 4}, {"LDX", &a::LDX, zpy, 4}, {"???", &a::XXX, imp, 4},
-            {"CLV", &a::CLV, imp, 2}, {"LDA", &a::LDA, aby, 4}, {"TSX", &a::TSX, imp, 2}, {"???", &a::XXX, imp, 4},
-            {"LDY", &a::LDY, abx, 4}, {"LDA", &a::LDA, abx, 4}, {"LDX", &a::LDX, aby, 4}, {"???", &a::XXX, imp, 4},
-            {"CPY", &a::CPY, imm, 2}, {"CMP", &a::CMP, izx, 6}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"CPY", &a::CPY, zp0, 3}, {"CMP", &a::CMP, zp0, 3}, {"DEC", &a::DEC, zp0, 5}, {"???", &a::XXX, imp, 5},
-            {"INY", &a::INY, imp, 2}, {"CMP", &a::CMP, imm, 2}, {"DEX", &a::DEX, imp, 2}, {"???", &a::XXX, imp, 2},
-            {"CPY", &a::CPY, abs, 4}, {"CMP", &a::CMP, abs, 4}, {"DEC", &a::DEC, abs, 6}, {"???", &a::XXX, imp, 6},
-            {"BNE", &a::BNE, rel, 2}, {"CMP", &a::CMP, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 4}, {"CMP", &a::CMP, zpx, 4}, {"DEC", &a::DEC, zpx, 6}, {"???", &a::XXX, imp, 6},
-            {"CLD", &a::CLD, imp, 2}, {"CMP", &a::CMP, aby, 4}, {"NOP", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
-            {"???", &a::NOP, imp, 4}, {"CMP", &a::CMP, abx, 4}, {"DEC", &a::DEC, abx, 7}, {"???", &a::XXX, imp, 7},
-            {"CPX", &a::CPX, imm, 2}, {"SBC", &a::SBC, izx, 6}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"CPX", &a::CPX, zp0, 3}, {"SBC", &a::SBC, zp0, 3}, {"INC", &a::INC, zp0, 5}, {"???", &a::XXX, imp, 5},
-            {"INX", &a::INX, imp, 2}, {"SBC", &a::SBC, imm, 2}, {"NOP", &a::NOP, imp, 2}, {"???", &a::SBC, imp, 2},
-            {"CPX", &a::CPX, abs, 4}, {"SBC", &a::SBC, abs, 4}, {"INC", &a::INC, abs, 6}, {"???", &a::XXX, imp, 6},
-            {"BEQ", &a::BEQ, rel, 2}, {"SBC", &a::SBC, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
-            {"???", &a::NOP, imp, 4}, {"SBC", &a::SBC, zpx, 4}, {"INC", &a::INC, zpx, 6}, {"???", &a::XXX, imp, 6},
-            {"SED", &a::SED, imp, 2}, {"SBC", &a::SBC, aby, 4}, {"NOP", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
-            {"???", &a::NOP, imp, 4}, {"SBC", &a::SBC, abx, 4}, {"INC", &a::INC, abx, 7}, {"???", &a::XXX, imp, 7}};
+  lookup = {{"BRK", &a::BRK, &addrM.imm, 7}, {"ORA", &a::ORA, &addrM.izx, 6}, {"???", &a::XXX, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 3}, {"ORA", &a::ORA, &addrM.zp0, 3},
+            {"ASL", &a::ASL, &addrM.zp0, 5}, {"???", &a::XXX, &addrM.imp, 5}, {"PHP", &a::PHP, &addrM.imp, 3},
+            {"ORA", &a::ORA, &addrM.imm, 2}, {"ASL", &a::ASL, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2},
+            {"???", &a::NOP, &addrM.imp, 4}, {"ORA", &a::ORA, &addrM.abs, 4}, {"ASL", &a::ASL, &addrM.abs, 6},
+            {"???", &a::XXX, &addrM.imp, 6}, {"BPL", &a::BPL, &addrM.rel, 2}, {"ORA", &a::ORA, &addrM.izy, 5},
+            {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4},
+            {"ORA", &a::ORA, &addrM.zpx, 4}, {"ASL", &a::ASL, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6},
+            {"CLC", &a::CLC, &addrM.imp, 2}, {"ORA", &a::ORA, &addrM.aby, 4}, {"???", &a::NOP, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 4}, {"ORA", &a::ORA, &addrM.abx, 4},
+            {"ASL", &a::ASL, &addrM.abx, 7}, {"???", &a::XXX, &addrM.imp, 7}, {"JSR", &a::JSR, &addrM.abs, 6},
+            {"AND", &a::AND, &addrM.izx, 6}, {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8},
+            {"BIT", &a::BIT, &addrM.zp0, 3}, {"AND", &a::AND, &addrM.zp0, 3}, {"ROL", &a::ROL, &addrM.zp0, 5},
+            {"???", &a::XXX, &addrM.imp, 5}, {"PLP", &a::PLP, &addrM.imp, 4}, {"AND", &a::AND, &addrM.imm, 2},
+            {"ROL", &a::ROL, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2}, {"BIT", &a::BIT, &addrM.abs, 4},
+            {"AND", &a::AND, &addrM.abs, 4}, {"ROL", &a::ROL, &addrM.abs, 6}, {"???", &a::XXX, &addrM.imp, 6},
+            {"BMI", &a::BMI, &addrM.rel, 2}, {"AND", &a::AND, &addrM.izy, 5}, {"???", &a::XXX, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4}, {"AND", &a::AND, &addrM.zpx, 4},
+            {"ROL", &a::ROL, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6}, {"SEC", &a::SEC, &addrM.imp, 2},
+            {"AND", &a::AND, &addrM.aby, 4}, {"???", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 7},
+            {"???", &a::NOP, &addrM.imp, 4}, {"AND", &a::AND, &addrM.abx, 4}, {"ROL", &a::ROL, &addrM.abx, 7},
+            {"???", &a::XXX, &addrM.imp, 7}, {"RTI", &a::RTI, &addrM.imp, 6}, {"EOR", &a::EOR, &addrM.izx, 6},
+            {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 3},
+            {"EOR", &a::EOR, &addrM.zp0, 3}, {"LSR", &a::LSR, &addrM.zp0, 5}, {"???", &a::XXX, &addrM.imp, 5},
+            {"PHA", &a::PHA, &addrM.imp, 3}, {"EOR", &a::EOR, &addrM.imm, 2}, {"LSR", &a::LSR, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 2}, {"JMP", &a::JMP, &addrM.abs, 3}, {"EOR", &a::EOR, &addrM.abs, 4},
+            {"LSR", &a::LSR, &addrM.abs, 6}, {"???", &a::XXX, &addrM.imp, 6}, {"BVC", &a::BVC, &addrM.rel, 2},
+            {"EOR", &a::EOR, &addrM.izy, 5}, {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8},
+            {"???", &a::NOP, &addrM.imp, 4}, {"EOR", &a::EOR, &addrM.zpx, 4}, {"LSR", &a::LSR, &addrM.zpx, 6},
+            {"???", &a::XXX, &addrM.imp, 6}, {"CLI", &a::CLI, &addrM.imp, 2}, {"EOR", &a::EOR, &addrM.aby, 4},
+            {"???", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 4},
+            {"EOR", &a::EOR, &addrM.abx, 4}, {"LSR", &a::LSR, &addrM.abx, 7}, {"???", &a::XXX, &addrM.imp, 7},
+            {"RTS", &a::RTS, &addrM.imp, 6}, {"ADC", &a::ADC, &addrM.izx, 6}, {"???", &a::XXX, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 3}, {"ADC", &a::ADC, &addrM.zp0, 3},
+            {"ROR", &a::ROR, &addrM.zp0, 5}, {"???", &a::XXX, &addrM.imp, 5}, {"PLA", &a::PLA, &addrM.imp, 4},
+            {"ADC", &a::ADC, &addrM.imm, 2}, {"ROR", &a::ROR, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2},
+            {"JMP", &a::JMP, &addrM.ind, 5}, {"ADC", &a::ADC, &addrM.abs, 4}, {"ROR", &a::ROR, &addrM.abs, 6},
+            {"???", &a::XXX, &addrM.imp, 6}, {"BVS", &a::BVS, &addrM.rel, 2}, {"ADC", &a::ADC, &addrM.izy, 5},
+            {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4},
+            {"ADC", &a::ADC, &addrM.zpx, 4}, {"ROR", &a::ROR, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6},
+            {"SEI", &a::SEI, &addrM.imp, 2}, {"ADC", &a::ADC, &addrM.aby, 4}, {"???", &a::NOP, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 4}, {"ADC", &a::ADC, &addrM.abx, 4},
+            {"ROR", &a::ROR, &addrM.abx, 7}, {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 2},
+            {"STA", &a::STA, &addrM.izx, 6}, {"???", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 6},
+            {"STY", &a::STY, &addrM.zp0, 3}, {"STA", &a::STA, &addrM.zp0, 3}, {"STX", &a::STX, &addrM.zp0, 3},
+            {"???", &a::XXX, &addrM.imp, 3}, {"DEY", &a::DEY, &addrM.imp, 2}, {"???", &a::NOP, &addrM.imp, 2},
+            {"TXA", &a::TXA, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2}, {"STY", &a::STY, &addrM.abs, 4},
+            {"STA", &a::STA, &addrM.abs, 4}, {"STX", &a::STX, &addrM.abs, 4}, {"???", &a::XXX, &addrM.imp, 4},
+            {"BCC", &a::BCC, &addrM.rel, 2}, {"STA", &a::STA, &addrM.izy, 6}, {"???", &a::XXX, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 6}, {"STY", &a::STY, &addrM.zpx, 4}, {"STA", &a::STA, &addrM.zpx, 4},
+            {"STX", &a::STX, &addrM.zpy, 4}, {"???", &a::XXX, &addrM.imp, 4}, {"TYA", &a::TYA, &addrM.imp, 2},
+            {"STA", &a::STA, &addrM.aby, 5}, {"TXS", &a::TXS, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 5},
+            {"???", &a::NOP, &addrM.imp, 5}, {"STA", &a::STA, &addrM.abx, 5}, {"???", &a::XXX, &addrM.imp, 5},
+            {"???", &a::XXX, &addrM.imp, 5}, {"LDY", &a::LDY, &addrM.imm, 2}, {"LDA", &a::LDA, &addrM.izx, 6},
+            {"LDX", &a::LDX, &addrM.imm, 2}, {"???", &a::XXX, &addrM.imp, 6}, {"LDY", &a::LDY, &addrM.zp0, 3},
+            {"LDA", &a::LDA, &addrM.zp0, 3}, {"LDX", &a::LDX, &addrM.zp0, 3}, {"???", &a::XXX, &addrM.imp, 3},
+            {"TAY", &a::TAY, &addrM.imp, 2}, {"LDA", &a::LDA, &addrM.imm, 2}, {"TAX", &a::TAX, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 2}, {"LDY", &a::LDY, &addrM.abs, 4}, {"LDA", &a::LDA, &addrM.abs, 4},
+            {"LDX", &a::LDX, &addrM.abs, 4}, {"???", &a::XXX, &addrM.imp, 4}, {"BCS", &a::BCS, &addrM.rel, 2},
+            {"LDA", &a::LDA, &addrM.izy, 5}, {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 5},
+            {"LDY", &a::LDY, &addrM.zpx, 4}, {"LDA", &a::LDA, &addrM.zpx, 4}, {"LDX", &a::LDX, &addrM.zpy, 4},
+            {"???", &a::XXX, &addrM.imp, 4}, {"CLV", &a::CLV, &addrM.imp, 2}, {"LDA", &a::LDA, &addrM.aby, 4},
+            {"TSX", &a::TSX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 4}, {"LDY", &a::LDY, &addrM.abx, 4},
+            {"LDA", &a::LDA, &addrM.abx, 4}, {"LDX", &a::LDX, &addrM.aby, 4}, {"???", &a::XXX, &addrM.imp, 4},
+            {"CPY", &a::CPY, &addrM.imm, 2}, {"CMP", &a::CMP, &addrM.izx, 6}, {"???", &a::NOP, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 8}, {"CPY", &a::CPY, &addrM.zp0, 3}, {"CMP", &a::CMP, &addrM.zp0, 3},
+            {"DEC", &a::DEC, &addrM.zp0, 5}, {"???", &a::XXX, &addrM.imp, 5}, {"INY", &a::INY, &addrM.imp, 2},
+            {"CMP", &a::CMP, &addrM.imm, 2}, {"DEX", &a::DEX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2},
+            {"CPY", &a::CPY, &addrM.abs, 4}, {"CMP", &a::CMP, &addrM.abs, 4}, {"DEC", &a::DEC, &addrM.abs, 6},
+            {"???", &a::XXX, &addrM.imp, 6}, {"BNE", &a::BNE, &addrM.rel, 2}, {"CMP", &a::CMP, &addrM.izy, 5},
+            {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4},
+            {"CMP", &a::CMP, &addrM.zpx, 4}, {"DEC", &a::DEC, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6},
+            {"CLD", &a::CLD, &addrM.imp, 2}, {"CMP", &a::CMP, &addrM.aby, 4}, {"NOP", &a::NOP, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 4}, {"CMP", &a::CMP, &addrM.abx, 4},
+            {"DEC", &a::DEC, &addrM.abx, 7}, {"???", &a::XXX, &addrM.imp, 7}, {"CPX", &a::CPX, &addrM.imm, 2},
+            {"SBC", &a::SBC, &addrM.izx, 6}, {"???", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8},
+            {"CPX", &a::CPX, &addrM.zp0, 3}, {"SBC", &a::SBC, &addrM.zp0, 3}, {"INC", &a::INC, &addrM.zp0, 5},
+            {"???", &a::XXX, &addrM.imp, 5}, {"INX", &a::INX, &addrM.imp, 2}, {"SBC", &a::SBC, &addrM.imm, 2},
+            {"NOP", &a::NOP, &addrM.imp, 2}, {"???", &a::SBC, &addrM.imp, 2}, {"CPX", &a::CPX, &addrM.abs, 4},
+            {"SBC", &a::SBC, &addrM.abs, 4}, {"INC", &a::INC, &addrM.abs, 6}, {"???", &a::XXX, &addrM.imp, 6},
+            {"BEQ", &a::BEQ, &addrM.rel, 2}, {"SBC", &a::SBC, &addrM.izy, 5}, {"???", &a::XXX, &addrM.imp, 2},
+            {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4}, {"SBC", &a::SBC, &addrM.zpx, 4},
+            {"INC", &a::INC, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6}, {"SED", &a::SED, &addrM.imp, 2},
+            {"SBC", &a::SBC, &addrM.aby, 4}, {"NOP", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 7},
+            {"???", &a::NOP, &addrM.imp, 4}, {"SBC", &a::SBC, &addrM.abx, 4}, {"INC", &a::INC, &addrM.abx, 7},
+            {"???", &a::XXX, &addrM.imp, 7}};
 }
 
 void Processor6502::ConnectBus(Bus* bus) {
@@ -107,7 +116,7 @@ void Processor6502::PushToStack(uint8_t data) {
 }
 
 uint8_t Processor6502::Fetch() {
-  if (!(lookup[opcode].addrMode == &Processor6502::IMP)) {
+  if (!(lookup[opcode].addrMode == &addressingModes.imp)) {
     fetched = Read(addrAbs);
   }
   return fetched;
@@ -122,7 +131,7 @@ void Processor6502::Clock() {
     auto instruction = lookup[opcode];
     cycles = lookup[opcode].cycles;
 
-    auto additionalCycle1 = lookup[opcode].addrMode();
+    auto additionalCycle1 = (*lookup[opcode].addrMode)();
     auto additionalCycle2 = (this->*lookup[opcode].operate)();
 
     cycles += additionalCycle1 && additionalCycle2;
@@ -182,7 +191,7 @@ bool Processor6502::ASL() {
   status.z = (temp & 0x00FF) == 0x00;
   status.n = temp & 0x80;
 
-  if (lookup[opcode].addrMode == &Processor6502::IMP) {
+  if (lookup[opcode].addrMode == &addressingModes.imp) {
     a = temp & 0x00FF;
   } else {
     Write(addrAbs, temp & 0x00FF);
@@ -376,7 +385,7 @@ bool Processor6502::LSR() {
   status.z = (temp & 0x00FF) == 0x0000;
   status.n = temp & 0x0080;
 
-  if (lookup[opcode].addrMode == &Processor6502::IMP) {
+  if (lookup[opcode].addrMode == &addressingModes.imp) {
     a = temp & 0x00FF;
   } else {
     Write(addrAbs, temp & 0x00FF);
@@ -438,7 +447,7 @@ bool Processor6502::ROL() {
   status.z = (temp & 0x00FF) == 0x0000;
   status.n = temp & 0x0080;
 
-  if (lookup[opcode].addrMode == &Processor6502::IMP) {
+  if (lookup[opcode].addrMode == &addressingModes.imp) {
     a = temp & 0x00FF;
   } else {
     Write(addrAbs, temp & 0x00FF);
@@ -454,7 +463,7 @@ bool Processor6502::ROR() {
   status.z = (temp & 0x00FF) == 0x00;
   status.n = temp & 0x0080;
 
-  if (lookup[opcode].addrMode == &Processor6502::IMP) {
+  if (lookup[opcode].addrMode == &addressingModes.imp) {
     a = temp & 0x00FF;
   } else {
     Write(addrAbs, temp & 0x00FF);
@@ -618,57 +627,57 @@ std::map<uint16_t, std::string> Processor6502::Disassemble(uint16_t begin, uint1
     auto& instruction = lookup[opcode];
     std::string addressingMode = "";
 
-    if (instruction.addrMode == &Processor6502::IMP) {
+    if (instruction.addrMode == &addressingModes.imp) {
       addressingMode = "{IMP}";
-    } else if (instruction.addrMode == &Processor6502::IMM) {
+    } else if (instruction.addrMode == &addressingModes.imm) {
       auto value = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("{:#04x} {{IMM}}", value);
-    } else if (instruction.addrMode == &Processor6502::ZP0) {
+    } else if (instruction.addrMode == &addressingModes.zp0) {
       auto value = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("{:#04x} {{ZP0}}", value);
-    } else if (instruction.addrMode == &Processor6502::ZPX) {
+    } else if (instruction.addrMode == &addressingModes.zpx) {
       auto value = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("{:#04x}, X {{ZPX}}", value);
-    } else if (instruction.addrMode == &Processor6502::ZPY) {
+    } else if (instruction.addrMode == &addressingModes.zpy) {
       auto value = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("{:#04x}, Y {{ZPY}} ", value);
-    } else if (instruction.addrMode == &Processor6502::IZX) {
+    } else if (instruction.addrMode == &addressingModes.izx) {
       auto value = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("({:#04x}, X) {{IZX}}", value);
-    } else if (instruction.addrMode == &Processor6502::IZY) {
+    } else if (instruction.addrMode == &addressingModes.izy) {
       auto value = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("({:#04x}), Y {{IZY}}", value);
-    } else if (instruction.addrMode == &Processor6502::ABS) {
+    } else if (instruction.addrMode == &addressingModes.abs) {
       auto lo = mBus->CpuRead(current, true);
       current++;
       auto hi = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("{:#06x} {{ABS}}", static_cast<uint16_t>(hi << 8) | lo, 4);
-    } else if (instruction.addrMode == &Processor6502::ABX) {
+    } else if (instruction.addrMode == &addressingModes.abx) {
       auto lo = mBus->CpuRead(current, true);
       current++;
       auto hi = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("{:#06x}, X {{ABX}}", static_cast<uint16_t>(hi << 8) | lo, 4);
-    } else if (instruction.addrMode == &Processor6502::ABY) {
+    } else if (instruction.addrMode == &addressingModes.aby) {
       auto lo = mBus->CpuRead(current, true);
       current++;
       auto hi = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("{:#06x}, Y {{ABY}}", static_cast<uint16_t>(hi << 8) | lo, 4);
-    } else if (instruction.addrMode == &Processor6502::IND) {
+    } else if (instruction.addrMode == &addressingModes.ind) {
       auto lo = mBus->CpuRead(current, true);
       current++;
       auto hi = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("({:#06x}) {{IND}}", static_cast<uint16_t>(hi << 8) | lo, 4);
-    } else if (instruction.addrMode == &Processor6502::REL) {
+    } else if (instruction.addrMode == &addressingModes.rel) {
       auto value = mBus->CpuRead(current, true);
       current++;
       addressingMode = fmt::format("{:#04x} [{:#06x}] {{REL}}", value, current + static_cast<int8_t>(value));

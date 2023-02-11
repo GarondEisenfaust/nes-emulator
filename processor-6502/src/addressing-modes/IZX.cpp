@@ -1,4 +1,4 @@
-#include "IZX.h"
+#include "addressing-modes/IZX.h"
 #include "Processor6502.h"
 
 IZX::IZX(Processor6502* cpu) : IAddressingMode(cpu) {}

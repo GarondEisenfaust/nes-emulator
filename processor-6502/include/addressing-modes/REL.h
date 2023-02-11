@@ -1,6 +1,7 @@
+#pragma once
 #include "IAddressingMode.h"
 
-class REL : IAddressingMode {
+class REL : public IAddressingMode {
  public:
   REL(Processor6502* cpu);
   virtual bool operator()();

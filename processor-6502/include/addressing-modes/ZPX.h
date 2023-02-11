@@ -1,6 +1,7 @@
+#pragma once
 #include "IAddressingMode.h"
 
-class ZPX : IAddressingMode {
+class ZPX : public IAddressingMode {
  public:
   ZPX(Processor6502* cpu);
   virtual bool operator()();

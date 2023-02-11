@@ -1,6 +1,7 @@
+#pragma once
 #include "IAddressingMode.h"
 
-class ABY : IAddressingMode {
+class ABY : public IAddressingMode {
  public:
   ABY(Processor6502* cpu);
   virtual bool operator()();
