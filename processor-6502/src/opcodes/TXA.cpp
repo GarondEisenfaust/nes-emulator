@@ -9,3 +9,7 @@ bool TXA::operator()() {
   mCpu->status.n = mCpu->a & 0x80;
   return 0;
 }
+
+const char* TXA::Name() {
+  return "TXA";
+}

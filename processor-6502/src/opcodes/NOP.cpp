@@ -16,3 +16,7 @@ bool NOP::operator()() {
   }
   return 0;
 }
+
+const char* NOP::Name() {
+  return "NOP";
+}

@@ -5,4 +5,5 @@ class TYA : public IOpcode {
  public:
   TYA(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

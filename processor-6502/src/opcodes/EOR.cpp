@@ -10,3 +10,7 @@ bool EOR::operator()() {
   mCpu->status.n = mCpu->a & 0x80;
   return true;
 }
+
+const char* EOR::Name() {
+  return "EOR";
+}

@@ -7,3 +7,7 @@ bool STY::operator()() {
   mCpu->Write(mCpu->addrAbs, mCpu->y);
   return false;
 }
+
+const char* STY::Name() {
+  return "STY";
+}

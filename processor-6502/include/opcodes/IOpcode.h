@@ -5,6 +5,7 @@ class IOpcode {
  public:
   IOpcode(Processor6502* cpu) : mCpu(cpu) {}
   virtual bool operator()() = 0;
+  virtual const char* Name() = 0;
 
  protected:
   Processor6502* mCpu;

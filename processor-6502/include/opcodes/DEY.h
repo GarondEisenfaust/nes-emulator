@@ -5,4 +5,5 @@ class DEY : public IOpcode {
  public:
   DEY(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

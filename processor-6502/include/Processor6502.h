@@ -61,7 +61,6 @@ class Processor6502 {
   bool BranchIf(bool condition);
 
   struct Instruction {
-    std::string name;
     IOpcode* opcode;
     IAddressingMode* addrMode;
     uint8_t cycles = 0;

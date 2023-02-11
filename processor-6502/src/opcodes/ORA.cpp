@@ -10,3 +10,7 @@ bool ORA::operator()() {
   mCpu->status.n = mCpu->a & 0x80;
   return true;
 }
+
+const char* ORA::Name() {
+  return "ORA";
+}

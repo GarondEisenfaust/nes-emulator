@@ -4,3 +4,7 @@
 BEQ::BEQ(Processor6502* cpu) : IOpcode(cpu) {}
 
 bool BEQ::operator()() { return mCpu->BranchIf(mCpu->status.z == 1); }
+
+const char* BEQ::Name() {
+  return "BEQ";
+}

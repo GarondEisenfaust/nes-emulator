@@ -5,4 +5,5 @@ class DEX : public IOpcode {
  public:
   DEX(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

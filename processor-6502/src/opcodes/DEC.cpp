@@ -11,3 +11,7 @@ bool DEC::operator()() {
   mCpu->status.n = temp & 0x0080;
   return false;
 }
+
+const char* DEC::Name() {
+  return "DEC";
+}

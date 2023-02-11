@@ -9,3 +9,7 @@ bool DEY::operator()() {
   mCpu->status.n = mCpu->y & 0x80;
   return 0;
 }
+
+const char* DEY::Name() {
+  return "DEY";
+}

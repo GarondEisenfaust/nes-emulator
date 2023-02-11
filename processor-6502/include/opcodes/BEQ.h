@@ -5,4 +5,5 @@ class BEQ : public IOpcode {
  public:
   BEQ(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

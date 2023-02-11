@@ -17,3 +17,7 @@ bool LSR::operator()() {
   }
   return 0;
 }
+
+const char* LSR::Name() {
+  return "LSR";
+}

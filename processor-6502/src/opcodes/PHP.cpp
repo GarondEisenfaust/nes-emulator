@@ -9,3 +9,7 @@ bool PHP::operator()() {
   mCpu->status.u = false;
   return 0;
 }
+
+const char* PHP::Name() {
+  return "PHP";
+}

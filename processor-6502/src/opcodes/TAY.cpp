@@ -9,3 +9,7 @@ bool TAY::operator()() {
   mCpu->status.n = mCpu->y & 0x80;
   return false;
 }
+
+const char* TAY::Name() {
+  return "TAY";
+}

@@ -5,4 +5,5 @@ class CLC : public IOpcode {
  public:
   CLC(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

@@ -5,4 +5,5 @@ class ORA : public IOpcode {
  public:
   ORA(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

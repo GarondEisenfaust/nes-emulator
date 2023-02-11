@@ -10,3 +10,7 @@ bool LDA::operator()() {
   mCpu->status.n = mCpu->a & 0x80;
   return true;
 }
+
+const char* LDA::Name() {
+  return "LDA";
+}

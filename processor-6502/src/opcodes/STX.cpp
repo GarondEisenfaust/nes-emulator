@@ -7,3 +7,7 @@ bool STX::operator()() {
   mCpu->Write(mCpu->addrAbs, mCpu->x);
   return false;
 }
+
+const char* STX::Name() {
+  return "STX";
+}

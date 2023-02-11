@@ -10,6 +10,7 @@ class {name} : public IOpcode {{
  public:
   {name}(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 }};
 """
 
@@ -23,6 +24,12 @@ bool {name}::operator()() {{
 }}
 """
 
+get_name = """
+const char* {name}::Name() {{
+  return "{name}";
+}}
+"""
+
 for line in Lines:
   name = line.strip()
   h = h_template.format(name=name)
@@ -31,5 +38,7 @@ for line in Lines:
   with open("include/opcodes/" + name + ".h", 'w') as h_file:
     h_file.writelines(h)
 
-  with open("src/opcodes/" + name + ".cpp", 'w') as cpp_file:
-    cpp_file.writelines(cpp)
+  with open("src/opcodes/" + name + ".cpp", 'r+') as cpp_file:
+    current_cpp_content = cpp_file.read()
+    new_cpp_content = get_name.format(name=name)
+    cpp_file.writelines(new_cpp_content)

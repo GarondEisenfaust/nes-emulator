@@ -5,4 +5,5 @@ class ADC : public IOpcode {
  public:
   ADC(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

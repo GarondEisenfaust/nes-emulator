@@ -9,3 +9,7 @@ bool PLA::operator()() {
   mCpu->status.n = mCpu->a & 0x80;
   return 0;
 }
+
+const char* PLA::Name() {
+  return "PLA";
+}

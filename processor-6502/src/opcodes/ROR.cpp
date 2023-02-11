@@ -18,3 +18,7 @@ bool ROR::operator()() {
   }
   return 0;
 }
+
+const char* ROR::Name() {
+  return "ROR";
+}

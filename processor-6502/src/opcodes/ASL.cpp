@@ -17,3 +17,7 @@ bool ASL::operator()() {
   }
   return 0;
 }
+
+const char* ASL::Name() {
+  return "ASL";
+}

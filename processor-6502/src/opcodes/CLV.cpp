@@ -7,3 +7,7 @@ bool CLV::operator()() {
   mCpu->status.v = false;
   return false;
 }
+
+const char* CLV::Name() {
+  return "CLV";
+}

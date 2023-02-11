@@ -14,3 +14,7 @@ bool ADC::operator()() {
   mCpu->a = temp & 0x00FF;
   return 1;
 }
+
+const char* ADC::Name() {
+  return "ADC";
+}

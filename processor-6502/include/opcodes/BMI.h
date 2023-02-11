@@ -5,4 +5,5 @@ class BMI : public IOpcode {
  public:
   BMI(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

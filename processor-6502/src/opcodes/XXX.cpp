@@ -4,3 +4,7 @@
 XXX::XXX(Processor6502* cpu) : IOpcode(cpu) {}
 
 bool XXX::operator()() { return false; }
+
+const char* XXX::Name() {
+  return "XXX";
+}

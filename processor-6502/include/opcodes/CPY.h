@@ -5,4 +5,5 @@ class CPY : public IOpcode {
  public:
   CPY(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

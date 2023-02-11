@@ -5,4 +5,5 @@ class CLV : public IOpcode {
  public:
   CLV(Processor6502* cpu);
   virtual bool operator()();
+    virtual const char* Name();
 };

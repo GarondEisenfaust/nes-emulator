@@ -7,3 +7,7 @@ bool CLD::operator()() {
   mCpu->status.d = false;
   return false;
 }
+
+const char* CLD::Name() {
+  return "CLD";
+}

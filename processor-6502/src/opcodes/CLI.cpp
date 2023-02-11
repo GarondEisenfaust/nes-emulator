@@ -7,3 +7,7 @@ bool CLI::operator()() {
   mCpu->status.i = false;
   return false;
 }
+
+const char* CLI::Name() {
+  return "CLI";
+}

@@ -9,3 +9,7 @@ bool TAX::operator()() {
   mCpu->status.n = mCpu->x & 0x80;
   return false;
 }
+
+const char* TAX::Name() {
+  return "TAX";
+}

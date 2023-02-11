@@ -7,3 +7,7 @@ bool JMP::operator()() {
   mCpu->pc = mCpu->addrAbs;
   return 0;
 }
+
+const char* JMP::Name() {
+  return "JMP";
+}

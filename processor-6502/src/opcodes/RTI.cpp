@@ -12,3 +12,7 @@ bool RTI::operator()() {
   mCpu->pc |= mCpu->PopFromStack() << 8;
   return 0;
 }
+
+const char* RTI::Name() {
+  return "RTI";
+}

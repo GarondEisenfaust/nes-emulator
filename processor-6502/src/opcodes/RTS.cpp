@@ -10,3 +10,7 @@ bool RTS::operator()() {
   mCpu->pc++;
   return 0;
 }
+
+const char* RTS::Name() {
+  return "RTS";
+}
