@@ -1,0 +1,15 @@
+#pragma once
+
+#include "ABS.h"
+#include "ABX.h"
+#include "ABY.h"
+#include "IAddressingMode.h"
+#include "IMM.h"
+#include "IMP.h"
+#include "IND.h"
+#include "IZX.h"
+#include "IZY.h"
+#include "REL.h"
+#include "ZP0.h"
+#include "ZPX.h"
+#include "ZPY.h"

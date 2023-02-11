@@ -29,16 +29,16 @@ class Processor6502 {
   void ConnectBus(Bus* bus);
   std::map<uint16_t, std::string> Disassemble(uint16_t begin, uint16_t end);
 
-  uint8_t fetched = 0x00;       // Represents the working input value to the ALU
-  uint8_t a = 0x00;             // Accumulator Register
-  uint8_t x = 0x00;             // X Register
-  uint8_t y = 0x00;             // Y Register
-  uint8_t stackPointer = 0x00;  // Stack Pointer (points to location on bus)
-  uint16_t pc = 0x0000;         // Program Counter
-  uint8_t cycles = 0;           // Counts how many cycles the instruction has remaining
-  uint16_t addrAbs = 0x0000;    // All used memory addresses end up in here
-  uint16_t addrRel = 0x00;      // Represents absolute address following a branch
-  uint8_t opcode = 0x00;        // Is the instruction byte
+  uint8_t fetched = 0x00;
+  uint8_t a = 0x00;
+  uint8_t x = 0x00;
+  uint8_t y = 0x00;
+  uint8_t stackPointer = 0x00;
+  uint16_t pc = 0x0000;
+  uint8_t cycles = 0;
+  uint16_t addrAbs = 0x0000;
+  uint16_t addrRel = 0x00;
+  uint8_t opcode = 0x00;
 
   Bus* mBus;
 
@@ -57,20 +57,6 @@ class Processor6502 {
   } status;
 
  protected:
-  // Addressing Modes =============================================
-  bool IMP();
-  bool IMM();
-  bool ZP0();
-  bool ZPX();
-  bool ZPY();
-  bool REL();
-  bool ABS();
-  bool ABX();
-  bool ABY();
-  bool IND();
-  bool IZX();
-  bool IZY();
-
   // Opcodes ======================================================
   bool ADC();
   bool AND();
@@ -136,7 +122,7 @@ class Processor6502 {
   struct Instruction {
     std::string name;
     bool (Processor6502::*operate)(void) = nullptr;
-    bool (Processor6502::*addrMode)(void) = nullptr;
+    IAddressingMode* addrMode;
     uint8_t cycles = 0;
   };
 

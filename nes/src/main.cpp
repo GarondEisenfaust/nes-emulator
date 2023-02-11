@@ -69,7 +69,7 @@ int main() {
   ppu.ConnectBus(&bus);
 
   auto workDir = std::filesystem::current_path().string();
-  Cartridge cartridge(fmt::format("{}/roms/nestest.nes", workDir));
+  Cartridge cartridge(fmt::format("{}/roms/smb.nes", workDir));
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 

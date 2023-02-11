@@ -2,99 +2,91 @@
 #include "Bus.h"
 #include "Definitions.h"
 #include "Util.h"
+#include "addressing-modes/AddressingModes.h"
 #include "fmt/format.h"
 #include <cstdint>
 #include <iostream>
 
+ABS abs;
+ABX abx;
+ABY aby;
+IMM imm;
+IMP imp;
+IND ind;
+IZX izx;
+IZY izy;
+REL rel;
+ZP0 zp0;
+ZPX zpx;
+ZPY zpy;
+
 // Constructor
 Processor6502::Processor6502() {
   using a = Processor6502;
-  lookup = {{"BRK", &a::BRK, &a::IMM, 7}, {"ORA", &a::ORA, &a::IZX, 6}, {"???", &a::XXX, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 8}, {"???", &a::NOP, &a::IMP, 3}, {"ORA", &a::ORA, &a::ZP0, 3},
-            {"ASL", &a::ASL, &a::ZP0, 5}, {"???", &a::XXX, &a::IMP, 5}, {"PHP", &a::PHP, &a::IMP, 3},
-            {"ORA", &a::ORA, &a::IMM, 2}, {"ASL", &a::ASL, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 2},
-            {"???", &a::NOP, &a::IMP, 4}, {"ORA", &a::ORA, &a::ABS, 4}, {"ASL", &a::ASL, &a::ABS, 6},
-            {"???", &a::XXX, &a::IMP, 6}, {"BPL", &a::BPL, &a::REL, 2}, {"ORA", &a::ORA, &a::IZY, 5},
-            {"???", &a::XXX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 8}, {"???", &a::NOP, &a::IMP, 4},
-            {"ORA", &a::ORA, &a::ZPX, 4}, {"ASL", &a::ASL, &a::ZPX, 6}, {"???", &a::XXX, &a::IMP, 6},
-            {"CLC", &a::CLC, &a::IMP, 2}, {"ORA", &a::ORA, &a::ABY, 4}, {"???", &a::NOP, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 7}, {"???", &a::NOP, &a::IMP, 4}, {"ORA", &a::ORA, &a::ABX, 4},
-            {"ASL", &a::ASL, &a::ABX, 7}, {"???", &a::XXX, &a::IMP, 7}, {"JSR", &a::JSR, &a::ABS, 6},
-            {"AND", &a::AND, &a::IZX, 6}, {"???", &a::XXX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 8},
-            {"BIT", &a::BIT, &a::ZP0, 3}, {"AND", &a::AND, &a::ZP0, 3}, {"ROL", &a::ROL, &a::ZP0, 5},
-            {"???", &a::XXX, &a::IMP, 5}, {"PLP", &a::PLP, &a::IMP, 4}, {"AND", &a::AND, &a::IMM, 2},
-            {"ROL", &a::ROL, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 2}, {"BIT", &a::BIT, &a::ABS, 4},
-            {"AND", &a::AND, &a::ABS, 4}, {"ROL", &a::ROL, &a::ABS, 6}, {"???", &a::XXX, &a::IMP, 6},
-            {"BMI", &a::BMI, &a::REL, 2}, {"AND", &a::AND, &a::IZY, 5}, {"???", &a::XXX, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 8}, {"???", &a::NOP, &a::IMP, 4}, {"AND", &a::AND, &a::ZPX, 4},
-            {"ROL", &a::ROL, &a::ZPX, 6}, {"???", &a::XXX, &a::IMP, 6}, {"SEC", &a::SEC, &a::IMP, 2},
-            {"AND", &a::AND, &a::ABY, 4}, {"???", &a::NOP, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 7},
-            {"???", &a::NOP, &a::IMP, 4}, {"AND", &a::AND, &a::ABX, 4}, {"ROL", &a::ROL, &a::ABX, 7},
-            {"???", &a::XXX, &a::IMP, 7}, {"RTI", &a::RTI, &a::IMP, 6}, {"EOR", &a::EOR, &a::IZX, 6},
-            {"???", &a::XXX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 8}, {"???", &a::NOP, &a::IMP, 3},
-            {"EOR", &a::EOR, &a::ZP0, 3}, {"LSR", &a::LSR, &a::ZP0, 5}, {"???", &a::XXX, &a::IMP, 5},
-            {"PHA", &a::PHA, &a::IMP, 3}, {"EOR", &a::EOR, &a::IMM, 2}, {"LSR", &a::LSR, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 2}, {"JMP", &a::JMP, &a::ABS, 3}, {"EOR", &a::EOR, &a::ABS, 4},
-            {"LSR", &a::LSR, &a::ABS, 6}, {"???", &a::XXX, &a::IMP, 6}, {"BVC", &a::BVC, &a::REL, 2},
-            {"EOR", &a::EOR, &a::IZY, 5}, {"???", &a::XXX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 8},
-            {"???", &a::NOP, &a::IMP, 4}, {"EOR", &a::EOR, &a::ZPX, 4}, {"LSR", &a::LSR, &a::ZPX, 6},
-            {"???", &a::XXX, &a::IMP, 6}, {"CLI", &a::CLI, &a::IMP, 2}, {"EOR", &a::EOR, &a::ABY, 4},
-            {"???", &a::NOP, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 7}, {"???", &a::NOP, &a::IMP, 4},
-            {"EOR", &a::EOR, &a::ABX, 4}, {"LSR", &a::LSR, &a::ABX, 7}, {"???", &a::XXX, &a::IMP, 7},
-            {"RTS", &a::RTS, &a::IMP, 6}, {"ADC", &a::ADC, &a::IZX, 6}, {"???", &a::XXX, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 8}, {"???", &a::NOP, &a::IMP, 3}, {"ADC", &a::ADC, &a::ZP0, 3},
-            {"ROR", &a::ROR, &a::ZP0, 5}, {"???", &a::XXX, &a::IMP, 5}, {"PLA", &a::PLA, &a::IMP, 4},
-            {"ADC", &a::ADC, &a::IMM, 2}, {"ROR", &a::ROR, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 2},
-            {"JMP", &a::JMP, &a::IND, 5}, {"ADC", &a::ADC, &a::ABS, 4}, {"ROR", &a::ROR, &a::ABS, 6},
-            {"???", &a::XXX, &a::IMP, 6}, {"BVS", &a::BVS, &a::REL, 2}, {"ADC", &a::ADC, &a::IZY, 5},
-            {"???", &a::XXX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 8}, {"???", &a::NOP, &a::IMP, 4},
-            {"ADC", &a::ADC, &a::ZPX, 4}, {"ROR", &a::ROR, &a::ZPX, 6}, {"???", &a::XXX, &a::IMP, 6},
-            {"SEI", &a::SEI, &a::IMP, 2}, {"ADC", &a::ADC, &a::ABY, 4}, {"???", &a::NOP, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 7}, {"???", &a::NOP, &a::IMP, 4}, {"ADC", &a::ADC, &a::ABX, 4},
-            {"ROR", &a::ROR, &a::ABX, 7}, {"???", &a::XXX, &a::IMP, 7}, {"???", &a::NOP, &a::IMP, 2},
-            {"STA", &a::STA, &a::IZX, 6}, {"???", &a::NOP, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 6},
-            {"STY", &a::STY, &a::ZP0, 3}, {"STA", &a::STA, &a::ZP0, 3}, {"STX", &a::STX, &a::ZP0, 3},
-            {"???", &a::XXX, &a::IMP, 3}, {"DEY", &a::DEY, &a::IMP, 2}, {"???", &a::NOP, &a::IMP, 2},
-            {"TXA", &a::TXA, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 2}, {"STY", &a::STY, &a::ABS, 4},
-            {"STA", &a::STA, &a::ABS, 4}, {"STX", &a::STX, &a::ABS, 4}, {"???", &a::XXX, &a::IMP, 4},
-            {"BCC", &a::BCC, &a::REL, 2}, {"STA", &a::STA, &a::IZY, 6}, {"???", &a::XXX, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 6}, {"STY", &a::STY, &a::ZPX, 4}, {"STA", &a::STA, &a::ZPX, 4},
-            {"STX", &a::STX, &a::ZPY, 4}, {"???", &a::XXX, &a::IMP, 4}, {"TYA", &a::TYA, &a::IMP, 2},
-            {"STA", &a::STA, &a::ABY, 5}, {"TXS", &a::TXS, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 5},
-            {"???", &a::NOP, &a::IMP, 5}, {"STA", &a::STA, &a::ABX, 5}, {"???", &a::XXX, &a::IMP, 5},
-            {"???", &a::XXX, &a::IMP, 5}, {"LDY", &a::LDY, &a::IMM, 2}, {"LDA", &a::LDA, &a::IZX, 6},
-            {"LDX", &a::LDX, &a::IMM, 2}, {"???", &a::XXX, &a::IMP, 6}, {"LDY", &a::LDY, &a::ZP0, 3},
-            {"LDA", &a::LDA, &a::ZP0, 3}, {"LDX", &a::LDX, &a::ZP0, 3}, {"???", &a::XXX, &a::IMP, 3},
-            {"TAY", &a::TAY, &a::IMP, 2}, {"LDA", &a::LDA, &a::IMM, 2}, {"TAX", &a::TAX, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 2}, {"LDY", &a::LDY, &a::ABS, 4}, {"LDA", &a::LDA, &a::ABS, 4},
-            {"LDX", &a::LDX, &a::ABS, 4}, {"???", &a::XXX, &a::IMP, 4}, {"BCS", &a::BCS, &a::REL, 2},
-            {"LDA", &a::LDA, &a::IZY, 5}, {"???", &a::XXX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 5},
-            {"LDY", &a::LDY, &a::ZPX, 4}, {"LDA", &a::LDA, &a::ZPX, 4}, {"LDX", &a::LDX, &a::ZPY, 4},
-            {"???", &a::XXX, &a::IMP, 4}, {"CLV", &a::CLV, &a::IMP, 2}, {"LDA", &a::LDA, &a::ABY, 4},
-            {"TSX", &a::TSX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 4}, {"LDY", &a::LDY, &a::ABX, 4},
-            {"LDA", &a::LDA, &a::ABX, 4}, {"LDX", &a::LDX, &a::ABY, 4}, {"???", &a::XXX, &a::IMP, 4},
-            {"CPY", &a::CPY, &a::IMM, 2}, {"CMP", &a::CMP, &a::IZX, 6}, {"???", &a::NOP, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 8}, {"CPY", &a::CPY, &a::ZP0, 3}, {"CMP", &a::CMP, &a::ZP0, 3},
-            {"DEC", &a::DEC, &a::ZP0, 5}, {"???", &a::XXX, &a::IMP, 5}, {"INY", &a::INY, &a::IMP, 2},
-            {"CMP", &a::CMP, &a::IMM, 2}, {"DEX", &a::DEX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 2},
-            {"CPY", &a::CPY, &a::ABS, 4}, {"CMP", &a::CMP, &a::ABS, 4}, {"DEC", &a::DEC, &a::ABS, 6},
-            {"???", &a::XXX, &a::IMP, 6}, {"BNE", &a::BNE, &a::REL, 2}, {"CMP", &a::CMP, &a::IZY, 5},
-            {"???", &a::XXX, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 8}, {"???", &a::NOP, &a::IMP, 4},
-            {"CMP", &a::CMP, &a::ZPX, 4}, {"DEC", &a::DEC, &a::ZPX, 6}, {"???", &a::XXX, &a::IMP, 6},
-            {"CLD", &a::CLD, &a::IMP, 2}, {"CMP", &a::CMP, &a::ABY, 4}, {"NOP", &a::NOP, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 7}, {"???", &a::NOP, &a::IMP, 4}, {"CMP", &a::CMP, &a::ABX, 4},
-            {"DEC", &a::DEC, &a::ABX, 7}, {"???", &a::XXX, &a::IMP, 7}, {"CPX", &a::CPX, &a::IMM, 2},
-            {"SBC", &a::SBC, &a::IZX, 6}, {"???", &a::NOP, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 8},
-            {"CPX", &a::CPX, &a::ZP0, 3}, {"SBC", &a::SBC, &a::ZP0, 3}, {"INC", &a::INC, &a::ZP0, 5},
-            {"???", &a::XXX, &a::IMP, 5}, {"INX", &a::INX, &a::IMP, 2}, {"SBC", &a::SBC, &a::IMM, 2},
-            {"NOP", &a::NOP, &a::IMP, 2}, {"???", &a::SBC, &a::IMP, 2}, {"CPX", &a::CPX, &a::ABS, 4},
-            {"SBC", &a::SBC, &a::ABS, 4}, {"INC", &a::INC, &a::ABS, 6}, {"???", &a::XXX, &a::IMP, 6},
-            {"BEQ", &a::BEQ, &a::REL, 2}, {"SBC", &a::SBC, &a::IZY, 5}, {"???", &a::XXX, &a::IMP, 2},
-            {"???", &a::XXX, &a::IMP, 8}, {"???", &a::NOP, &a::IMP, 4}, {"SBC", &a::SBC, &a::ZPX, 4},
-            {"INC", &a::INC, &a::ZPX, 6}, {"???", &a::XXX, &a::IMP, 6}, {"SED", &a::SED, &a::IMP, 2},
-            {"SBC", &a::SBC, &a::ABY, 4}, {"NOP", &a::NOP, &a::IMP, 2}, {"???", &a::XXX, &a::IMP, 7},
-            {"???", &a::NOP, &a::IMP, 4}, {"SBC", &a::SBC, &a::ABX, 4}, {"INC", &a::INC, &a::ABX, 7},
-            {"???", &a::XXX, &a::IMP, 7}};
+  lookup = {{"BRK", &a::BRK, imm, 7}, {"ORA", &a::ORA, izx, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 3}, {"ORA", &a::ORA, zp0, 3}, {"ASL", &a::ASL, zp0, 5}, {"???", &a::XXX, imp, 5},
+            {"PHP", &a::PHP, imp, 3}, {"ORA", &a::ORA, imm, 2}, {"ASL", &a::ASL, imp, 2}, {"???", &a::XXX, imp, 2},
+            {"???", &a::NOP, imp, 4}, {"ORA", &a::ORA, abs, 4}, {"ASL", &a::ASL, abs, 6}, {"???", &a::XXX, imp, 6},
+            {"BPL", &a::BPL, rel, 2}, {"ORA", &a::ORA, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 4}, {"ORA", &a::ORA, zpx, 4}, {"ASL", &a::ASL, zpx, 6}, {"???", &a::XXX, imp, 6},
+            {"CLC", &a::CLC, imp, 2}, {"ORA", &a::ORA, aby, 4}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
+            {"???", &a::NOP, imp, 4}, {"ORA", &a::ORA, abx, 4}, {"ASL", &a::ASL, abx, 7}, {"???", &a::XXX, imp, 7},
+            {"JSR", &a::JSR, abs, 6}, {"AND", &a::AND, izx, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"BIT", &a::BIT, zp0, 3}, {"AND", &a::AND, zp0, 3}, {"ROL", &a::ROL, zp0, 5}, {"???", &a::XXX, imp, 5},
+            {"PLP", &a::PLP, imp, 4}, {"AND", &a::AND, imm, 2}, {"ROL", &a::ROL, imp, 2}, {"???", &a::XXX, imp, 2},
+            {"BIT", &a::BIT, abs, 4}, {"AND", &a::AND, abs, 4}, {"ROL", &a::ROL, abs, 6}, {"???", &a::XXX, imp, 6},
+            {"BMI", &a::BMI, rel, 2}, {"AND", &a::AND, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 4}, {"AND", &a::AND, zpx, 4}, {"ROL", &a::ROL, zpx, 6}, {"???", &a::XXX, imp, 6},
+            {"SEC", &a::SEC, imp, 2}, {"AND", &a::AND, aby, 4}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
+            {"???", &a::NOP, imp, 4}, {"AND", &a::AND, abx, 4}, {"ROL", &a::ROL, abx, 7}, {"???", &a::XXX, imp, 7},
+            {"RTI", &a::RTI, imp, 6}, {"EOR", &a::EOR, izx, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 3}, {"EOR", &a::EOR, zp0, 3}, {"LSR", &a::LSR, zp0, 5}, {"???", &a::XXX, imp, 5},
+            {"PHA", &a::PHA, imp, 3}, {"EOR", &a::EOR, imm, 2}, {"LSR", &a::LSR, imp, 2}, {"???", &a::XXX, imp, 2},
+            {"JMP", &a::JMP, abs, 3}, {"EOR", &a::EOR, abs, 4}, {"LSR", &a::LSR, abs, 6}, {"???", &a::XXX, imp, 6},
+            {"BVC", &a::BVC, rel, 2}, {"EOR", &a::EOR, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 4}, {"EOR", &a::EOR, zpx, 4}, {"LSR", &a::LSR, zpx, 6}, {"???", &a::XXX, imp, 6},
+            {"CLI", &a::CLI, imp, 2}, {"EOR", &a::EOR, aby, 4}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
+            {"???", &a::NOP, imp, 4}, {"EOR", &a::EOR, abx, 4}, {"LSR", &a::LSR, abx, 7}, {"???", &a::XXX, imp, 7},
+            {"RTS", &a::RTS, imp, 6}, {"ADC", &a::ADC, izx, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 3}, {"ADC", &a::ADC, zp0, 3}, {"ROR", &a::ROR, zp0, 5}, {"???", &a::XXX, imp, 5},
+            {"PLA", &a::PLA, imp, 4}, {"ADC", &a::ADC, imm, 2}, {"ROR", &a::ROR, imp, 2}, {"???", &a::XXX, imp, 2},
+            {"JMP", &a::JMP, ind, 5}, {"ADC", &a::ADC, abs, 4}, {"ROR", &a::ROR, abs, 6}, {"???", &a::XXX, imp, 6},
+            {"BVS", &a::BVS, rel, 2}, {"ADC", &a::ADC, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 4}, {"ADC", &a::ADC, zpx, 4}, {"ROR", &a::ROR, zpx, 6}, {"???", &a::XXX, imp, 6},
+            {"SEI", &a::SEI, imp, 2}, {"ADC", &a::ADC, aby, 4}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
+            {"???", &a::NOP, imp, 4}, {"ADC", &a::ADC, abx, 4}, {"ROR", &a::ROR, abx, 7}, {"???", &a::XXX, imp, 7},
+            {"???", &a::NOP, imp, 2}, {"STA", &a::STA, izx, 6}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 6},
+            {"STY", &a::STY, zp0, 3}, {"STA", &a::STA, zp0, 3}, {"STX", &a::STX, zp0, 3}, {"???", &a::XXX, imp, 3},
+            {"DEY", &a::DEY, imp, 2}, {"???", &a::NOP, imp, 2}, {"TXA", &a::TXA, imp, 2}, {"???", &a::XXX, imp, 2},
+            {"STY", &a::STY, abs, 4}, {"STA", &a::STA, abs, 4}, {"STX", &a::STX, abs, 4}, {"???", &a::XXX, imp, 4},
+            {"BCC", &a::BCC, rel, 2}, {"STA", &a::STA, izy, 6}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 6},
+            {"STY", &a::STY, zpx, 4}, {"STA", &a::STA, zpx, 4}, {"STX", &a::STX, zpy, 4}, {"???", &a::XXX, imp, 4},
+            {"TYA", &a::TYA, imp, 2}, {"STA", &a::STA, aby, 5}, {"TXS", &a::TXS, imp, 2}, {"???", &a::XXX, imp, 5},
+            {"???", &a::NOP, imp, 5}, {"STA", &a::STA, abx, 5}, {"???", &a::XXX, imp, 5}, {"???", &a::XXX, imp, 5},
+            {"LDY", &a::LDY, imm, 2}, {"LDA", &a::LDA, izx, 6}, {"LDX", &a::LDX, imm, 2}, {"???", &a::XXX, imp, 6},
+            {"LDY", &a::LDY, zp0, 3}, {"LDA", &a::LDA, zp0, 3}, {"LDX", &a::LDX, zp0, 3}, {"???", &a::XXX, imp, 3},
+            {"TAY", &a::TAY, imp, 2}, {"LDA", &a::LDA, imm, 2}, {"TAX", &a::TAX, imp, 2}, {"???", &a::XXX, imp, 2},
+            {"LDY", &a::LDY, abs, 4}, {"LDA", &a::LDA, abs, 4}, {"LDX", &a::LDX, abs, 4}, {"???", &a::XXX, imp, 4},
+            {"BCS", &a::BCS, rel, 2}, {"LDA", &a::LDA, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 5},
+            {"LDY", &a::LDY, zpx, 4}, {"LDA", &a::LDA, zpx, 4}, {"LDX", &a::LDX, zpy, 4}, {"???", &a::XXX, imp, 4},
+            {"CLV", &a::CLV, imp, 2}, {"LDA", &a::LDA, aby, 4}, {"TSX", &a::TSX, imp, 2}, {"???", &a::XXX, imp, 4},
+            {"LDY", &a::LDY, abx, 4}, {"LDA", &a::LDA, abx, 4}, {"LDX", &a::LDX, aby, 4}, {"???", &a::XXX, imp, 4},
+            {"CPY", &a::CPY, imm, 2}, {"CMP", &a::CMP, izx, 6}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"CPY", &a::CPY, zp0, 3}, {"CMP", &a::CMP, zp0, 3}, {"DEC", &a::DEC, zp0, 5}, {"???", &a::XXX, imp, 5},
+            {"INY", &a::INY, imp, 2}, {"CMP", &a::CMP, imm, 2}, {"DEX", &a::DEX, imp, 2}, {"???", &a::XXX, imp, 2},
+            {"CPY", &a::CPY, abs, 4}, {"CMP", &a::CMP, abs, 4}, {"DEC", &a::DEC, abs, 6}, {"???", &a::XXX, imp, 6},
+            {"BNE", &a::BNE, rel, 2}, {"CMP", &a::CMP, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 4}, {"CMP", &a::CMP, zpx, 4}, {"DEC", &a::DEC, zpx, 6}, {"???", &a::XXX, imp, 6},
+            {"CLD", &a::CLD, imp, 2}, {"CMP", &a::CMP, aby, 4}, {"NOP", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
+            {"???", &a::NOP, imp, 4}, {"CMP", &a::CMP, abx, 4}, {"DEC", &a::DEC, abx, 7}, {"???", &a::XXX, imp, 7},
+            {"CPX", &a::CPX, imm, 2}, {"SBC", &a::SBC, izx, 6}, {"???", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"CPX", &a::CPX, zp0, 3}, {"SBC", &a::SBC, zp0, 3}, {"INC", &a::INC, zp0, 5}, {"???", &a::XXX, imp, 5},
+            {"INX", &a::INX, imp, 2}, {"SBC", &a::SBC, imm, 2}, {"NOP", &a::NOP, imp, 2}, {"???", &a::SBC, imp, 2},
+            {"CPX", &a::CPX, abs, 4}, {"SBC", &a::SBC, abs, 4}, {"INC", &a::INC, abs, 6}, {"???", &a::XXX, imp, 6},
+            {"BEQ", &a::BEQ, rel, 2}, {"SBC", &a::SBC, izy, 5}, {"???", &a::XXX, imp, 2}, {"???", &a::XXX, imp, 8},
+            {"???", &a::NOP, imp, 4}, {"SBC", &a::SBC, zpx, 4}, {"INC", &a::INC, zpx, 6}, {"???", &a::XXX, imp, 6},
+            {"SED", &a::SED, imp, 2}, {"SBC", &a::SBC, aby, 4}, {"NOP", &a::NOP, imp, 2}, {"???", &a::XXX, imp, 7},
+            {"???", &a::NOP, imp, 4}, {"SBC", &a::SBC, abx, 4}, {"INC", &a::INC, abx, 7}, {"???", &a::XXX, imp, 7}};
 }
 
 void Processor6502::ConnectBus(Bus* bus) {
@@ -130,7 +122,7 @@ void Processor6502::Clock() {
     auto instruction = lookup[opcode];
     cycles = lookup[opcode].cycles;
 
-    auto additionalCycle1 = (this->*lookup[opcode].addrMode)();
+    auto additionalCycle1 = lookup[opcode].addrMode();
     auto additionalCycle2 = (this->*lookup[opcode].operate)();
 
     cycles += additionalCycle1 && additionalCycle2;
@@ -160,132 +152,6 @@ void Processor6502::Reset() {
   fetched = 0x00;
 
   cycles = 8;
-}
-
-// Addressing Modes =============================================
-bool Processor6502::IMP() {
-  fetched = a;
-  return 0;
-}
-
-bool Processor6502::IMM() {
-  addrAbs = pc++;
-  return 0;
-}
-
-bool Processor6502::ZP0() {
-  addrAbs = Read(pc);
-  pc++;
-  addrAbs &= 0x00FF;
-  return 0;
-}
-
-bool Processor6502::ZPX() {
-  addrAbs = Read(pc) + x;
-  pc++;
-  addrAbs &= 0x00FF;
-  return 0;
-}
-
-bool Processor6502::ZPY() {
-  addrAbs = Read(pc) + y;
-  pc++;
-  addrAbs &= 0x00FF;
-  return 0;
-}
-
-bool Processor6502::REL() {
-  addrRel = Read(pc);
-  pc++;
-  if (addrRel & 0x80) {
-    addrRel |= 0xFF00;
-  }
-  return 0;
-}
-
-bool Processor6502::ABS() {
-  uint16_t low = Read(pc);
-  pc++;
-  uint16_t high = Read(pc);
-  pc++;
-
-  addrAbs = (high << 8) | low;
-
-  return 0;
-}
-
-bool Processor6502::ABX() {
-  uint16_t low = Read(pc);
-  pc++;
-  uint16_t high = Read(pc);
-  pc++;
-
-  addrAbs = ((high << 8) | low) + x;
-
-  if ((addrAbs & 0xFF00) != (high << 8)) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-bool Processor6502::ABY() {
-  uint16_t low = Read(pc);
-  pc++;
-  uint16_t high = Read(pc);
-  pc++;
-
-  addrAbs = ((high << 8) | low) + y;
-
-  if ((addrAbs & 0xFF00) != (high << 8)) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-bool Processor6502::IND() {
-  uint16_t ptrLow = Read(pc);
-  pc++;
-  uint16_t ptrHigh = Read(pc);
-  pc++;
-
-  uint16_t ptr = (ptrHigh << 8) | ptrLow;
-
-  if (ptrLow == 0x00FF) {
-    addrAbs = (Read(ptr & 0xFF00) << 8) | Read(ptr + 0);
-  } else {
-    addrAbs = (Read(ptr + 1) << 8) | Read(ptr + 0);
-  }
-  return 0;
-}
-
-bool Processor6502::IZX() {
-  uint16_t t = Read(pc);
-  pc++;
-
-  uint16_t lo = Read((t + x) & 0x00FF);
-  uint16_t hi = Read((t + x + 1) & 0x00FF);
-
-  addrAbs = (hi << 8) | lo;
-
-  return 0;
-}
-
-bool Processor6502::IZY() {
-  uint16_t t = Read(pc);
-  pc++;
-
-  uint16_t lo = Read(t & 0x00FF);
-  uint16_t hi = Read((t + 1) & 0x00FF);
-
-  addrAbs = ((hi << 8) | lo) + y;
-
-  if ((addrAbs & 0xFF00) != (hi << 8)) {
-    return 1;
-  } else {
-    return 0;
-  }
 }
 
 // Opcodes ======================================================
