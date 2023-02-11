@@ -7,95 +7,137 @@
 #include <iostream>
 
 // Constructor
-Processor6502::Processor6502() : addressingModes(this) {
+Processor6502::Processor6502() : addressingModes(this), opcodes(this) {
   auto& addrM = addressingModes;
-  using a = Processor6502;
-  lookup = {{"BRK", &a::BRK, &addrM.imm, 7}, {"ORA", &a::ORA, &addrM.izx, 6}, {"???", &a::XXX, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 3}, {"ORA", &a::ORA, &addrM.zp0, 3},
-            {"ASL", &a::ASL, &addrM.zp0, 5}, {"???", &a::XXX, &addrM.imp, 5}, {"PHP", &a::PHP, &addrM.imp, 3},
-            {"ORA", &a::ORA, &addrM.imm, 2}, {"ASL", &a::ASL, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2},
-            {"???", &a::NOP, &addrM.imp, 4}, {"ORA", &a::ORA, &addrM.abs, 4}, {"ASL", &a::ASL, &addrM.abs, 6},
-            {"???", &a::XXX, &addrM.imp, 6}, {"BPL", &a::BPL, &addrM.rel, 2}, {"ORA", &a::ORA, &addrM.izy, 5},
-            {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4},
-            {"ORA", &a::ORA, &addrM.zpx, 4}, {"ASL", &a::ASL, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6},
-            {"CLC", &a::CLC, &addrM.imp, 2}, {"ORA", &a::ORA, &addrM.aby, 4}, {"???", &a::NOP, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 4}, {"ORA", &a::ORA, &addrM.abx, 4},
-            {"ASL", &a::ASL, &addrM.abx, 7}, {"???", &a::XXX, &addrM.imp, 7}, {"JSR", &a::JSR, &addrM.abs, 6},
-            {"AND", &a::AND, &addrM.izx, 6}, {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8},
-            {"BIT", &a::BIT, &addrM.zp0, 3}, {"AND", &a::AND, &addrM.zp0, 3}, {"ROL", &a::ROL, &addrM.zp0, 5},
-            {"???", &a::XXX, &addrM.imp, 5}, {"PLP", &a::PLP, &addrM.imp, 4}, {"AND", &a::AND, &addrM.imm, 2},
-            {"ROL", &a::ROL, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2}, {"BIT", &a::BIT, &addrM.abs, 4},
-            {"AND", &a::AND, &addrM.abs, 4}, {"ROL", &a::ROL, &addrM.abs, 6}, {"???", &a::XXX, &addrM.imp, 6},
-            {"BMI", &a::BMI, &addrM.rel, 2}, {"AND", &a::AND, &addrM.izy, 5}, {"???", &a::XXX, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4}, {"AND", &a::AND, &addrM.zpx, 4},
-            {"ROL", &a::ROL, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6}, {"SEC", &a::SEC, &addrM.imp, 2},
-            {"AND", &a::AND, &addrM.aby, 4}, {"???", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 7},
-            {"???", &a::NOP, &addrM.imp, 4}, {"AND", &a::AND, &addrM.abx, 4}, {"ROL", &a::ROL, &addrM.abx, 7},
-            {"???", &a::XXX, &addrM.imp, 7}, {"RTI", &a::RTI, &addrM.imp, 6}, {"EOR", &a::EOR, &addrM.izx, 6},
-            {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 3},
-            {"EOR", &a::EOR, &addrM.zp0, 3}, {"LSR", &a::LSR, &addrM.zp0, 5}, {"???", &a::XXX, &addrM.imp, 5},
-            {"PHA", &a::PHA, &addrM.imp, 3}, {"EOR", &a::EOR, &addrM.imm, 2}, {"LSR", &a::LSR, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 2}, {"JMP", &a::JMP, &addrM.abs, 3}, {"EOR", &a::EOR, &addrM.abs, 4},
-            {"LSR", &a::LSR, &addrM.abs, 6}, {"???", &a::XXX, &addrM.imp, 6}, {"BVC", &a::BVC, &addrM.rel, 2},
-            {"EOR", &a::EOR, &addrM.izy, 5}, {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8},
-            {"???", &a::NOP, &addrM.imp, 4}, {"EOR", &a::EOR, &addrM.zpx, 4}, {"LSR", &a::LSR, &addrM.zpx, 6},
-            {"???", &a::XXX, &addrM.imp, 6}, {"CLI", &a::CLI, &addrM.imp, 2}, {"EOR", &a::EOR, &addrM.aby, 4},
-            {"???", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 4},
-            {"EOR", &a::EOR, &addrM.abx, 4}, {"LSR", &a::LSR, &addrM.abx, 7}, {"???", &a::XXX, &addrM.imp, 7},
-            {"RTS", &a::RTS, &addrM.imp, 6}, {"ADC", &a::ADC, &addrM.izx, 6}, {"???", &a::XXX, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 3}, {"ADC", &a::ADC, &addrM.zp0, 3},
-            {"ROR", &a::ROR, &addrM.zp0, 5}, {"???", &a::XXX, &addrM.imp, 5}, {"PLA", &a::PLA, &addrM.imp, 4},
-            {"ADC", &a::ADC, &addrM.imm, 2}, {"ROR", &a::ROR, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2},
-            {"JMP", &a::JMP, &addrM.ind, 5}, {"ADC", &a::ADC, &addrM.abs, 4}, {"ROR", &a::ROR, &addrM.abs, 6},
-            {"???", &a::XXX, &addrM.imp, 6}, {"BVS", &a::BVS, &addrM.rel, 2}, {"ADC", &a::ADC, &addrM.izy, 5},
-            {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4},
-            {"ADC", &a::ADC, &addrM.zpx, 4}, {"ROR", &a::ROR, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6},
-            {"SEI", &a::SEI, &addrM.imp, 2}, {"ADC", &a::ADC, &addrM.aby, 4}, {"???", &a::NOP, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 4}, {"ADC", &a::ADC, &addrM.abx, 4},
-            {"ROR", &a::ROR, &addrM.abx, 7}, {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 2},
-            {"STA", &a::STA, &addrM.izx, 6}, {"???", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 6},
-            {"STY", &a::STY, &addrM.zp0, 3}, {"STA", &a::STA, &addrM.zp0, 3}, {"STX", &a::STX, &addrM.zp0, 3},
-            {"???", &a::XXX, &addrM.imp, 3}, {"DEY", &a::DEY, &addrM.imp, 2}, {"???", &a::NOP, &addrM.imp, 2},
-            {"TXA", &a::TXA, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2}, {"STY", &a::STY, &addrM.abs, 4},
-            {"STA", &a::STA, &addrM.abs, 4}, {"STX", &a::STX, &addrM.abs, 4}, {"???", &a::XXX, &addrM.imp, 4},
-            {"BCC", &a::BCC, &addrM.rel, 2}, {"STA", &a::STA, &addrM.izy, 6}, {"???", &a::XXX, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 6}, {"STY", &a::STY, &addrM.zpx, 4}, {"STA", &a::STA, &addrM.zpx, 4},
-            {"STX", &a::STX, &addrM.zpy, 4}, {"???", &a::XXX, &addrM.imp, 4}, {"TYA", &a::TYA, &addrM.imp, 2},
-            {"STA", &a::STA, &addrM.aby, 5}, {"TXS", &a::TXS, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 5},
-            {"???", &a::NOP, &addrM.imp, 5}, {"STA", &a::STA, &addrM.abx, 5}, {"???", &a::XXX, &addrM.imp, 5},
-            {"???", &a::XXX, &addrM.imp, 5}, {"LDY", &a::LDY, &addrM.imm, 2}, {"LDA", &a::LDA, &addrM.izx, 6},
-            {"LDX", &a::LDX, &addrM.imm, 2}, {"???", &a::XXX, &addrM.imp, 6}, {"LDY", &a::LDY, &addrM.zp0, 3},
-            {"LDA", &a::LDA, &addrM.zp0, 3}, {"LDX", &a::LDX, &addrM.zp0, 3}, {"???", &a::XXX, &addrM.imp, 3},
-            {"TAY", &a::TAY, &addrM.imp, 2}, {"LDA", &a::LDA, &addrM.imm, 2}, {"TAX", &a::TAX, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 2}, {"LDY", &a::LDY, &addrM.abs, 4}, {"LDA", &a::LDA, &addrM.abs, 4},
-            {"LDX", &a::LDX, &addrM.abs, 4}, {"???", &a::XXX, &addrM.imp, 4}, {"BCS", &a::BCS, &addrM.rel, 2},
-            {"LDA", &a::LDA, &addrM.izy, 5}, {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 5},
-            {"LDY", &a::LDY, &addrM.zpx, 4}, {"LDA", &a::LDA, &addrM.zpx, 4}, {"LDX", &a::LDX, &addrM.zpy, 4},
-            {"???", &a::XXX, &addrM.imp, 4}, {"CLV", &a::CLV, &addrM.imp, 2}, {"LDA", &a::LDA, &addrM.aby, 4},
-            {"TSX", &a::TSX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 4}, {"LDY", &a::LDY, &addrM.abx, 4},
-            {"LDA", &a::LDA, &addrM.abx, 4}, {"LDX", &a::LDX, &addrM.aby, 4}, {"???", &a::XXX, &addrM.imp, 4},
-            {"CPY", &a::CPY, &addrM.imm, 2}, {"CMP", &a::CMP, &addrM.izx, 6}, {"???", &a::NOP, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 8}, {"CPY", &a::CPY, &addrM.zp0, 3}, {"CMP", &a::CMP, &addrM.zp0, 3},
-            {"DEC", &a::DEC, &addrM.zp0, 5}, {"???", &a::XXX, &addrM.imp, 5}, {"INY", &a::INY, &addrM.imp, 2},
-            {"CMP", &a::CMP, &addrM.imm, 2}, {"DEX", &a::DEX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 2},
-            {"CPY", &a::CPY, &addrM.abs, 4}, {"CMP", &a::CMP, &addrM.abs, 4}, {"DEC", &a::DEC, &addrM.abs, 6},
-            {"???", &a::XXX, &addrM.imp, 6}, {"BNE", &a::BNE, &addrM.rel, 2}, {"CMP", &a::CMP, &addrM.izy, 5},
-            {"???", &a::XXX, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4},
-            {"CMP", &a::CMP, &addrM.zpx, 4}, {"DEC", &a::DEC, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6},
-            {"CLD", &a::CLD, &addrM.imp, 2}, {"CMP", &a::CMP, &addrM.aby, 4}, {"NOP", &a::NOP, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 7}, {"???", &a::NOP, &addrM.imp, 4}, {"CMP", &a::CMP, &addrM.abx, 4},
-            {"DEC", &a::DEC, &addrM.abx, 7}, {"???", &a::XXX, &addrM.imp, 7}, {"CPX", &a::CPX, &addrM.imm, 2},
-            {"SBC", &a::SBC, &addrM.izx, 6}, {"???", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 8},
-            {"CPX", &a::CPX, &addrM.zp0, 3}, {"SBC", &a::SBC, &addrM.zp0, 3}, {"INC", &a::INC, &addrM.zp0, 5},
-            {"???", &a::XXX, &addrM.imp, 5}, {"INX", &a::INX, &addrM.imp, 2}, {"SBC", &a::SBC, &addrM.imm, 2},
-            {"NOP", &a::NOP, &addrM.imp, 2}, {"???", &a::SBC, &addrM.imp, 2}, {"CPX", &a::CPX, &addrM.abs, 4},
-            {"SBC", &a::SBC, &addrM.abs, 4}, {"INC", &a::INC, &addrM.abs, 6}, {"???", &a::XXX, &addrM.imp, 6},
-            {"BEQ", &a::BEQ, &addrM.rel, 2}, {"SBC", &a::SBC, &addrM.izy, 5}, {"???", &a::XXX, &addrM.imp, 2},
-            {"???", &a::XXX, &addrM.imp, 8}, {"???", &a::NOP, &addrM.imp, 4}, {"SBC", &a::SBC, &addrM.zpx, 4},
-            {"INC", &a::INC, &addrM.zpx, 6}, {"???", &a::XXX, &addrM.imp, 6}, {"SED", &a::SED, &addrM.imp, 2},
-            {"SBC", &a::SBC, &addrM.aby, 4}, {"NOP", &a::NOP, &addrM.imp, 2}, {"???", &a::XXX, &addrM.imp, 7},
-            {"???", &a::NOP, &addrM.imp, 4}, {"SBC", &a::SBC, &addrM.abx, 4}, {"INC", &a::INC, &addrM.abx, 7},
-            {"???", &a::XXX, &addrM.imp, 7}};
+
+  lookup = {{"BRK", &opcodes.brk, &addrM.imm, 7}, {"ORA", &opcodes.ora, &addrM.izx, 6},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 3}, {"ORA", &opcodes.ora, &addrM.zp0, 3},
+            {"ASL", &opcodes.asl, &addrM.zp0, 5}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"PHP", &opcodes.php, &addrM.imp, 3}, {"ORA", &opcodes.ora, &addrM.imm, 2},
+            {"ASL", &opcodes.asl, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 2},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"ORA", &opcodes.ora, &addrM.abs, 4},
+            {"ASL", &opcodes.asl, &addrM.abs, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"BPL", &opcodes.bpl, &addrM.rel, 2}, {"ORA", &opcodes.ora, &addrM.izy, 5},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"ORA", &opcodes.ora, &addrM.zpx, 4},
+            {"ASL", &opcodes.asl, &addrM.zpx, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"CLC", &opcodes.clc, &addrM.imp, 2}, {"ORA", &opcodes.ora, &addrM.aby, 4},
+            {"???", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"ORA", &opcodes.ora, &addrM.abx, 4},
+            {"ASL", &opcodes.asl, &addrM.abx, 7}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"JSR", &opcodes.jsr, &addrM.abs, 6}, {"AND", &opcodes.andd, &addrM.izx, 6},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"BIT", &opcodes.bit, &addrM.zp0, 3}, {"AND", &opcodes.andd, &addrM.zp0, 3},
+            {"ROL", &opcodes.rol, &addrM.zp0, 5}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"PLP", &opcodes.plp, &addrM.imp, 4}, {"AND", &opcodes.andd, &addrM.imm, 2},
+            {"ROL", &opcodes.rol, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 2},
+            {"BIT", &opcodes.bit, &addrM.abs, 4}, {"AND", &opcodes.andd, &addrM.abs, 4},
+            {"ROL", &opcodes.rol, &addrM.abs, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"BMI", &opcodes.bmi, &addrM.rel, 2}, {"AND", &opcodes.andd, &addrM.izy, 5},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"AND", &opcodes.andd, &addrM.zpx, 4},
+            {"ROL", &opcodes.rol, &addrM.zpx, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"SEC", &opcodes.sec, &addrM.imp, 2}, {"AND", &opcodes.andd, &addrM.aby, 4},
+            {"???", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"AND", &opcodes.andd, &addrM.abx, 4},
+            {"ROL", &opcodes.rol, &addrM.abx, 7}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"RTI", &opcodes.rti, &addrM.imp, 6}, {"EOR", &opcodes.eor, &addrM.izx, 6},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 3}, {"EOR", &opcodes.eor, &addrM.zp0, 3},
+            {"LSR", &opcodes.lsr, &addrM.zp0, 5}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"PHA", &opcodes.pha, &addrM.imp, 3}, {"EOR", &opcodes.eor, &addrM.imm, 2},
+            {"LSR", &opcodes.lsr, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 2},
+            {"JMP", &opcodes.jmp, &addrM.abs, 3}, {"EOR", &opcodes.eor, &addrM.abs, 4},
+            {"LSR", &opcodes.lsr, &addrM.abs, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"BVC", &opcodes.bvc, &addrM.rel, 2}, {"EOR", &opcodes.eor, &addrM.izy, 5},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"EOR", &opcodes.eor, &addrM.zpx, 4},
+            {"LSR", &opcodes.lsr, &addrM.zpx, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"CLI", &opcodes.cli, &addrM.imp, 2}, {"EOR", &opcodes.eor, &addrM.aby, 4},
+            {"???", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"EOR", &opcodes.eor, &addrM.abx, 4},
+            {"LSR", &opcodes.lsr, &addrM.abx, 7}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"RTS", &opcodes.rts, &addrM.imp, 6}, {"ADC", &opcodes.adc, &addrM.izx, 6},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 3}, {"ADC", &opcodes.adc, &addrM.zp0, 3},
+            {"ROR", &opcodes.ror, &addrM.zp0, 5}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"PLA", &opcodes.pla, &addrM.imp, 4}, {"ADC", &opcodes.adc, &addrM.imm, 2},
+            {"ROR", &opcodes.ror, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 2},
+            {"JMP", &opcodes.jmp, &addrM.ind, 5}, {"ADC", &opcodes.adc, &addrM.abs, 4},
+            {"ROR", &opcodes.ror, &addrM.abs, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"BVS", &opcodes.bvs, &addrM.rel, 2}, {"ADC", &opcodes.adc, &addrM.izy, 5},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"ADC", &opcodes.adc, &addrM.zpx, 4},
+            {"ROR", &opcodes.ror, &addrM.zpx, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"SEI", &opcodes.sei, &addrM.imp, 2}, {"ADC", &opcodes.adc, &addrM.aby, 4},
+            {"???", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"ADC", &opcodes.adc, &addrM.abx, 4},
+            {"ROR", &opcodes.ror, &addrM.abx, 7}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"???", &opcodes.nop, &addrM.imp, 2}, {"STA", &opcodes.sta, &addrM.izx, 6},
+            {"???", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"STY", &opcodes.sty, &addrM.zp0, 3}, {"STA", &opcodes.sta, &addrM.zp0, 3},
+            {"STX", &opcodes.stx, &addrM.zp0, 3}, {"???", &opcodes.xxx, &addrM.imp, 3},
+            {"DEY", &opcodes.dey, &addrM.imp, 2}, {"???", &opcodes.nop, &addrM.imp, 2},
+            {"TXA", &opcodes.txa, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 2},
+            {"STY", &opcodes.sty, &addrM.abs, 4}, {"STA", &opcodes.sta, &addrM.abs, 4},
+            {"STX", &opcodes.stx, &addrM.abs, 4}, {"???", &opcodes.xxx, &addrM.imp, 4},
+            {"BCC", &opcodes.bcc, &addrM.rel, 2}, {"STA", &opcodes.sta, &addrM.izy, 6},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"STY", &opcodes.sty, &addrM.zpx, 4}, {"STA", &opcodes.sta, &addrM.zpx, 4},
+            {"STX", &opcodes.stx, &addrM.zpy, 4}, {"???", &opcodes.xxx, &addrM.imp, 4},
+            {"TYA", &opcodes.tya, &addrM.imp, 2}, {"STA", &opcodes.sta, &addrM.aby, 5},
+            {"TXS", &opcodes.txs, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"???", &opcodes.nop, &addrM.imp, 5}, {"STA", &opcodes.sta, &addrM.abx, 5},
+            {"???", &opcodes.xxx, &addrM.imp, 5}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"LDY", &opcodes.ldy, &addrM.imm, 2}, {"LDA", &opcodes.lda, &addrM.izx, 6},
+            {"LDX", &opcodes.ldx, &addrM.imm, 2}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"LDY", &opcodes.ldy, &addrM.zp0, 3}, {"LDA", &opcodes.lda, &addrM.zp0, 3},
+            {"LDX", &opcodes.ldx, &addrM.zp0, 3}, {"???", &opcodes.xxx, &addrM.imp, 3},
+            {"TAY", &opcodes.tay, &addrM.imp, 2}, {"LDA", &opcodes.lda, &addrM.imm, 2},
+            {"TAX", &opcodes.tax, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 2},
+            {"LDY", &opcodes.ldy, &addrM.abs, 4}, {"LDA", &opcodes.lda, &addrM.abs, 4},
+            {"LDX", &opcodes.ldx, &addrM.abs, 4}, {"???", &opcodes.xxx, &addrM.imp, 4},
+            {"BCS", &opcodes.bcs, &addrM.rel, 2}, {"LDA", &opcodes.lda, &addrM.izy, 5},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"LDY", &opcodes.ldy, &addrM.zpx, 4}, {"LDA", &opcodes.lda, &addrM.zpx, 4},
+            {"LDX", &opcodes.ldx, &addrM.zpy, 4}, {"???", &opcodes.xxx, &addrM.imp, 4},
+            {"CLV", &opcodes.clv, &addrM.imp, 2}, {"LDA", &opcodes.lda, &addrM.aby, 4},
+            {"TSX", &opcodes.tsx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 4},
+            {"LDY", &opcodes.ldy, &addrM.abx, 4}, {"LDA", &opcodes.lda, &addrM.abx, 4},
+            {"LDX", &opcodes.ldx, &addrM.aby, 4}, {"???", &opcodes.xxx, &addrM.imp, 4},
+            {"CPY", &opcodes.cpy, &addrM.imm, 2}, {"CMP", &opcodes.cmp, &addrM.izx, 6},
+            {"???", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"CPY", &opcodes.cpy, &addrM.zp0, 3}, {"CMP", &opcodes.cmp, &addrM.zp0, 3},
+            {"DEC", &opcodes.dec, &addrM.zp0, 5}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"INY", &opcodes.iny, &addrM.imp, 2}, {"CMP", &opcodes.cmp, &addrM.imm, 2},
+            {"DEX", &opcodes.dex, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 2},
+            {"CPY", &opcodes.cpy, &addrM.abs, 4}, {"CMP", &opcodes.cmp, &addrM.abs, 4},
+            {"DEC", &opcodes.dec, &addrM.abs, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"BNE", &opcodes.bne, &addrM.rel, 2}, {"CMP", &opcodes.cmp, &addrM.izy, 5},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"CMP", &opcodes.cmp, &addrM.zpx, 4},
+            {"DEC", &opcodes.dec, &addrM.zpx, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"CLD", &opcodes.cld, &addrM.imp, 2}, {"CMP", &opcodes.cmp, &addrM.aby, 4},
+            {"NOP", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"CMP", &opcodes.cmp, &addrM.abx, 4},
+            {"DEC", &opcodes.dec, &addrM.abx, 7}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"CPX", &opcodes.cpx, &addrM.imm, 2}, {"SBC", &opcodes.sbc, &addrM.izx, 6},
+            {"???", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"CPX", &opcodes.cpx, &addrM.zp0, 3}, {"SBC", &opcodes.sbc, &addrM.zp0, 3},
+            {"INC", &opcodes.inc, &addrM.zp0, 5}, {"???", &opcodes.xxx, &addrM.imp, 5},
+            {"INX", &opcodes.inx, &addrM.imp, 2}, {"SBC", &opcodes.sbc, &addrM.imm, 2},
+            {"NOP", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.sbc, &addrM.imp, 2},
+            {"CPX", &opcodes.cpx, &addrM.abs, 4}, {"SBC", &opcodes.sbc, &addrM.abs, 4},
+            {"INC", &opcodes.inc, &addrM.abs, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"BEQ", &opcodes.beq, &addrM.rel, 2}, {"SBC", &opcodes.sbc, &addrM.izy, 5},
+            {"???", &opcodes.xxx, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 8},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"SBC", &opcodes.sbc, &addrM.zpx, 4},
+            {"INC", &opcodes.inc, &addrM.zpx, 6}, {"???", &opcodes.xxx, &addrM.imp, 6},
+            {"SED", &opcodes.sed, &addrM.imp, 2}, {"SBC", &opcodes.sbc, &addrM.aby, 4},
+            {"NOP", &opcodes.nop, &addrM.imp, 2}, {"???", &opcodes.xxx, &addrM.imp, 7},
+            {"???", &opcodes.nop, &addrM.imp, 4}, {"SBC", &opcodes.sbc, &addrM.abx, 4},
+            {"INC", &opcodes.inc, &addrM.abx, 7}, {"???", &opcodes.xxx, &addrM.imp, 7}};
 }
 
 void Processor6502::ConnectBus(Bus* bus) {
@@ -132,7 +174,7 @@ void Processor6502::Clock() {
     cycles = lookup[opcode].cycles;
 
     auto additionalCycle1 = (*lookup[opcode].addrMode)();
-    auto additionalCycle2 = (this->*lookup[opcode].operate)();
+    auto additionalCycle2 = (*lookup[opcode].opcode)();
 
     cycles += additionalCycle1 && additionalCycle2;
     status.u = true;
@@ -162,418 +204,6 @@ void Processor6502::Reset() {
 
   cycles = 8;
 }
-
-// Opcodes ======================================================
-bool Processor6502::ADC() {
-  Fetch();
-  auto temp = a + fetched + status.c;
-  status.c = temp > 255;
-  status.z = (temp & 0x00FF) == 0;
-
-  status.v = (~(a ^ fetched) & (a ^ temp)) & 0x0080;
-  status.n = temp & 0x80;
-  a = temp & 0x00FF;
-  return 1;
-}
-
-bool Processor6502::AND() {
-  Fetch();
-  a = a & fetched;
-  status.z = a == 0x00;
-  status.n = a & 0x80;
-  return 1;
-}
-
-bool Processor6502::ASL() {
-  Fetch();
-  auto temp = fetched << 1;
-  status.c = (temp & 0xFF00) > 0;
-  status.z = (temp & 0x00FF) == 0x00;
-  status.n = temp & 0x80;
-
-  if (lookup[opcode].addrMode == &addressingModes.imp) {
-    a = temp & 0x00FF;
-  } else {
-    Write(addrAbs, temp & 0x00FF);
-  }
-  return 0;
-}
-
-bool Processor6502::BCC() { return BranchIf(status.c == 0); }
-
-bool Processor6502::BCS() { return BranchIf(status.c == 1); }
-
-bool Processor6502::BEQ() { return BranchIf(status.z == 1); }
-
-bool Processor6502::BIT() {
-  Fetch();
-  auto temp = a & fetched;
-  status.z = (temp & 0x00FF) == 0x00;
-  status.n = fetched & (1 << 7);
-  status.v = fetched & (1 << 6);
-  return 0;
-}
-
-bool Processor6502::BMI() { return BranchIf(status.n == 1); }
-
-bool Processor6502::BNE() { return BranchIf(status.z == 0); }
-
-bool Processor6502::BPL() { return BranchIf(status.n == 0); }
-
-bool Processor6502::BRK() {
-  pc++;
-
-  status.i = true;
-  PushToStack((pc >> 8) & 0x00FF);
-  PushToStack(pc & 0x00FF);
-
-  status.b = true;
-  PushToStack(status.reg);
-  status.b = false;
-
-  pc = Read(0xFFFE) | (Read(0xFFFF) << 8);
-  return 0;
-}
-
-bool Processor6502::BVC() { return BranchIf(status.v == 0); }
-
-bool Processor6502::BVS() { return BranchIf(status.v == 1); }
-
-bool Processor6502::CLC() {
-  status.c = false;
-  return 0;
-}
-
-bool Processor6502::CLD() {
-  status.d = false;
-  return 0;
-}
-
-bool Processor6502::CLI() {
-  status.i = false;
-  return 0;
-}
-
-bool Processor6502::CLV() {
-  status.v = false;
-  return 0;
-}
-
-bool Processor6502::CMP() {
-  Fetch();
-  auto temp = a - fetched;
-  status.c = a >= fetched;
-  status.z = (temp & 0x00FF) == 0x0000;
-  status.n = temp & 0x0080;
-  return 1;
-}
-
-bool Processor6502::CPX() {
-  Fetch();
-  auto temp = x - fetched;
-  status.c = x >= fetched;
-  status.z = (temp & 0x00FF) == 0x0000;
-  status.n = temp & 0x0080;
-  return 0;
-}
-
-bool Processor6502::CPY() {
-  Fetch();
-  auto temp = y - fetched;
-  status.c = y >= fetched;
-  status.z = (temp & 0x00FF) == 0x0000;
-  status.n = temp & 0x0080;
-  return 0;
-}
-
-bool Processor6502::DEC() {
-  Fetch();
-  auto temp = fetched - 1;
-  Write(addrAbs, temp & 0x00FF);
-  status.z = (temp & 0x00FF) == 0x0000;
-  status.n = temp & 0x0080;
-  return 0;
-}
-
-bool Processor6502::DEX() {
-  x--;
-  status.z = x == 0x00;
-  status.n = x & 0x80;
-  return 0;
-}
-
-bool Processor6502::DEY() {
-  y--;
-  status.z = y == 0x00;
-  status.n = y & 0x80;
-  return 0;
-}
-
-bool Processor6502::EOR() {
-  Fetch();
-  a = a ^ fetched;
-  status.z = a == 0x00;
-  status.n = a & 0x80;
-  return 1;
-}
-
-bool Processor6502::INC() {
-  Fetch();
-  auto temp = fetched + 1;
-  Write(addrAbs, temp);
-  status.z = (temp & 0x00FF) == 0x0000;
-  status.n = temp & 0x0080;
-  return 0;
-}
-
-bool Processor6502::INX() {
-  x++;
-  status.z = x == 0x00;
-  status.n = x & 0x80;
-  return 0;
-}
-
-bool Processor6502::INY() {
-  y++;
-  status.z = y == 0;
-  status.n = y & 0x80;
-  return 0;
-}
-
-bool Processor6502::JMP() {
-  pc = addrAbs;
-  return 0;
-}
-
-bool Processor6502::JSR() {
-  pc--;
-  PushToStack((pc >> 8) & 0x00FF);
-  PushToStack(pc & 0x00FF);
-
-  pc = addrAbs;
-  return 0;
-}
-
-bool Processor6502::LDA() {
-  Fetch();
-  a = fetched;
-  status.z = a == 0x00;
-  status.n = a & 0x80;
-  return 1;
-}
-
-bool Processor6502::LDX() {
-  Fetch();
-  x = fetched;
-  status.z = x == 0x00;
-  status.n = x & 0x80;
-  return 1;
-}
-
-bool Processor6502::LDY() {
-  Fetch();
-  y = fetched;
-  status.z = y == 0x00;
-  status.n = y & 0x80;
-  return 1;
-}
-
-bool Processor6502::LSR() {
-  Fetch();
-  status.c = fetched & 0x0001;
-  auto temp = fetched >> 1;
-  status.z = (temp & 0x00FF) == 0x0000;
-  status.n = temp & 0x0080;
-
-  if (lookup[opcode].addrMode == &addressingModes.imp) {
-    a = temp & 0x00FF;
-  } else {
-    Write(addrAbs, temp & 0x00FF);
-  }
-  return 0;
-}
-
-bool Processor6502::NOP() {
-  switch (opcode) {
-    case 0x1C:
-    case 0x3C:
-    case 0x5C:
-    case 0x7C:
-    case 0xDC:
-    case 0xFC:
-      return 1;
-      break;
-  }
-  return 0;
-}
-
-bool Processor6502::ORA() {
-  Fetch();
-  a = a | fetched;
-  status.z = a == 0x00;
-  status.n = a & 0x80;
-  return 1;
-}
-
-bool Processor6502::PHA() {
-  PushToStack(a);
-  return 0;
-}
-
-bool Processor6502::PHP() {
-  PushToStack(status.reg | B | U);
-  status.b = false;
-  status.u = false;
-  return 0;
-}
-
-bool Processor6502::PLA() {
-  a = PopFromStack();
-  status.z = a == 0x00;
-  status.n = a & 0x80;
-  return 0;
-}
-
-bool Processor6502::PLP() {
-  status.reg = PopFromStack();
-  status.u = true;
-  return 0;
-}
-
-bool Processor6502::ROL() {
-  Fetch();
-  auto temp = fetched << 1 | status.c;
-  status.c = temp & 0xFF00;
-  status.z = (temp & 0x00FF) == 0x0000;
-  status.n = temp & 0x0080;
-
-  if (lookup[opcode].addrMode == &addressingModes.imp) {
-    a = temp & 0x00FF;
-  } else {
-    Write(addrAbs, temp & 0x00FF);
-  }
-  return 0;
-}
-
-bool Processor6502::ROR() {
-  Fetch();
-
-  auto temp = status.c << 7 | (fetched >> 1);
-  status.c = fetched & 0x01;
-  status.z = (temp & 0x00FF) == 0x00;
-  status.n = temp & 0x0080;
-
-  if (lookup[opcode].addrMode == &addressingModes.imp) {
-    a = temp & 0x00FF;
-  } else {
-    Write(addrAbs, temp & 0x00FF);
-  }
-  return 0;
-}
-
-bool Processor6502::RTI() {
-  status.reg = PopFromStack();
-  status.reg &= ~B;
-  status.reg &= ~U;
-
-  pc = PopFromStack();
-  pc |= PopFromStack() << 8;
-  return 0;
-}
-
-bool Processor6502::RTS() {
-  pc = PopFromStack();
-  pc |= PopFromStack() << 8;
-
-  pc++;
-  return 0;
-}
-
-bool Processor6502::SBC() {
-  Fetch();
-
-  uint16_t value = fetched ^ 0x00FF;
-
-  auto temp = a + value + status.c;
-  status.c = temp & 0xFF00;
-  status.z = (temp & 0x00FF) == 0;
-  status.v = (temp ^ a) & (temp ^ value) & 0x0080;
-  status.n = temp & 0x0080;
-  a = temp & 0x00FF;
-  return 1;
-}
-
-bool Processor6502::SEC() {
-  status.c = true;
-  return 0;
-}
-
-bool Processor6502::SED() {
-  status.d = true;
-  return 0;
-}
-
-bool Processor6502::SEI() {
-  status.i = true;
-  return 0;
-}
-
-bool Processor6502::STA() {
-  Write(addrAbs, a);
-  return 0;
-}
-
-bool Processor6502::STX() {
-  Write(addrAbs, x);
-  return 0;
-}
-
-bool Processor6502::STY() {
-  Write(addrAbs, y);
-  return 0;
-}
-
-bool Processor6502::TAX() {
-  x = a;
-  status.z = x == 0x00;
-  status.n = x & 0x80;
-  return 0;
-}
-
-bool Processor6502::TAY() {
-  y = a;
-  status.z = y == 0x00;
-  status.n = y & 0x80;
-  return 0;
-}
-
-bool Processor6502::TSX() {
-  x = stackPointer;
-  status.z = x == 0x00;
-  status.n = x & 0x80;
-  return 0;
-}
-
-bool Processor6502::TXA() {
-  a = x;
-  status.z = a == 0x00;
-  status.n = a & 0x80;
-  return 0;
-}
-
-bool Processor6502::TXS() {
-  stackPointer = x;
-  return 0;
-}
-
-bool Processor6502::TYA() {
-  a = y;
-  status.z = a == 0x00;
-  status.n = a & 0x80;
-  return 0;
-}
-
-bool Processor6502::XXX() { return 0; }
 
 bool Processor6502::BranchIf(bool condition) {
   if (condition) {

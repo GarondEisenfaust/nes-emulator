@@ -1,0 +1,123 @@
+#pragma once
+
+#include "ADC.h"
+#include "AND.h"
+#include "ASL.h"
+#include "BCC.h"
+#include "BCS.h"
+#include "BEQ.h"
+#include "BIT.h"
+#include "BMI.h"
+#include "BNE.h"
+#include "BPL.h"
+#include "BRK.h"
+#include "BVC.h"
+#include "BVS.h"
+#include "CLC.h"
+#include "CLD.h"
+#include "CLI.h"
+#include "CLV.h"
+#include "CMP.h"
+#include "CPX.h"
+#include "CPY.h"
+#include "DEC.h"
+#include "DEX.h"
+#include "DEY.h"
+#include "EOR.h"
+#include "INC.h"
+#include "INX.h"
+#include "INY.h"
+#include "JMP.h"
+#include "JSR.h"
+#include "LDA.h"
+#include "LDX.h"
+#include "LDY.h"
+#include "LSR.h"
+#include "NOP.h"
+#include "ORA.h"
+#include "PHA.h"
+#include "PHP.h"
+#include "PLA.h"
+#include "PLP.h"
+#include "ROL.h"
+#include "ROR.h"
+#include "RTI.h"
+#include "RTS.h"
+#include "SBC.h"
+#include "SEC.h"
+#include "SED.h"
+#include "SEI.h"
+#include "STA.h"
+#include "STX.h"
+#include "STY.h"
+#include "TAX.h"
+#include "TAY.h"
+#include "TSX.h"
+#include "TXA.h"
+#include "TXS.h"
+#include "TYA.h"
+#include "XXX.h"
+
+class Processor6502;
+
+class OpcodeContainer {
+ public:
+  OpcodeContainer(Processor6502* cpu);
+  ADC adc;
+  AND andd;
+  ASL asl;
+  BCC bcc;
+  BCS bcs;
+  BEQ beq;
+  BIT bit;
+  BMI bmi;
+  BNE bne;
+  BPL bpl;
+  BRK brk;
+  BVC bvc;
+  BVS bvs;
+  CLC clc;
+  CLD cld;
+  CLI cli;
+  CLV clv;
+  CMP cmp;
+  CPX cpx;
+  CPY cpy;
+  DEC dec;
+  DEX dex;
+  DEY dey;
+  EOR eor;
+  INC inc;
+  INX inx;
+  INY iny;
+  JMP jmp;
+  JSR jsr;
+  LDA lda;
+  LDX ldx;
+  LDY ldy;
+  LSR lsr;
+  NOP nop;
+  ORA ora;
+  PHA pha;
+  PHP php;
+  PLA pla;
+  PLP plp;
+  ROL rol;
+  ROR ror;
+  RTI rti;
+  RTS rts;
+  SBC sbc;
+  SEC sec;
+  SED sed;
+  SEI sei;
+  STA sta;
+  STX stx;
+  STY sty;
+  TAX tax;
+  TAY tay;
+  TSX tsx;
+  TXA txa;
+  TXS txs;
+  TYA tya;
+  XXX xxx;
+};

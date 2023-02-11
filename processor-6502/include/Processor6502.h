@@ -1,11 +1,13 @@
 #pragma once
 #include "FLAGS6502.h"
 #include "addressing-modes/AddressingModeContainer.h"
+#include "opcodes/OpcodeContainer.h"
 #include <cstdint>
 #include <functional>
 #include <map>
 #include <string>
 #include <vector>
+
 class Bus;
 
 class Processor6502 {
@@ -56,78 +58,18 @@ class Processor6502 {
     uint8_t reg;
   } status;
 
- protected:
-  // Opcodes ======================================================
-  bool ADC();
-  bool AND();
-  bool ASL();
-  bool BCC();
-  bool BCS();
-  bool BEQ();
-  bool BIT();
-  bool BMI();
-  bool BNE();
-  bool BPL();
-  bool BRK();
-  bool BVC();
-  bool BVS();
-  bool CLC();
-  bool CLD();
-  bool CLI();
-  bool CLV();
-  bool CMP();
-  bool CPX();
-  bool CPY();
-  bool DEC();
-  bool DEX();
-  bool DEY();
-  bool EOR();
-  bool INC();
-  bool INX();
-  bool INY();
-  bool JMP();
-  bool JSR();
-  bool LDA();
-  bool LDX();
-  bool LDY();
-  bool LSR();
-  bool NOP();
-  bool ORA();
-  bool PHA();
-  bool PHP();
-  bool PLA();
-  bool PLP();
-  bool ROL();
-  bool ROR();
-  bool RTI();
-  bool RTS();
-  bool SBC();
-  bool SEC();
-  bool SED();
-  bool SEI();
-  bool STA();
-  bool STX();
-  bool STY();
-  bool TAX();
-  bool TAY();
-  bool TSX();
-  bool TXA();
-  bool TXS();
-  bool TYA();
-  bool XXX();
-
   bool BranchIf(bool condition);
 
- protected:
   struct Instruction {
     std::string name;
-    bool (Processor6502::*operate)(void) = nullptr;
+    IOpcode* opcode;
     IAddressingMode* addrMode;
     uint8_t cycles = 0;
   };
 
   std::vector<Instruction> lookup;
   AddressingModeContainer addressingModes;
+  OpcodeContainer opcodes;
 
   void Interrupt(uint16_t address, uint8_t numCycles);
 };
