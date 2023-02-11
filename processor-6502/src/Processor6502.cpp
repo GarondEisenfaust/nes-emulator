@@ -210,68 +210,13 @@ std::map<uint16_t, std::string> Processor6502::Disassemble(uint16_t begin, uint1
 
   while (current <= end) {
     auto line = current;
-    uint8_t opcode = mBus->CpuRead(current, true);
+    auto opcode = mBus->CpuRead(current, true);
+
     current++;
     auto& instruction = lookup[opcode];
-    std::string addressingMode = "";
-
-    if (instruction.addrMode == &addressingModes.imp) {
-      addressingMode = "{IMP}";
-    } else if (instruction.addrMode == &addressingModes.imm) {
-      auto value = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("{:#04x} {{IMM}}", value);
-    } else if (instruction.addrMode == &addressingModes.zp0) {
-      auto value = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("{:#04x} {{ZP0}}", value);
-    } else if (instruction.addrMode == &addressingModes.zpx) {
-      auto value = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("{:#04x}, X {{ZPX}}", value);
-    } else if (instruction.addrMode == &addressingModes.zpy) {
-      auto value = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("{:#04x}, Y {{ZPY}} ", value);
-    } else if (instruction.addrMode == &addressingModes.izx) {
-      auto value = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("({:#04x}, X) {{IZX}}", value);
-    } else if (instruction.addrMode == &addressingModes.izy) {
-      auto value = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("({:#04x}), Y {{IZY}}", value);
-    } else if (instruction.addrMode == &addressingModes.abs) {
-      auto lo = mBus->CpuRead(current, true);
-      current++;
-      auto hi = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("{:#06x} {{ABS}}", static_cast<uint16_t>(hi << 8) | lo, 4);
-    } else if (instruction.addrMode == &addressingModes.abx) {
-      auto lo = mBus->CpuRead(current, true);
-      current++;
-      auto hi = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("{:#06x}, X {{ABX}}", static_cast<uint16_t>(hi << 8) | lo, 4);
-    } else if (instruction.addrMode == &addressingModes.aby) {
-      auto lo = mBus->CpuRead(current, true);
-      current++;
-      auto hi = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("{:#06x}, Y {{ABY}}", static_cast<uint16_t>(hi << 8) | lo, 4);
-    } else if (instruction.addrMode == &addressingModes.ind) {
-      auto lo = mBus->CpuRead(current, true);
-      current++;
-      auto hi = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("({:#06x}) {{IND}}", static_cast<uint16_t>(hi << 8) | lo, 4);
-    } else if (instruction.addrMode == &addressingModes.rel) {
-      auto value = mBus->CpuRead(current, true);
-      current++;
-      addressingMode = fmt::format("{:#04x} [{:#06x}] {{REL}}", value, current + static_cast<int8_t>(value));
-    }
-
-    auto instructionAsString = fmt::format("{:#06x}: {} {}", line, instruction.opcode->Name(), addressingMode);
+    auto name = instruction.opcode->Name();
+    auto addressingMode = instruction.addrMode->Disassemble(current);
+    auto instructionAsString = fmt::format("{:#06x}: {} {}", line, name, addressingMode);
     disassembledCode[line] = instructionAsString;
   }
   return disassembledCode;

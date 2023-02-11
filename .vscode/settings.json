@@ -75,7 +75,9 @@
     "*.inc": "cpp",
     "strstream": "cpp",
     "complex": "cpp",
-    "typeindex": "cpp"
+    "typeindex": "cpp",
+    "charconv": "cpp",
+    "regex": "cpp"
   },
   "cmake.configureOnOpen": false,
   "[cpp]": {

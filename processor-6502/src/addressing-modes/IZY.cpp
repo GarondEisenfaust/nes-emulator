@@ -1,5 +1,7 @@
 #include "addressing-modes/IZY.h"
+#include "Bus.h"
 #include "Processor6502.h"
+#include "fmt/format.h"
 
 IZY::IZY(Processor6502* cpu) : IAddressingMode(cpu) {}
 
@@ -17,4 +19,10 @@ bool IZY::operator()() {
   } else {
     return 0;
   }
+}
+
+std::string IZY::Disassemble(uint32_t& current) {
+  auto value = mCpu->mBus->CpuRead(current, true);
+  current++;
+  return fmt::format("({:#04x}), Y {{IZY}}", value);
 }

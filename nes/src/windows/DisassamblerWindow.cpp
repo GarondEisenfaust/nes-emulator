@@ -9,9 +9,7 @@ DisassamblerWindow::DisassamblerWindow(Processor6502* cpu) : GuiWindow("Disassam
 }
 
 void DisassamblerWindow::Content() {
-  auto pc = mCpu->pc;
-
-  auto iterator = mDissasabledCode.find(pc);
+  auto iterator = mDissasabledCode.find(mCpu->pc);
   auto current = iterator->second;
   std::array<std::string, 10> previousTen;
   for (auto i = 0; i < 10; i++) {
@@ -19,7 +17,7 @@ void DisassamblerWindow::Content() {
     previousTen[9 - i] = iterator->second;
   }
 
-  iterator = mDissasabledCode.find(pc);
+  iterator = mDissasabledCode.find(mCpu->pc);
   std::array<std::string, 10> nextTen;
   for (auto i = 0; i < 10; i++) {
     iterator++;
