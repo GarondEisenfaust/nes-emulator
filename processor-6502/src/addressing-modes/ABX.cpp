@@ -21,9 +21,6 @@ bool ABX::operator()() {
 }
 
 std::string ABX::Disassemble(uint32_t& current) {
-  auto lo = mCpu->mBus->CpuRead(current, true);
-  current++;
-  auto hi = mCpu->mBus->CpuRead(current, true);
-  current++;
-  return fmt::format("{:#06x}, X {{ABX}}", static_cast<uint16_t>(hi << 8) | lo, 4);
+  auto address = Read16BitAddress(current);
+  return fmt::format("{:#06x}, X {{ABX}}", address);
 }

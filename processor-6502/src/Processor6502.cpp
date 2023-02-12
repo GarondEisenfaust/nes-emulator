@@ -211,13 +211,12 @@ std::map<uint16_t, std::string> Processor6502::Disassemble(uint16_t begin, uint1
   while (current <= end) {
     auto line = current;
     auto opcode = mBus->CpuRead(current, true);
-
-    current++;
     auto& instruction = lookup[opcode];
+    current++;
+
     auto name = instruction.opcode->Name();
     auto addressingMode = instruction.addrMode->Disassemble(current);
-    auto instructionAsString = fmt::format("{:#06x}: {} {}", line, name, addressingMode);
-    disassembledCode[line] = instructionAsString;
+    disassembledCode[line] = fmt::format("{:#06x}: {} {}", line, name, addressingMode);
   }
   return disassembledCode;
 }
