@@ -1,10 +1,13 @@
 #pragma once
 #include "FLAGS6502.h"
+#include "Instruction.h"
+#include "LookupTable.h"
 #include "addressing-modes/AddressingModeContainer.h"
 #include "opcodes/OpcodeContainer.h"
 #include <cstdint>
 #include <functional>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -60,13 +63,7 @@ class Processor6502 {
 
   bool BranchIf(bool condition);
 
-  struct Instruction {
-    IOpcode* opcode;
-    IAddressingMode* addrMode;
-    uint8_t cycles = 0;
-  };
-
-  std::vector<Instruction> lookup;
+  std::unique_ptr<LookupTable> lookup;
   AddressingModeContainer addressingModes;
   OpcodeContainer opcodes;
 

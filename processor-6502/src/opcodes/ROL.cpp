@@ -10,7 +10,7 @@ bool ROL::operator()() {
   mCpu->status.z = (temp & 0x00FF) == 0x0000;
   mCpu->status.n = temp & 0x0080;
 
-  if (mCpu->lookup[mCpu->opcode].addrMode == &mCpu->addressingModes.imp) {
+  if (mCpu->lookup->at(mCpu->opcode).addrMode == &mCpu->addressingModes.imp) {
     mCpu->a = temp & 0x00FF;
   } else {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
@@ -18,6 +18,4 @@ bool ROL::operator()() {
   return 0;
 }
 
-const char* ROL::Name() {
-  return "ROL";
-}
+const char* ROL::Name() { return "ROL"; }
