@@ -21,5 +21,5 @@ endif()
 
 add_subdirectory(nes)
 add_subdirectory(playground)
-add_subdirectory(processor-6502)
+add_subdirectory(nes-lib)
 add_subdirectory(util)
