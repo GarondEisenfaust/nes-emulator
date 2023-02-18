@@ -1,11 +1,11 @@
 #pragma once
 #include "Instruction.h"
+#include <array>
 #include <memory>
-#include <vector>
 
 class AddressingModeContainer;
 class OpcodeContainer;
 
-using LookupTable = std::vector<Instruction>;
+using LookupTable = std::array<Instruction, 256>;
 
 std::unique_ptr<LookupTable> MakeLookupTable(AddressingModeContainer& addressingModes, OpcodeContainer& opcodes);
