@@ -1,20 +1,15 @@
 #include "PixelProcessingUnit.h"
 #include "Bus.h"
 #include "Definitions.h"
-#include "Grid.h"
+#include "IRenderer.h"
 #include "lodepng.h"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <vector>
 
-PixelProcessingUnit::PixelProcessingUnit(Grid* grid)
-    : mCycle(0),
-      mScanline(0),
-      mFrameComplete(false),
-      mColorPalette(std::move(MakePixelColors())),
-      mGrid(grid),
-      nmi(false) {}
+PixelProcessingUnit::PixelProcessingUnit(IRenderer& renderer)
+    : mCycle(0), mScanline(0), mColorPalette(std::move(MakePixelColors())), mRenderer(renderer), nmi(false) {}
 
 void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
   switch (addr) {
@@ -579,14 +574,10 @@ void PixelProcessingUnit::Clock() {
     }
   }
 
-  auto width = mGrid->GetGridWidth();
-  auto height = mGrid->GetGridHeight();
   auto xPos = mCycle - 1;
   auto yPos = mScanline;
-  if ((0 <= xPos && xPos < width) && (0 <= yPos && yPos < height)) {
-    auto& color = GetColorFromPalette(palette, pixel);
-    mGrid->GetPixel(xPos, yPos).SetColor(color);
-  }
+  auto& color = GetColorFromPalette(palette, pixel);
+  mRenderer.SetPixelColor(xPos, yPos, color);
 
   mCycle++;
 
@@ -595,7 +586,7 @@ void PixelProcessingUnit::Clock() {
     mScanline++;
     if (mScanline >= 261) {
       mScanline = -1;
-      mFrameComplete = true;
+      mRenderer.CommitFrame();
     }
   }
 }

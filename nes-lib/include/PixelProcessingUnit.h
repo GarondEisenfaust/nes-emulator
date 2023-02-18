@@ -1,6 +1,7 @@
 #pragma once
 #include "Cartridge.h"
 #include "ColorPalette.h"
+#include "IRenderer.h"
 #include "PixelColor.h"
 #include "PixelProcessingUnitRegisterDefinitions.h"
 #include "Sprite.h"
@@ -18,7 +19,7 @@ using PatternMemory = std::array<std::array<uint8_t, 128 * 128>, 2>;
 
 class PixelProcessingUnit {
  public:
-  PixelProcessingUnit(Grid* grid);
+  PixelProcessingUnit(IRenderer& renderer);
   ~PixelProcessingUnit() = default;
 
   uint8_t CpuRead(uint16_t addr, bool bReadOnly = false);
@@ -36,7 +37,6 @@ class PixelProcessingUnit {
   void WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette);
   void WriteColorPaletteToImage(const char* path);
 
-  bool mFrameComplete;
   bool nmi;
 
   uint8_t* mOamPtr = (uint8_t*)mOam;
@@ -49,7 +49,7 @@ class PixelProcessingUnit {
   int16_t mCycle;
   int16_t mScanline;
   Bus* mBus;
-  Grid* mGrid;
+  IRenderer& mRenderer;
   std::unique_ptr<ColorPalette> mColorPalette;
 
   uint8_t tblName[2][1024];

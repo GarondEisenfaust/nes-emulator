@@ -1,6 +1,6 @@
 #include "Bus.h"
 #include "Definitions.h"
-#include "Grid.h"
+#include "IRenderer.h"
 
 Bus::Bus(RAM* ram) : mRam(ram), mSystemClockCounter(0) {}
 

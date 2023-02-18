@@ -1,8 +1,8 @@
-#include "Grid.h"
+#include "rendering/Grid.h"
 #include "Util.h"
 
 Grid::Grid(int width, int height, int gridWidth, int gridHeight)
-    : mWidth(width), mHeight(height), mGridWidth(gridWidth), mGridHeight(gridHeight) {
+    : mWidth(width), mHeight(height), mGridWidth(gridWidth), mGridHeight(gridHeight), mFrameComplete(false) {
   mPixels.reserve(mWidth * mHeight);
 }
 
@@ -51,3 +51,16 @@ std::vector<float> Grid::MakeColorData() {
 
 int Grid::GetGridWidth() { return mGridWidth; }
 int Grid::GetGridHeight() { return mGridHeight; }
+
+void Grid::SetPixelColor(int x, int y, PixelColor& color) {
+  auto width = GetGridWidth();
+  auto height = GetGridHeight();
+
+  if ((0 <= x && x < width) && (0 <= y && y < height)) {
+    GetPixel(x, y).SetColor(color);
+  }
+}
+
+void Grid::CommitFrame() { mFrameComplete = true; }
+bool Grid::StartNewFrame() { mFrameComplete = false; }
+bool Grid::FrameComplete() { return mFrameComplete; }

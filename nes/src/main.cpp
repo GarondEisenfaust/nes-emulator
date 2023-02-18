@@ -2,7 +2,6 @@
 #include "Cartridge.h"
 #include "Controller.h"
 #include "Definitions.h"
-#include "Grid.h"
 #include "PixelProcessingUnit.h"
 #include "Processor6502.h"
 #include "Util.h"
@@ -10,6 +9,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "rendering/Grid.h"
 #include "rendering/RenderContext.h"
 #include "windows/DisassamblerWindow.h"
 #include "windows/RegisterWindow.h"
@@ -20,12 +20,12 @@
 #include <string>
 #include <thread>
 
-void RenderCompleteFrame(Bus& bus) {
+void RenderCompleteFrame(Bus& bus, Grid& grid) {
   auto* ppu = bus.mPpu;
-  while (!ppu->mFrameComplete) {
+  while (!grid.FrameComplete()) {
     bus.Clock();
   }
-  ppu->mFrameComplete = false;
+  grid.StartNewFrame();
 }
 
 void MakeOneStep(Bus& bus) {
@@ -61,7 +61,7 @@ int main() {
   auto ram = std::make_unique<RAM>();
   Bus bus(ram.get());
   Processor6502 cpu;
-  PixelProcessingUnit ppu(&grid);
+  PixelProcessingUnit ppu(grid);
   Controller controller(renderContext.GetWindow());
 
   bus.ConnectController(&controller);
@@ -111,7 +111,7 @@ int main() {
           shouldStep = false;
         }
       } else {
-        RenderCompleteFrame(bus);
+        RenderCompleteFrame(bus, grid);
         std::this_thread::sleep_until(next);
       }
     });
