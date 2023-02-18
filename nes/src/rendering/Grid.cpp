@@ -62,5 +62,5 @@ void Grid::SetPixelColor(int x, int y, PixelColor& color) {
 }
 
 void Grid::CommitFrame() { mFrameComplete = true; }
-bool Grid::StartNewFrame() { mFrameComplete = false; }
+void Grid::StartNewFrame() { mFrameComplete = false; }
 bool Grid::FrameComplete() { return mFrameComplete; }

@@ -10,8 +10,8 @@ class Grid : public IRenderer {
 
   void SetPixelColor(int x, int y, PixelColor& color);
   void CommitFrame();
+  void StartNewFrame();
   bool FrameComplete();
-  bool StartNewFrame();
 
   Pixel& GetPixel(int x, int y);
   std::vector<float> MakePixelData();
