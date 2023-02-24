@@ -248,78 +248,6 @@ uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
 void PixelProcessingUnit::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
 
 void PixelProcessingUnit::Clock() {
-  auto IncrementScrollX = [&]() {
-    if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-      if (vRamAddr.coarseX == 31) {
-        vRamAddr.coarseX = 0;
-        vRamAddr.nameTableX = ~vRamAddr.nameTableX;
-      } else {
-        vRamAddr.coarseX++;
-      }
-    }
-  };
-
-  auto IncrementScrollY = [&]() {
-    if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-      if (vRamAddr.fineY < 7) {
-        vRamAddr.fineY++;
-      } else {
-        vRamAddr.fineY = 0;
-        if (vRamAddr.coarseY == 29) {
-          vRamAddr.coarseY = 0;
-          vRamAddr.nameTableY = ~vRamAddr.nameTableY;
-        } else if (vRamAddr.coarseY == 31) {
-          vRamAddr.coarseY = 0;
-        } else {
-          vRamAddr.coarseY++;
-        }
-      }
-    }
-  };
-
-  auto TransferAddressX = [&]() {
-    if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-      vRamAddr.nameTableX = tRamAddr.nameTableX;
-      vRamAddr.coarseX = tRamAddr.coarseX;
-    }
-  };
-
-  auto TransferAddressY = [&]() {
-    if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-      vRamAddr.fineY = tRamAddr.fineY;
-      vRamAddr.nameTableY = tRamAddr.nameTableY;
-      vRamAddr.coarseY = tRamAddr.coarseY;
-    }
-  };
-
-  auto LoadBackgroundShifters = [&]() {
-    mBgShifterPatternLow = (mBgShifterPatternLow & 0xFF00) | mBgNextTileLsb;
-    mBgShifterPatternHigh = (mBgShifterPatternHigh & 0xFF00) | mBgNextTileMsb;
-
-    mBgShifterAttributeLow = (mBgShifterAttributeLow & 0xFF00) | ((mBgNextTileAttribute & 0b01) ? 0xFF : 0x00);
-    mBgShifterAttributeHigh = (mBgShifterAttributeHigh & 0xFF00) | ((mBgNextTileAttribute & 0b10) ? 0xFF : 0x00);
-  };
-
-  auto UpdateShifters = [&]() {
-    if (mMaskRegister.renderBackground) {
-      mBgShifterPatternLow <<= 1;
-      mBgShifterPatternHigh <<= 1;
-
-      mBgShifterAttributeLow <<= 1;
-      mBgShifterAttributeHigh <<= 1;
-    }
-    if (mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258) {
-      for (int i = 0; i < mSpriteCount; i++) {
-        if (mSpriteOnScanline[i].x > 0) {
-          mSpriteOnScanline[i].x--;
-        } else {
-          mSpriteShifterPatternLo[i] <<= 1;
-          mSpriteShifterPatternHi[i] <<= 1;
-        }
-      }
-    }
-  };
-
   if (mScanline >= -1 && mScanline < 240) {
     if (mScanline == 0 && mCycle == 0) {
       mCycle = 1;
@@ -673,3 +601,75 @@ void PixelProcessingUnit::WriteColorPaletteToImage(const char* path) {
 
   lodepng::encode(path, image.data(), paletteSize, numPalettes, LCT_RGB);
 }
+
+void PixelProcessingUnit::IncrementScrollX() {
+  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
+    if (vRamAddr.coarseX == 31) {
+      vRamAddr.coarseX = 0;
+      vRamAddr.nameTableX = ~vRamAddr.nameTableX;
+    } else {
+      vRamAddr.coarseX++;
+    }
+  }
+};
+
+void PixelProcessingUnit::IncrementScrollY() {
+  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
+    if (vRamAddr.fineY < 7) {
+      vRamAddr.fineY++;
+    } else {
+      vRamAddr.fineY = 0;
+      if (vRamAddr.coarseY == 29) {
+        vRamAddr.coarseY = 0;
+        vRamAddr.nameTableY = ~vRamAddr.nameTableY;
+      } else if (vRamAddr.coarseY == 31) {
+        vRamAddr.coarseY = 0;
+      } else {
+        vRamAddr.coarseY++;
+      }
+    }
+  }
+};
+
+void PixelProcessingUnit::TransferAddressX() {
+  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
+    vRamAddr.nameTableX = tRamAddr.nameTableX;
+    vRamAddr.coarseX = tRamAddr.coarseX;
+  }
+};
+
+void PixelProcessingUnit::TransferAddressY() {
+  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
+    vRamAddr.fineY = tRamAddr.fineY;
+    vRamAddr.nameTableY = tRamAddr.nameTableY;
+    vRamAddr.coarseY = tRamAddr.coarseY;
+  }
+};
+
+void PixelProcessingUnit::LoadBackgroundShifters() {
+  mBgShifterPatternLow = (mBgShifterPatternLow & 0xFF00) | mBgNextTileLsb;
+  mBgShifterPatternHigh = (mBgShifterPatternHigh & 0xFF00) | mBgNextTileMsb;
+
+  mBgShifterAttributeLow = (mBgShifterAttributeLow & 0xFF00) | ((mBgNextTileAttribute & 0b01) ? 0xFF : 0x00);
+  mBgShifterAttributeHigh = (mBgShifterAttributeHigh & 0xFF00) | ((mBgNextTileAttribute & 0b10) ? 0xFF : 0x00);
+};
+
+void PixelProcessingUnit::UpdateShifters() {
+  if (mMaskRegister.renderBackground) {
+    mBgShifterPatternLow <<= 1;
+    mBgShifterPatternHigh <<= 1;
+
+    mBgShifterAttributeLow <<= 1;
+    mBgShifterAttributeHigh <<= 1;
+  }
+  if (mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258) {
+    for (int i = 0; i < mSpriteCount; i++) {
+      if (mSpriteOnScanline[i].x > 0) {
+        mSpriteOnScanline[i].x--;
+      } else {
+        mSpriteShifterPatternLo[i] <<= 1;
+        mSpriteShifterPatternHi[i] <<= 1;
+      }
+    }
+  }
+};

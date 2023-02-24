@@ -45,6 +45,13 @@ class PixelProcessingUnit {
   uint8_t mSpriteShifterPatternHi[8];
 
  private:
+  void IncrementScrollX();
+  void IncrementScrollY();
+  void TransferAddressX();
+  void TransferAddressY();
+  void LoadBackgroundShifters();
+  void UpdateShifters();
+
   Cartridge* mCartridge;
   int16_t mCycle;
   int16_t mScanline;
