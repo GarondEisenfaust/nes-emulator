@@ -286,14 +286,14 @@ void PixelProcessingUnit::Clock() {
           break;
         }
         case 4: {
-          auto toReadFrom =
-              (mControlRegister.patternBackground << 12) + ((uint16_t)mBgNextTileId << 4) + (vRamAddr.fineY + 0);
+          auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBgNextTileId) << 4) +
+                            (vRamAddr.fineY + 0);
           mBgNextTileLsb = PpuRead(toReadFrom);
           break;
         }
         case 6: {
-          auto toReadFrom =
-              (mControlRegister.patternBackground << 12) + ((uint16_t)mBgNextTileId << 4) + (vRamAddr.fineY + 8);
+          auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBgNextTileId) << 4) +
+                            (vRamAddr.fineY + 8);
           mBgNextTileMsb = PpuRead(toReadFrom);
           break;
         }
