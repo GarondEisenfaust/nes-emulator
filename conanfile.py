@@ -16,6 +16,7 @@ class CMakeTemplateConan(ConanFile):
     self.requires("glm/0.9.9.8", private=True, override=False)
     self.requires("lodepng/cci.20200615", private=True, override=False)
     self.requires("miniaudio/0.11.11", private=True, override=False)
+    self.requires("sfml/2.5.1",private =True,override=False)
 
   def build_requirements(self):
     pass
