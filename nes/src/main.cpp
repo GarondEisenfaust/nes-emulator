@@ -102,7 +102,6 @@ int main() {
 
       auto colorData = grid.MakeColorData();
       colors->SetData(colorData);
-      disassamblerWindow.Render();
       registerWindow.Render();
 
       if (stepMode) {

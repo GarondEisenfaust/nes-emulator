@@ -5,7 +5,12 @@
 #include "PixelColor.h"
 #include "PixelProcessingUnitRegisterDefinitions.h"
 #include "Sprite.h"
+#include "ppu-states/IPpuState.h"
+#include "ppu-states/NotVisibleScreenSpaceState.h"
+#include "ppu-states/VerticalBlankState.h"
+#include "ppu-states/VisibleScreenSpaceState.h"
 #include <cstdint>
+#include <memory>
 #include <utility>
 
 #define PPU_RAM_START 0x2000
@@ -52,6 +57,11 @@ class PixelProcessingUnit {
   void LoadBackgroundShifters();
   void UpdateShifters();
 
+  template <class STATE>
+  void Transition() {
+    mState = std::make_unique<STATE>(*this);
+  }
+
   Cartridge* mCartridge;
   int16_t mCycle;
   int16_t mScanline;
@@ -96,4 +106,10 @@ class PixelProcessingUnit {
 
   bool bSpriteZeroHitPossible = false;
   bool bSpriteZeroBeingRendered = false;
+
+  std::unique_ptr<IPpuState> mState;
+
+  friend VisibleScreenSpaceState;
+  friend NotVisibleScreenSpaceState;
+  friend VerticalBlankState;
 };

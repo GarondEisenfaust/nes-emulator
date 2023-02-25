@@ -64,7 +64,7 @@ class OpcodeContainer {
  public:
   OpcodeContainer(Processor6502* cpu);
   ADC adc;
-  AND andd;
+  AND andd;  // because of the "and" operator https://en.cppreference.com/w/cpp/keyword/and
   ASL asl;
   BCC bcc;
   BCS bcs;

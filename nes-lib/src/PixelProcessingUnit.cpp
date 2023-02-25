@@ -248,180 +248,7 @@ uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
 void PixelProcessingUnit::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
 
 void PixelProcessingUnit::Clock() {
-  if (mScanline >= -1 && mScanline < 240) {
-    if (mScanline == 0 && mCycle == 0) {
-      mCycle = 1;
-    }
-    if (mScanline == -1 && mCycle == 1) {
-      mStatusRegister.verticalBlank = 0;
-      mStatusRegister.spriteOverflow = 0;
-
-      mStatusRegister.spriteZeroHit = 0;
-
-      for (int i = 0; i < 8; i++) {
-        mSpriteShifterPatternLo[i] = 0;
-        mSpriteShifterPatternHi[i] = 0;
-      }
-    }
-
-    if ((mCycle >= 2 && mCycle < 258) || (mCycle >= 321 && mCycle < 338)) {
-      UpdateShifters();
-      switch ((mCycle - 1) % 8) {
-        case 0: {
-          LoadBackgroundShifters();
-          mBgNextTileId = PpuRead(0x2000 | (vRamAddr.reg & 0x0FFF));
-          break;
-        }
-        case 2: {
-          mBgNextTileAttribute = PpuRead(0x23C0 | (vRamAddr.nameTableY << 11) | (vRamAddr.nameTableX << 10) |
-                                         ((vRamAddr.coarseY >> 2) << 3) | (vRamAddr.coarseX >> 2));
-
-          if (vRamAddr.coarseY & 0x02) {
-            mBgNextTileAttribute >>= 4;
-          }
-          if (vRamAddr.coarseX & 0x02) {
-            mBgNextTileAttribute >>= 2;
-          }
-          mBgNextTileAttribute &= 0x03;
-          break;
-        }
-        case 4: {
-          auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBgNextTileId) << 4) +
-                            (vRamAddr.fineY + 0);
-          mBgNextTileLsb = PpuRead(toReadFrom);
-          break;
-        }
-        case 6: {
-          auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBgNextTileId) << 4) +
-                            (vRamAddr.fineY + 8);
-          mBgNextTileMsb = PpuRead(toReadFrom);
-          break;
-        }
-        case 7: {
-          IncrementScrollX();
-          break;
-        }
-      }
-    }
-
-    if (mCycle == 256) {
-      IncrementScrollY();
-    }
-
-    if (mCycle == 257) {
-      LoadBackgroundShifters();
-      TransferAddressX();
-    }
-
-    if (mCycle == 338 || mCycle == 340) {
-      mBgNextTileId = PpuRead(0x2000 | (vRamAddr.reg & 0x0FFF));
-    }
-
-    if (mScanline == -1 && mCycle >= 280 && mCycle < 305) {
-      TransferAddressY();
-    }
-    if (mCycle == 257 && mScanline >= 0) {
-      std::memset(mSpriteOnScanline, 0xFF, 8 * sizeof(ObjectAttributeEntry));
-      mSpriteCount = 0;
-
-      for (uint8_t i = 0; i < 8; i++) {
-        mSpriteShifterPatternLo[i] = 0;
-        mSpriteShifterPatternHi[i] = 0;
-      }
-      uint8_t nOAMEntry = 0;
-
-      bSpriteZeroHitPossible = false;
-
-      while (nOAMEntry < 64 && mSpriteCount < 9) {
-        int16_t diff = ((int16_t)mScanline - (int16_t)mOam[nOAMEntry].y);
-
-        if (diff >= 0 && diff < (mControlRegister.spriteSize ? 16 : 8)) {
-          if (mSpriteCount < 8) {
-            if (nOAMEntry == 0) {
-              bSpriteZeroHitPossible = true;
-            }
-
-            memcpy(&mSpriteOnScanline[mSpriteCount], &mOam[nOAMEntry], sizeof(ObjectAttributeEntry));
-            mSpriteCount++;
-          }
-        }
-
-        nOAMEntry++;
-      }
-
-      mStatusRegister.spriteOverflow = (mSpriteCount > 8);
-    }
-
-    if (mCycle == 340) {
-      for (uint8_t i = 0; i < mSpriteCount; i++) {
-        uint8_t spritePatternBitsLo;
-        uint8_t spritePatternBitsHi;
-        uint16_t spritePatternAddrLo;
-        uint16_t spritePatternAddrHi;
-
-        if (!mControlRegister.spriteSize) {
-          if (!(mSpriteOnScanline[i].attribute & 0x80)) {
-            spritePatternAddrLo = (mControlRegister.patternSprite << 12) | (mSpriteOnScanline[i].id << 4) |
-                                  (mScanline - mSpriteOnScanline[i].y);
-
-          } else {
-            spritePatternAddrLo = (mControlRegister.patternSprite << 12) | (mSpriteOnScanline[i].id << 4) |
-                                  (7 - (mScanline - mSpriteOnScanline[i].y));
-          }
-
-        } else {
-          if (!(mSpriteOnScanline[i].attribute & 0x80)) {
-            if (mScanline - mSpriteOnScanline[i].y < 8) {
-              spritePatternAddrLo = ((mSpriteOnScanline[i].id & 0x01) << 12) | ((mSpriteOnScanline[i].id & 0xFE) << 4) |
-                                    ((mScanline - mSpriteOnScanline[i].y) & 0x07);
-            } else {
-              spritePatternAddrLo = ((mSpriteOnScanline[i].id & 0x01) << 12) |
-                                    (((mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
-                                    ((mScanline - mSpriteOnScanline[i].y) & 0x07);
-            }
-          } else {
-            if (mScanline - mSpriteOnScanline[i].y < 8) {
-              spritePatternAddrLo = ((mSpriteOnScanline[i].id & 0x01) << 12) |
-                                    (((mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
-                                    (7 - (mScanline - mSpriteOnScanline[i].y) & 0x07);
-            } else {
-              spritePatternAddrLo = ((mSpriteOnScanline[i].id & 0x01) << 12) | ((mSpriteOnScanline[i].id & 0xFE) << 4) |
-                                    (7 - (mScanline - mSpriteOnScanline[i].y) & 0x07);
-            }
-          }
-        }
-
-        spritePatternAddrHi = spritePatternAddrLo + 8;
-
-        spritePatternBitsLo = PpuRead(spritePatternAddrLo);
-        spritePatternBitsHi = PpuRead(spritePatternAddrHi);
-
-        if (mSpriteOnScanline[i].attribute & 0x40) {
-          auto flipbyte = [](uint8_t b) {
-            b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-            b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-            b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-            return b;
-          };
-
-          spritePatternBitsLo = flipbyte(spritePatternBitsLo);
-          spritePatternBitsHi = flipbyte(spritePatternBitsHi);
-        }
-        mSpriteShifterPatternLo[i] = spritePatternBitsLo;
-        mSpriteShifterPatternHi[i] = spritePatternBitsHi;
-      }
-    }
-  }
-
-  if (mScanline == 240) {
-  }
-
-  if (mScanline == 241 && mCycle == 1) {
-    mStatusRegister.verticalBlank = 1;
-    if (mControlRegister.enableNmi) {
-      nmi = true;
-    }
-  }
+  mState->Execute();
 
   uint8_t bgPixel = 0x00;
   uint8_t bgPalette = 0x00;
@@ -549,6 +376,7 @@ void PixelProcessingUnit::Reset() {
   mControlRegister.reg = 0x00;
   vRamAddr.reg = 0x0000;
   tRamAddr.reg = 0x0000;
+  Transition<VisibleScreenSpaceState>();
 }
 
 void PixelProcessingUnit::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette) {
@@ -606,7 +434,7 @@ void PixelProcessingUnit::IncrementScrollX() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
     if (vRamAddr.coarseX == 31) {
       vRamAddr.coarseX = 0;
-      vRamAddr.nameTableX = ~vRamAddr.nameTableX;
+      vRamAddr.nameTableX = !vRamAddr.nameTableX;
     } else {
       vRamAddr.coarseX++;
     }
@@ -621,7 +449,7 @@ void PixelProcessingUnit::IncrementScrollY() {
       vRamAddr.fineY = 0;
       if (vRamAddr.coarseY == 29) {
         vRamAddr.coarseY = 0;
-        vRamAddr.nameTableY = ~vRamAddr.nameTableY;
+        vRamAddr.nameTableY = !vRamAddr.nameTableY;
       } else if (vRamAddr.coarseY == 31) {
         vRamAddr.coarseY = 0;
       } else {

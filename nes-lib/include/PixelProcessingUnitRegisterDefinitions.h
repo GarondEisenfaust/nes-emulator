@@ -43,10 +43,10 @@ union LoopyRegister {
   struct {
     uint16_t coarseX : 5;
     uint16_t coarseY : 5;
-    uint16_t nameTableX : 1;
-    uint16_t nameTableY : 1;
+    bool nameTableX : 1;
+    bool nameTableY : 1;
     uint16_t fineY : 3;
-    uint16_t unused : 1;
+    bool unused : 1;
   };
   uint16_t reg = 0x0000;
 };
