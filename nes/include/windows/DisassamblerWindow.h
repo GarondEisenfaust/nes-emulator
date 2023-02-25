@@ -7,12 +7,12 @@
 
 class DisassamblerWindow : public GuiWindow {
  public:
-  DisassamblerWindow(Cpu* cpu);
+  DisassamblerWindow(Cpu& cpu);
 
  protected:
   virtual void Content() override;
 
  private:
-  Cpu* mCpu;
+  Cpu& mCpu;
   std::map<uint16_t, std::string> mDissasabledCode;
 };

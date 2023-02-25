@@ -3,6 +3,6 @@
 
 class VerticalBlankState : public IPpuState {
  public:
-  VerticalBlankState(PixelProcessingUnit& ppu);
+  VerticalBlankState(Ppu& ppu);
   void Execute() override;
 };

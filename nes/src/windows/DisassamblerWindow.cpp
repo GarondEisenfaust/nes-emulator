@@ -4,12 +4,12 @@
 #include <iostream>
 #include <string>
 
-DisassamblerWindow::DisassamblerWindow(Cpu* cpu) : GuiWindow("Disassambler", true), mCpu(cpu) {
-  mDissasabledCode = cpu->Disassemble(0x0000, 0xFFFF);
+DisassamblerWindow::DisassamblerWindow(Cpu& cpu) : GuiWindow("Disassambler", true), mCpu(cpu) {
+  mDissasabledCode = cpu.Disassemble(0x0000, 0xFFFF);
 }
 
 void DisassamblerWindow::Content() {
-  auto pc = mCpu->pc;
+  auto pc = mCpu.pc;
   mDissasabledCode[pc];
   auto iterator = mDissasabledCode.find(pc);
   auto current = iterator->second;

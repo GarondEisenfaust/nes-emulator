@@ -1,8 +1,8 @@
 #include "ppu-states/NotVisibleScreenSpaceState.h"
-#include "PixelProcessingUnit.h"
+#include "Ppu.h"
 #include <cstring>
 
-NotVisibleScreenSpaceState::NotVisibleScreenSpaceState(PixelProcessingUnit& ppu) : IPpuState(ppu) {}
+NotVisibleScreenSpaceState::NotVisibleScreenSpaceState(Ppu& ppu) : IPpuState(ppu) {}
 
 void NotVisibleScreenSpaceState::Execute() {
   if (mPpu.mScanline == 241 && mPpu.mCycle == 1) {

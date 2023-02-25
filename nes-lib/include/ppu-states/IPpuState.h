@@ -1,11 +1,11 @@
 #pragma once
 
-class PixelProcessingUnit;
+class Ppu;
 class IPpuState {
  public:
-  IPpuState(PixelProcessingUnit& ppu);
+  IPpuState(Ppu& ppu);
   virtual void Execute() = 0;
 
  protected:
-  PixelProcessingUnit& mPpu;
+  Ppu& mPpu;
 };

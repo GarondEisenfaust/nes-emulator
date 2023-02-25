@@ -3,7 +3,7 @@
 #include "Controller.h"
 #include "Cpu.h"
 #include "Definitions.h"
-#include "PixelProcessingUnit.h"
+#include "Ppu.h"
 #include "Util.h"
 #include "fmt/format.h"
 #include "imgui.h"
@@ -61,7 +61,7 @@ int main() {
   auto ram = std::make_unique<RAM>();
   Bus bus(ram.get());
   Cpu cpu;
-  PixelProcessingUnit ppu(grid);
+  Ppu ppu(grid);
   Controller controller(renderContext.GetWindow());
 
   bus.ConnectController(&controller);
@@ -91,7 +91,7 @@ int main() {
   };
 
   renderContext.SetKeyCallback(&keyCallback);
-  DisassamblerWindow disassamblerWindow(&cpu);
+  DisassamblerWindow disassamblerWindow(cpu);
   RegisterWindow registerWindow(cpu);
   {
     using namespace std::chrono_literals;
@@ -103,6 +103,7 @@ int main() {
       auto colorData = grid.MakeColorData();
       colors->SetData(colorData);
       registerWindow.Render();
+      disassamblerWindow.Render();
 
       if (stepMode) {
         if (shouldStep) {

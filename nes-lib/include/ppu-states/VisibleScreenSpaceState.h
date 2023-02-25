@@ -3,6 +3,6 @@
 
 class VisibleScreenSpaceState : public IPpuState {
  public:
-  VisibleScreenSpaceState(PixelProcessingUnit& ppu);
+  VisibleScreenSpaceState(Ppu& ppu);
   void Execute() override;
 };

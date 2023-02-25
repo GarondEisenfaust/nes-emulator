@@ -1,4 +1,4 @@
-#include "PixelProcessingUnit.h"
+#include "Ppu.h"
 #include "Bus.h"
 #include "Definitions.h"
 #include "IRenderer.h"
@@ -8,10 +8,10 @@
 #include <iostream>
 #include <vector>
 
-PixelProcessingUnit::PixelProcessingUnit(IRenderer& renderer)
+Ppu::Ppu(IRenderer& renderer)
     : mCycle(0), mScanline(0), mColorPalette(std::move(MakePixelColors())), mRenderer(renderer), nmi(false) {}
 
-void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
+void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
   switch (addr) {
     case 0x0000:  // Control
     {
@@ -59,7 +59,7 @@ void PixelProcessingUnit::CpuWrite(uint16_t addr, uint8_t data) {
   }
 }
 
-uint8_t PixelProcessingUnit::CpuRead(uint16_t addr, bool bReadOnly) {
+uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
   uint8_t data = 0x00;
   if (bReadOnly) {
     switch (addr) {
@@ -132,7 +132,7 @@ uint8_t PixelProcessingUnit::CpuRead(uint16_t addr, bool bReadOnly) {
   return data;
 }
 
-void PixelProcessingUnit::PpuWrite(uint16_t addr, uint8_t data) {
+void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   addr &= 0x3FFF;
   if (mCartridge->PpuWrite(addr, data)) {
     //
@@ -187,7 +187,7 @@ void PixelProcessingUnit::PpuWrite(uint16_t addr, uint8_t data) {
   }
 }
 
-uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
+uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
   uint8_t data = 0x00;
   addr &= 0x3FFF;
 
@@ -245,9 +245,9 @@ uint8_t PixelProcessingUnit::PpuRead(uint16_t addr, bool bReadOnly) {
   return data;
 }
 
-void PixelProcessingUnit::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
+void Ppu::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
 
-void PixelProcessingUnit::Clock() {
+void Ppu::Clock() {
   mState->Execute();
 
   uint8_t bgPixel = 0x00;
@@ -346,18 +346,18 @@ void PixelProcessingUnit::Clock() {
   }
 }
 
-void PixelProcessingUnit::ConnectBus(Bus* bus) {
+void Ppu::ConnectBus(Bus* bus) {
   mBus = bus;
   mBus->mPpu = this;
 }
 
-PixelColor& PixelProcessingUnit::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
+PixelColor& Ppu::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
   auto address = 0x3F00 + (palette << 2) + pixel;
   auto index = PpuRead(address) & 0x3F;
   return mColorPalette->at(index);
 }
 
-void PixelProcessingUnit::Reset() {
+void Ppu::Reset() {
   fineX = 0x00;
   mAddressLatch = 0x00;
   mPpuDataBuffer = 0x00;
@@ -379,7 +379,7 @@ void PixelProcessingUnit::Reset() {
   Transition<VisibleScreenSpaceState>();
 }
 
-void PixelProcessingUnit::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette) {
+void Ppu::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette) {
   const int width = 128;
   const int height = 128;
   const int channels = 3;
@@ -414,7 +414,7 @@ void PixelProcessingUnit::WritePatternTableToImage(const char* path, uint8_t i, 
   lodepng::encode(path, image.data(), width, height, LCT_RGB);
 }
 
-void PixelProcessingUnit::WriteColorPaletteToImage(const char* path) {
+void Ppu::WriteColorPaletteToImage(const char* path) {
   const int numPalettes = 8;
   const int paletteSize = 4;
 
@@ -430,7 +430,7 @@ void PixelProcessingUnit::WriteColorPaletteToImage(const char* path) {
   lodepng::encode(path, image.data(), paletteSize, numPalettes, LCT_RGB);
 }
 
-void PixelProcessingUnit::IncrementScrollX() {
+void Ppu::IncrementScrollX() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
     if (vRamAddr.coarseX == 31) {
       vRamAddr.coarseX = 0;
@@ -441,7 +441,7 @@ void PixelProcessingUnit::IncrementScrollX() {
   }
 };
 
-void PixelProcessingUnit::IncrementScrollY() {
+void Ppu::IncrementScrollY() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
     if (vRamAddr.fineY < 7) {
       vRamAddr.fineY++;
@@ -459,14 +459,14 @@ void PixelProcessingUnit::IncrementScrollY() {
   }
 };
 
-void PixelProcessingUnit::TransferAddressX() {
+void Ppu::TransferAddressX() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
     vRamAddr.nameTableX = tRamAddr.nameTableX;
     vRamAddr.coarseX = tRamAddr.coarseX;
   }
 };
 
-void PixelProcessingUnit::TransferAddressY() {
+void Ppu::TransferAddressY() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
     vRamAddr.fineY = tRamAddr.fineY;
     vRamAddr.nameTableY = tRamAddr.nameTableY;
@@ -474,7 +474,7 @@ void PixelProcessingUnit::TransferAddressY() {
   }
 };
 
-void PixelProcessingUnit::LoadBackgroundShifters() {
+void Ppu::LoadBackgroundShifters() {
   mBgShifterPatternLow = (mBgShifterPatternLow & 0xFF00) | mBgNextTileLsb;
   mBgShifterPatternHigh = (mBgShifterPatternHigh & 0xFF00) | mBgNextTileMsb;
 
@@ -482,7 +482,7 @@ void PixelProcessingUnit::LoadBackgroundShifters() {
   mBgShifterAttributeHigh = (mBgShifterAttributeHigh & 0xFF00) | ((mBgNextTileAttribute & 0b10) ? 0xFF : 0x00);
 };
 
-void PixelProcessingUnit::UpdateShifters() {
+void Ppu::UpdateShifters() {
   if (mMaskRegister.renderBackground) {
     mBgShifterPatternLow <<= 1;
     mBgShifterPatternHigh <<= 1;

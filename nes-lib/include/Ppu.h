@@ -3,7 +3,7 @@
 #include "ColorPalette.h"
 #include "IRenderer.h"
 #include "PixelColor.h"
-#include "PixelProcessingUnitRegisterDefinitions.h"
+#include "PpuRegisterDefinitions.h"
 #include "Sprite.h"
 #include "ppu-states/IPpuState.h"
 #include "ppu-states/NotVisibleScreenSpaceState.h"
@@ -22,10 +22,10 @@ class Grid;
 
 using PatternMemory = std::array<std::array<uint8_t, 128 * 128>, 2>;
 
-class PixelProcessingUnit {
+class Ppu {
  public:
-  PixelProcessingUnit(IRenderer& renderer);
-  ~PixelProcessingUnit() = default;
+  Ppu(IRenderer& renderer);
+  ~Ppu() = default;
 
   uint8_t CpuRead(uint16_t addr, bool bReadOnly = false);
   void CpuWrite(uint16_t addr, uint8_t data);

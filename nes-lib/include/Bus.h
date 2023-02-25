@@ -2,7 +2,7 @@
 #include "Cartridge.h"
 #include "Controller.h"
 #include "Cpu.h"
-#include "PixelProcessingUnit.h"
+#include "Ppu.h"
 #include "RAM.h"
 #include <cstdint>
 #include <memory>
@@ -22,7 +22,7 @@ class Bus {
   void ConnectController(Controller* controller);
 
   Cpu* mCpu;
-  PixelProcessingUnit* mPpu;
+  Ppu* mPpu;
 
  private:
   Cartridge* mCartridge;

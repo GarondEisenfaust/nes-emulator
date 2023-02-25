@@ -1,8 +1,8 @@
 #include "ppu-states/VisibleScreenSpaceState.h"
-#include "PixelProcessingUnit.h"
+#include "Ppu.h"
 #include <cstring>
 
-VisibleScreenSpaceState::VisibleScreenSpaceState(PixelProcessingUnit& ppu) : IPpuState(ppu) {}
+VisibleScreenSpaceState::VisibleScreenSpaceState(Ppu& ppu) : IPpuState(ppu) {}
 
 uint8_t FlipByte(uint8_t b) {
   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
@@ -85,7 +85,7 @@ void VisibleScreenSpaceState::Execute() {
     mPpu.TransferAddressY();
   }
   if (mPpu.mCycle == 257 && mPpu.mScanline >= 0) {
-    std::memset(mPpu.mSpriteOnScanline, 0xFF, 8 * sizeof(PixelProcessingUnit::ObjectAttributeEntry));
+    std::memset(mPpu.mSpriteOnScanline, 0xFF, 8 * sizeof(Ppu::ObjectAttributeEntry));
     mPpu.mSpriteCount = 0;
 
     for (uint8_t i = 0; i < 8; i++) {
@@ -105,8 +105,8 @@ void VisibleScreenSpaceState::Execute() {
             mPpu.bSpriteZeroHitPossible = true;
           }
 
-          memcpy(&mPpu.mSpriteOnScanline[mPpu.mSpriteCount], &mPpu.mOam[nOAMEntry],
-                 sizeof(PixelProcessingUnit::ObjectAttributeEntry));
+          std::memcpy(&mPpu.mSpriteOnScanline[mPpu.mSpriteCount], &mPpu.mOam[nOAMEntry],
+                      sizeof(Ppu::ObjectAttributeEntry));
           mPpu.mSpriteCount++;
         }
       }

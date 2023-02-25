@@ -1,7 +1,7 @@
 #include "ppu-states/VerticalBlankState.h"
-#include "PixelProcessingUnit.h"
+#include "Ppu.h"
 
-VerticalBlankState::VerticalBlankState(PixelProcessingUnit& ppu) : IPpuState(ppu) {}
+VerticalBlankState::VerticalBlankState(Ppu& ppu) : IPpuState(ppu) {}
 
 void VerticalBlankState::Execute() {
   mPpu.mStatusRegister.verticalBlank = 1;
