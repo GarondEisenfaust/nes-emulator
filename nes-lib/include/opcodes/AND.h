@@ -3,7 +3,7 @@
 
 class AND : public IOpcode {
  public:
-  AND(Processor6502* cpu);
+  AND(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

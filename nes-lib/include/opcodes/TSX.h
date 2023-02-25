@@ -3,7 +3,7 @@
 
 class TSX : public IOpcode {
  public:
-  TSX(Processor6502* cpu);
+  TSX(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

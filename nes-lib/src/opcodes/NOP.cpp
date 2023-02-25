@@ -1,7 +1,7 @@
 #include "opcodes/NOP.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-NOP::NOP(Processor6502* cpu) : IOpcode(cpu) {}
+NOP::NOP(Cpu* cpu) : IOpcode(cpu) {}
 
 bool NOP::operator()() {
   switch (mCpu->opcode) {
@@ -17,6 +17,4 @@ bool NOP::operator()() {
   return 0;
 }
 
-const char* NOP::Name() {
-  return "NOP";
-}
+const char* NOP::Name() { return "NOP"; }

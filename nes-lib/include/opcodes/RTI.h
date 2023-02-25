@@ -3,7 +3,7 @@
 
 class RTI : public IOpcode {
  public:
-  RTI(Processor6502* cpu);
+  RTI(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

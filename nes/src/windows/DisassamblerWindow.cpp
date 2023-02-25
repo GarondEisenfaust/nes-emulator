@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-DisassamblerWindow::DisassamblerWindow(Processor6502* cpu) : GuiWindow("Disassambler", true), mCpu(cpu) {
+DisassamblerWindow::DisassamblerWindow(Cpu* cpu) : GuiWindow("Disassambler", true), mCpu(cpu) {
   mDissasabledCode = cpu->Disassemble(0x0000, 0xFFFF);
 }
 

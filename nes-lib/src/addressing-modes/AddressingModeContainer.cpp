@@ -1,6 +1,6 @@
 #include "addressing-modes/AddressingModeContainer.h"
 
-AddressingModeContainer::AddressingModeContainer(Processor6502* cpu)
+AddressingModeContainer::AddressingModeContainer(Cpu* cpu)
     : abs(cpu),
       abx(cpu),
       aby(cpu),

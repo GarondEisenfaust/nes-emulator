@@ -3,7 +3,7 @@
 
 class JMP : public IOpcode {
  public:
-  JMP(Processor6502* cpu);
+  JMP(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

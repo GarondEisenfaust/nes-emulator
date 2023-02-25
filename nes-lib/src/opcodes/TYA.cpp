@@ -1,7 +1,7 @@
 #include "opcodes/TYA.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-TYA::TYA(Processor6502* cpu) : IOpcode(cpu) {}
+TYA::TYA(Cpu* cpu) : IOpcode(cpu) {}
 
 bool TYA::operator()() {
   mCpu->a = mCpu->y;
@@ -10,6 +10,4 @@ bool TYA::operator()() {
   return false;
 }
 
-const char* TYA::Name() {
-  return "TYA";
-}
+const char* TYA::Name() { return "TYA"; }

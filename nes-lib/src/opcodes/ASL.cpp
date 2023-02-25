@@ -1,7 +1,7 @@
 #include "opcodes/ASL.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-ASL::ASL(Processor6502* cpu) : IOpcode(cpu) {}
+ASL::ASL(Cpu* cpu) : IOpcode(cpu) {}
 
 bool ASL::operator()() {
   mCpu->Fetch();

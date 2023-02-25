@@ -3,7 +3,7 @@
 
 class STX : public IOpcode {
  public:
-  STX(Processor6502* cpu);
+  STX(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

@@ -3,7 +3,7 @@
 
 class INX : public IOpcode {
  public:
-  INX(Processor6502* cpu);
+  INX(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

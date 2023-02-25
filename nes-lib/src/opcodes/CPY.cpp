@@ -1,7 +1,7 @@
 #include "opcodes/CPY.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-CPY::CPY(Processor6502* cpu) : IOpcode(cpu) {}
+CPY::CPY(Cpu* cpu) : IOpcode(cpu) {}
 
 bool CPY::operator()() {
   mCpu->Fetch();
@@ -12,6 +12,4 @@ bool CPY::operator()() {
   return true;
 }
 
-const char* CPY::Name() {
-  return "CPY";
-}
+const char* CPY::Name() { return "CPY"; }

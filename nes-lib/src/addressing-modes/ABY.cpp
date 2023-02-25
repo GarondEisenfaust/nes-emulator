@@ -1,9 +1,9 @@
 #include "addressing-modes/ABY.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-ABY::ABY(Processor6502* cpu) : IAddressingMode(cpu) {}
+ABY::ABY(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool ABY::operator()() {
   uint16_t low = mCpu->Read(mCpu->pc);

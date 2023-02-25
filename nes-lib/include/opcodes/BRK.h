@@ -3,7 +3,7 @@
 
 class BRK : public IOpcode {
  public:
-  BRK(Processor6502* cpu);
+  BRK(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

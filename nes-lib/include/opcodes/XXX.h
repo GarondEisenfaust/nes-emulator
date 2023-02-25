@@ -3,7 +3,7 @@
 
 class XXX : public IOpcode {
  public:
-  XXX(Processor6502* cpu);
+  XXX(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

@@ -1,7 +1,7 @@
 #include "opcodes/ORA.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-ORA::ORA(Processor6502* cpu) : IOpcode(cpu) {}
+ORA::ORA(Cpu* cpu) : IOpcode(cpu) {}
 
 bool ORA::operator()() {
   mCpu->Fetch();
@@ -11,6 +11,4 @@ bool ORA::operator()() {
   return true;
 }
 
-const char* ORA::Name() {
-  return "ORA";
-}
+const char* ORA::Name() { return "ORA"; }

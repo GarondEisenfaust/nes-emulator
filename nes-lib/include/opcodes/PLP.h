@@ -3,7 +3,7 @@
 
 class PLP : public IOpcode {
  public:
-  PLP(Processor6502* cpu);
+  PLP(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

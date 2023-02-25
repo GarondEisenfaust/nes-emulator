@@ -3,7 +3,7 @@
 
 class JSR : public IOpcode {
  public:
-  JSR(Processor6502* cpu);
+  JSR(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

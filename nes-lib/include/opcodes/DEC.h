@@ -3,7 +3,7 @@
 
 class DEC : public IOpcode {
  public:
-  DEC(Processor6502* cpu);
+  DEC(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

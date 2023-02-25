@@ -3,7 +3,7 @@
 
 class BCS : public IOpcode {
  public:
-  BCS(Processor6502* cpu);
+  BCS(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

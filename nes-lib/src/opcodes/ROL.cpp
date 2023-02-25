@@ -1,7 +1,7 @@
 #include "opcodes/ROL.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-ROL::ROL(Processor6502* cpu) : IOpcode(cpu) {}
+ROL::ROL(Cpu* cpu) : IOpcode(cpu) {}
 
 bool ROL::operator()() {
   mCpu->Fetch();

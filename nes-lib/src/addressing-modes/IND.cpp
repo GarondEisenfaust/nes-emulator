@@ -1,9 +1,9 @@
 #include "addressing-modes/IND.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-IND::IND(Processor6502* cpu) : IAddressingMode(cpu) {}
+IND::IND(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool IND::operator()() {
   uint16_t ptrLow = mCpu->Read(mCpu->pc);

@@ -1,13 +1,11 @@
 #include "opcodes/SED.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-SED::SED(Processor6502* cpu) : IOpcode(cpu) {}
+SED::SED(Cpu* cpu) : IOpcode(cpu) {}
 
 bool SED::operator()() {
   mCpu->status.d = true;
   return 0;
 }
 
-const char* SED::Name() {
-  return "SED";
-}
+const char* SED::Name() { return "SED"; }

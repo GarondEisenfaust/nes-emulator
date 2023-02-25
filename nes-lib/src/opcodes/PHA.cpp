@@ -1,13 +1,11 @@
 #include "opcodes/PHA.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-PHA::PHA(Processor6502* cpu) : IOpcode(cpu) {}
+PHA::PHA(Cpu* cpu) : IOpcode(cpu) {}
 
 bool PHA::operator()() {
   mCpu->PushToStack(mCpu->a);
   return 0;
 }
 
-const char* PHA::Name() {
-  return "PHA";
-}
+const char* PHA::Name() { return "PHA"; }

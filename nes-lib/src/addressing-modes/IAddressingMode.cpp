@@ -1,8 +1,8 @@
 #include "addressing-modes/IAddressingMode.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-IAddressingMode::IAddressingMode(Processor6502* cpu) : mCpu(cpu) {}
+IAddressingMode::IAddressingMode(Cpu* cpu) : mCpu(cpu) {}
 
 uint16_t IAddressingMode::Read16BitAddress(uint32_t& address) {
   auto lo = mCpu->mBus->CpuRead(address, true);

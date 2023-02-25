@@ -1,7 +1,7 @@
 #include "opcodes/OpcodeContainer.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-OpcodeContainer::OpcodeContainer(Processor6502* cpu)
+OpcodeContainer::OpcodeContainer(Cpu* cpu)
     : adc(cpu),
       andd(cpu),
       asl(cpu),

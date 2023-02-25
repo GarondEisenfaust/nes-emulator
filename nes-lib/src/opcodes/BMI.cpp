@@ -1,10 +1,8 @@
 #include "opcodes/BMI.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-BMI::BMI(Processor6502* cpu) : IOpcode(cpu) {}
+BMI::BMI(Cpu* cpu) : IOpcode(cpu) {}
 
 bool BMI::operator()() { return mCpu->BranchIf(mCpu->status.n == 1); }
 
-const char* BMI::Name() {
-  return "BMI";
-}
+const char* BMI::Name() { return "BMI"; }

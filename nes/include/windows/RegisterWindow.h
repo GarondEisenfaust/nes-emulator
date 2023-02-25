@@ -1,15 +1,15 @@
 #pragma once
+#include "Cpu.h"
 #include "GuiWindow.h"
-#include "Processor6502.h"
 
 class RegisterWindow : public GuiWindow {
  public:
-  RegisterWindow(Processor6502& processor6502);
+  RegisterWindow(Cpu& Cpu);
   ~RegisterWindow() = default;
   void Content() override;
 
  private:
-  Processor6502& mProcessor6502;
+  Cpu& mCpu;
 
   uint8_t mOldFetched = 0x00;
   uint8_t mOldA = 0x00;

@@ -3,7 +3,7 @@
 
 class LSR : public IOpcode {
  public:
-  LSR(Processor6502* cpu);
+  LSR(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

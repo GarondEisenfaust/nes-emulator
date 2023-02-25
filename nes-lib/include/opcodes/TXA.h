@@ -3,7 +3,7 @@
 
 class TXA : public IOpcode {
  public:
-  TXA(Processor6502* cpu);
+  TXA(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

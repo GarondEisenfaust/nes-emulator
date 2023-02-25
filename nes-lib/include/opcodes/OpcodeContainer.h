@@ -58,11 +58,11 @@
 #include "TYA.h"
 #include "XXX.h"
 
-class Processor6502;
+class Cpu;
 
 class OpcodeContainer {
  public:
-  OpcodeContainer(Processor6502* cpu);
+  OpcodeContainer(Cpu* cpu);
   ADC adc;
   AND andd;  // because of the "and" operator https://en.cppreference.com/w/cpp/keyword/and
   ASL asl;

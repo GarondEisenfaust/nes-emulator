@@ -3,7 +3,7 @@
 
 class BEQ : public IOpcode {
  public:
-  BEQ(Processor6502* cpu);
+  BEQ(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

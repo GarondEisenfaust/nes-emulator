@@ -3,7 +3,7 @@
 
 class CLD : public IOpcode {
  public:
-  CLD(Processor6502* cpu);
+  CLD(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

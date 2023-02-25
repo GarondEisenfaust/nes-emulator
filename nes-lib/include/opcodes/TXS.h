@@ -3,7 +3,7 @@
 
 class TXS : public IOpcode {
  public:
-  TXS(Processor6502* cpu);
+  TXS(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

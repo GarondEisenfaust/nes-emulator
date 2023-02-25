@@ -3,7 +3,7 @@
 
 class STA : public IOpcode {
  public:
-  STA(Processor6502* cpu);
+  STA(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

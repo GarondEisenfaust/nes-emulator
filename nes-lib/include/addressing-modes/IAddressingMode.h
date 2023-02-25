@@ -2,15 +2,15 @@
 #include <cstdint>
 #include <string>
 
-class Processor6502;
+class Cpu;
 
 class IAddressingMode {
  public:
-  IAddressingMode(Processor6502* cpu);
+  IAddressingMode(Cpu* cpu);
   virtual bool operator()() = 0;
   virtual std::string Disassemble(uint32_t& current) = 0;
 
  protected:
-  Processor6502* mCpu;
+  Cpu* mCpu;
   uint16_t Read16BitAddress(uint32_t& address);
 };

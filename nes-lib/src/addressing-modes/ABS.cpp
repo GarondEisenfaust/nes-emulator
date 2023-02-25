@@ -1,9 +1,9 @@
 #include "addressing-modes/ABS.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-ABS::ABS(Processor6502* cpu) : IAddressingMode(cpu) {}
+ABS::ABS(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool ABS::operator()() {
   uint16_t low = mCpu->Read(mCpu->pc);

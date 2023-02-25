@@ -1,7 +1,7 @@
 #include "opcodes/LDY.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-LDY::LDY(Processor6502* cpu) : IOpcode(cpu) {}
+LDY::LDY(Cpu* cpu) : IOpcode(cpu) {}
 
 bool LDY::operator()() {
   mCpu->Fetch();
@@ -11,6 +11,4 @@ bool LDY::operator()() {
   return true;
 }
 
-const char* LDY::Name() {
-  return "LDY";
-}
+const char* LDY::Name() { return "LDY"; }

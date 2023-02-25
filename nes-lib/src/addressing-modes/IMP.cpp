@@ -1,9 +1,9 @@
 #include "addressing-modes/IMP.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-IMP::IMP(Processor6502* cpu) : IAddressingMode(cpu) {}
+IMP::IMP(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool IMP::operator()() {
   mCpu->fetched = mCpu->a;

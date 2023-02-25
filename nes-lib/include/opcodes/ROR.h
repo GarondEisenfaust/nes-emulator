@@ -3,7 +3,7 @@
 
 class ROR : public IOpcode {
  public:
-  ROR(Processor6502* cpu);
+  ROR(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

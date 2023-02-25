@@ -1,12 +1,12 @@
 #pragma once
-class Processor6502;
+class Cpu;
 
 class IOpcode {
  public:
-  IOpcode(Processor6502* cpu) : mCpu(cpu) {}
+  IOpcode(Cpu* cpu) : mCpu(cpu) {}
   virtual bool operator()() = 0;
   virtual const char* Name() = 0;
 
  protected:
-  Processor6502* mCpu;
+  Cpu* mCpu;
 };

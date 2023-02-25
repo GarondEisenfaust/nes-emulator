@@ -1,7 +1,7 @@
 #include "opcodes/TAX.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-TAX::TAX(Processor6502* cpu) : IOpcode(cpu) {}
+TAX::TAX(Cpu* cpu) : IOpcode(cpu) {}
 
 bool TAX::operator()() {
   mCpu->x = mCpu->a;
@@ -10,6 +10,4 @@ bool TAX::operator()() {
   return false;
 }
 
-const char* TAX::Name() {
-  return "TAX";
-}
+const char* TAX::Name() { return "TAX"; }

@@ -1,7 +1,7 @@
 #include "opcodes/ADC.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-ADC::ADC(Processor6502* cpu) : IOpcode(cpu) {}
+ADC::ADC(Cpu* cpu) : IOpcode(cpu) {}
 
 bool ADC::operator()() {
   mCpu->Fetch();
@@ -15,6 +15,4 @@ bool ADC::operator()() {
   return 1;
 }
 
-const char* ADC::Name() {
-  return "ADC";
-}
+const char* ADC::Name() { return "ADC"; }

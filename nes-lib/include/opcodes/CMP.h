@@ -3,7 +3,7 @@
 
 class CMP : public IOpcode {
  public:
-  CMP(Processor6502* cpu);
+  CMP(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

@@ -1,9 +1,9 @@
 #include "addressing-modes/ZPX.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-ZPX::ZPX(Processor6502* cpu) : IAddressingMode(cpu) {}
+ZPX::ZPX(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool ZPX::operator()() {
   mCpu->addrAbs = mCpu->Read(mCpu->pc) + mCpu->x;

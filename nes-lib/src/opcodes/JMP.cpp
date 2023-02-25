@@ -1,13 +1,11 @@
 #include "opcodes/JMP.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-JMP::JMP(Processor6502* cpu) : IOpcode(cpu) {}
+JMP::JMP(Cpu* cpu) : IOpcode(cpu) {}
 
 bool JMP::operator()() {
   mCpu->pc = mCpu->addrAbs;
   return 0;
 }
 
-const char* JMP::Name() {
-  return "JMP";
-}
+const char* JMP::Name() { return "JMP"; }

@@ -1,7 +1,7 @@
 #include "opcodes/RTI.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-RTI::RTI(Processor6502* cpu) : IOpcode(cpu) {}
+RTI::RTI(Cpu* cpu) : IOpcode(cpu) {}
 
 bool RTI::operator()() {
   mCpu->status.reg = mCpu->PopFromStack();
@@ -13,6 +13,4 @@ bool RTI::operator()() {
   return 0;
 }
 
-const char* RTI::Name() {
-  return "RTI";
-}
+const char* RTI::Name() { return "RTI"; }

@@ -1,13 +1,11 @@
 #include "opcodes/CLV.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-CLV::CLV(Processor6502* cpu) : IOpcode(cpu) {}
+CLV::CLV(Cpu* cpu) : IOpcode(cpu) {}
 
 bool CLV::operator()() {
   mCpu->status.v = false;
   return false;
 }
 
-const char* CLV::Name() {
-  return "CLV";
-}
+const char* CLV::Name() { return "CLV"; }

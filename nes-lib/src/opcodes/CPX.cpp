@@ -1,7 +1,7 @@
 #include "opcodes/CPX.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-CPX::CPX(Processor6502* cpu) : IOpcode(cpu) {}
+CPX::CPX(Cpu* cpu) : IOpcode(cpu) {}
 
 bool CPX::operator()() {
   mCpu->Fetch();
@@ -12,6 +12,4 @@ bool CPX::operator()() {
   return true;
 }
 
-const char* CPX::Name() {
-  return "CPX";
-}
+const char* CPX::Name() { return "CPX"; }

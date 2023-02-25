@@ -1,7 +1,7 @@
 #include "opcodes/CMP.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-CMP::CMP(Processor6502* cpu) : IOpcode(cpu) {}
+CMP::CMP(Cpu* cpu) : IOpcode(cpu) {}
 
 bool CMP::operator()() {
   mCpu->Fetch();
@@ -12,6 +12,4 @@ bool CMP::operator()() {
   return true;
 }
 
-const char* CMP::Name() {
-  return "CMP";
-}
+const char* CMP::Name() { return "CMP"; }

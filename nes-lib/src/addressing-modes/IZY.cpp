@@ -1,9 +1,9 @@
 #include "addressing-modes/IZY.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-IZY::IZY(Processor6502* cpu) : IAddressingMode(cpu) {}
+IZY::IZY(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool IZY::operator()() {
   uint16_t t = mCpu->Read(mCpu->pc);

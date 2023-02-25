@@ -3,7 +3,7 @@
 
 class CPY : public IOpcode {
  public:
-  CPY(Processor6502* cpu);
+  CPY(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

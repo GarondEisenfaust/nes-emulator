@@ -1,7 +1,7 @@
 #include "opcodes/DEC.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-DEC::DEC(Processor6502* cpu) : IOpcode(cpu) {}
+DEC::DEC(Cpu* cpu) : IOpcode(cpu) {}
 
 bool DEC::operator()() {
   mCpu->Fetch();
@@ -12,6 +12,4 @@ bool DEC::operator()() {
   return false;
 }
 
-const char* DEC::Name() {
-  return "DEC";
-}
+const char* DEC::Name() { return "DEC"; }

@@ -3,7 +3,7 @@
 
 class BVC : public IOpcode {
  public:
-  BVC(Processor6502* cpu);
+  BVC(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

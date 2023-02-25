@@ -1,9 +1,9 @@
 #include "addressing-modes/IMM.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-IMM::IMM(Processor6502* cpu) : IAddressingMode(cpu) {}
+IMM::IMM(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool IMM::operator()() {
   mCpu->addrAbs = mCpu->pc++;

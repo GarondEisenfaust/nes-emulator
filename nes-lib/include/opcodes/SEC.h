@@ -3,7 +3,7 @@
 
 class SEC : public IOpcode {
  public:
-  SEC(Processor6502* cpu);
+  SEC(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

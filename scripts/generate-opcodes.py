@@ -8,16 +8,16 @@ h_template = """#pragma once
 
 class {name} : public IOpcode {{
  public:
-  {name}(Processor6502* cpu);
+  {name}(Cpu* cpu);
   virtual bool operator()();
     virtual const char* Name();
 }};
 """
 
 cpp_template = """#include "opcodes/{name}.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-{name}::{name}(Processor6502* cpu) : IOpcode(cpu) {{}}
+{name}::{name}(Cpu* cpu) : IOpcode(cpu) {{}}
 
 bool {name}::operator()() {{
   return false;

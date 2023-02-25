@@ -1,10 +1,8 @@
 #include "opcodes/BEQ.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-BEQ::BEQ(Processor6502* cpu) : IOpcode(cpu) {}
+BEQ::BEQ(Cpu* cpu) : IOpcode(cpu) {}
 
 bool BEQ::operator()() { return mCpu->BranchIf(mCpu->status.z == 1); }
 
-const char* BEQ::Name() {
-  return "BEQ";
-}
+const char* BEQ::Name() { return "BEQ"; }

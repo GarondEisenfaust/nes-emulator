@@ -1,8 +1,8 @@
 #pragma once
 #include "Cartridge.h"
 #include "Controller.h"
+#include "Cpu.h"
 #include "PixelProcessingUnit.h"
-#include "Processor6502.h"
 #include "RAM.h"
 #include <cstdint>
 #include <memory>
@@ -21,7 +21,7 @@ class Bus {
 
   void ConnectController(Controller* controller);
 
-  Processor6502* mCpu;
+  Cpu* mCpu;
   PixelProcessingUnit* mPpu;
 
  private:

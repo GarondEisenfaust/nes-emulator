@@ -3,7 +3,7 @@
 
 class ABS : public IAddressingMode {
  public:
-  ABS(Processor6502* cpu);
+  ABS(Cpu* cpu);
   virtual bool operator()();
   virtual std::string Disassemble(uint32_t& current);
 };

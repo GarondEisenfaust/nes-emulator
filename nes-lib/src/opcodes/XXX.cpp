@@ -1,10 +1,8 @@
 #include "opcodes/XXX.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-XXX::XXX(Processor6502* cpu) : IOpcode(cpu) {}
+XXX::XXX(Cpu* cpu) : IOpcode(cpu) {}
 
 bool XXX::operator()() { return false; }
 
-const char* XXX::Name() {
-  return "XXX";
-}
+const char* XXX::Name() { return "XXX"; }

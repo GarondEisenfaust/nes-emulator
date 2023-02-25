@@ -3,7 +3,7 @@
 
 class CPX : public IOpcode {
  public:
-  CPX(Processor6502* cpu);
+  CPX(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

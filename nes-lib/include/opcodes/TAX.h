@@ -3,7 +3,7 @@
 
 class TAX : public IOpcode {
  public:
-  TAX(Processor6502* cpu);
+  TAX(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

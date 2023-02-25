@@ -1,7 +1,7 @@
 #include "opcodes/DEY.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-DEY::DEY(Processor6502* cpu) : IOpcode(cpu) {}
+DEY::DEY(Cpu* cpu) : IOpcode(cpu) {}
 
 bool DEY::operator()() {
   mCpu->y--;
@@ -10,6 +10,4 @@ bool DEY::operator()() {
   return 0;
 }
 
-const char* DEY::Name() {
-  return "DEY";
-}
+const char* DEY::Name() { return "DEY"; }

@@ -3,7 +3,7 @@
 
 class RTS : public IOpcode {
  public:
-  RTS(Processor6502* cpu);
+  RTS(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

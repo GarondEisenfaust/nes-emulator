@@ -1,13 +1,11 @@
 #include "opcodes/STY.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-STY::STY(Processor6502* cpu) : IOpcode(cpu) {}
+STY::STY(Cpu* cpu) : IOpcode(cpu) {}
 
 bool STY::operator()() {
   mCpu->Write(mCpu->addrAbs, mCpu->y);
   return false;
 }
 
-const char* STY::Name() {
-  return "STY";
-}
+const char* STY::Name() { return "STY"; }

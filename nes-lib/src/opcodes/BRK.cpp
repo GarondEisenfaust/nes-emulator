@@ -1,7 +1,7 @@
 #include "opcodes/BRK.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-BRK::BRK(Processor6502* cpu) : IOpcode(cpu) {}
+BRK::BRK(Cpu* cpu) : IOpcode(cpu) {}
 
 bool BRK::operator()() {
   mCpu->pc++;
@@ -18,6 +18,4 @@ bool BRK::operator()() {
   return 0;
 }
 
-const char* BRK::Name() {
-  return "BRK";
-}
+const char* BRK::Name() { return "BRK"; }

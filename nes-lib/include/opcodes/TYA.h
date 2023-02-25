@@ -3,7 +3,7 @@
 
 class TYA : public IOpcode {
  public:
-  TYA(Processor6502* cpu);
+  TYA(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

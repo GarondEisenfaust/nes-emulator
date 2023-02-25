@@ -1,7 +1,7 @@
 #include "opcodes/TSX.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-TSX::TSX(Processor6502* cpu) : IOpcode(cpu) {}
+TSX::TSX(Cpu* cpu) : IOpcode(cpu) {}
 
 bool TSX::operator()() {
   mCpu->x = mCpu->stackPointer;
@@ -10,6 +10,4 @@ bool TSX::operator()() {
   return false;
 }
 
-const char* TSX::Name() {
-  return "TSX";
-}
+const char* TSX::Name() { return "TSX"; }

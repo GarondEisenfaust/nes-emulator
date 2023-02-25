@@ -3,7 +3,7 @@
 
 class ASL : public IOpcode {
  public:
-  ASL(Processor6502* cpu);
+  ASL(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

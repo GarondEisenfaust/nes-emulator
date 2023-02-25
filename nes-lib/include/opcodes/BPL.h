@@ -3,7 +3,7 @@
 
 class BPL : public IOpcode {
  public:
-  BPL(Processor6502* cpu);
+  BPL(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

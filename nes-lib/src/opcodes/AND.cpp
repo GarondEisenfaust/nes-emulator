@@ -1,7 +1,7 @@
 #include "opcodes/AND.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-AND::AND(Processor6502* cpu) : IOpcode(cpu) {}
+AND::AND(Cpu* cpu) : IOpcode(cpu) {}
 
 bool AND::operator()() {
   mCpu->Fetch();
@@ -11,6 +11,4 @@ bool AND::operator()() {
   return 1;
 }
 
-const char* AND::Name() {
-  return "AND";
-}
+const char* AND::Name() { return "AND"; }

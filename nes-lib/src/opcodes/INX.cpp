@@ -1,7 +1,7 @@
 #include "opcodes/INX.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-INX::INX(Processor6502* cpu) : IOpcode(cpu) {}
+INX::INX(Cpu* cpu) : IOpcode(cpu) {}
 
 bool INX::operator()() {
   mCpu->x++;
@@ -10,6 +10,4 @@ bool INX::operator()() {
   return false;
 }
 
-const char* INX::Name() {
-  return "INX";
-}
+const char* INX::Name() { return "INX"; }

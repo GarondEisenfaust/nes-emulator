@@ -1,7 +1,7 @@
 #include "opcodes/BIT.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-BIT::BIT(Processor6502* cpu) : IOpcode(cpu) {}
+BIT::BIT(Cpu* cpu) : IOpcode(cpu) {}
 
 bool BIT::operator()() {
   mCpu->Fetch();
@@ -12,6 +12,4 @@ bool BIT::operator()() {
   return 0;
 }
 
-const char* BIT::Name() {
-  return "BIT";
-}
+const char* BIT::Name() { return "BIT"; }

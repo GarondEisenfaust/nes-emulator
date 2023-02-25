@@ -3,7 +3,7 @@
 
 class PLA : public IOpcode {
  public:
-  PLA(Processor6502* cpu);
+  PLA(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

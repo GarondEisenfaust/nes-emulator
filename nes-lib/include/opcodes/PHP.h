@@ -3,7 +3,7 @@
 
 class PHP : public IOpcode {
  public:
-  PHP(Processor6502* cpu);
+  PHP(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

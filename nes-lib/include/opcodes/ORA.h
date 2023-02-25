@@ -3,7 +3,7 @@
 
 class ORA : public IOpcode {
  public:
-  ORA(Processor6502* cpu);
+  ORA(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

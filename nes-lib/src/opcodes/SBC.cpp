@@ -1,7 +1,7 @@
 #include "opcodes/SBC.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-SBC::SBC(Processor6502* cpu) : IOpcode(cpu) {}
+SBC::SBC(Cpu* cpu) : IOpcode(cpu) {}
 
 bool SBC::operator()() {
   mCpu->Fetch();
@@ -17,6 +17,4 @@ bool SBC::operator()() {
   return true;
 }
 
-const char* SBC::Name() {
-  return "SBC";
-}
+const char* SBC::Name() { return "SBC"; }

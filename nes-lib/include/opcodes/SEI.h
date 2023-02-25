@@ -3,7 +3,7 @@
 
 class SEI : public IOpcode {
  public:
-  SEI(Processor6502* cpu);
+  SEI(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

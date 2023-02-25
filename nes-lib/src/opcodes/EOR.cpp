@@ -1,7 +1,7 @@
 #include "opcodes/EOR.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-EOR::EOR(Processor6502* cpu) : IOpcode(cpu) {}
+EOR::EOR(Cpu* cpu) : IOpcode(cpu) {}
 
 bool EOR::operator()() {
   mCpu->Fetch();
@@ -11,6 +11,4 @@ bool EOR::operator()() {
   return true;
 }
 
-const char* EOR::Name() {
-  return "EOR";
-}
+const char* EOR::Name() { return "EOR"; }

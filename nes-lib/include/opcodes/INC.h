@@ -3,7 +3,7 @@
 
 class INC : public IOpcode {
  public:
-  INC(Processor6502* cpu);
+  INC(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

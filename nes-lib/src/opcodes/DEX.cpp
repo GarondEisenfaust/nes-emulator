@@ -1,7 +1,7 @@
 #include "opcodes/DEX.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-DEX::DEX(Processor6502* cpu) : IOpcode(cpu) {}
+DEX::DEX(Cpu* cpu) : IOpcode(cpu) {}
 
 bool DEX::operator()() {
   mCpu->x--;
@@ -10,6 +10,4 @@ bool DEX::operator()() {
   return 0;
 }
 
-const char* DEX::Name() {
-  return "DEX";
-}
+const char* DEX::Name() { return "DEX"; }

@@ -3,7 +3,7 @@
 
 class BIT : public IOpcode {
  public:
-  BIT(Processor6502* cpu);
+  BIT(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

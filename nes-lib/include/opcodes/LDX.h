@@ -3,7 +3,7 @@
 
 class LDX : public IOpcode {
  public:
-  LDX(Processor6502* cpu);
+  LDX(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

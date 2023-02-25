@@ -1,7 +1,7 @@
 #include "opcodes/TXA.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-TXA::TXA(Processor6502* cpu) : IOpcode(cpu) {}
+TXA::TXA(Cpu* cpu) : IOpcode(cpu) {}
 
 bool TXA::operator()() {
   mCpu->a = mCpu->x;
@@ -10,6 +10,4 @@ bool TXA::operator()() {
   return 0;
 }
 
-const char* TXA::Name() {
-  return "TXA";
-}
+const char* TXA::Name() { return "TXA"; }

@@ -1,7 +1,7 @@
 #include "opcodes/LSR.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-LSR::LSR(Processor6502* cpu) : IOpcode(cpu) {}
+LSR::LSR(Cpu* cpu) : IOpcode(cpu) {}
 
 bool LSR::operator()() {
   mCpu->Fetch();

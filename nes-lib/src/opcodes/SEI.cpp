@@ -1,13 +1,11 @@
 #include "opcodes/SEI.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-SEI::SEI(Processor6502* cpu) : IOpcode(cpu) {}
+SEI::SEI(Cpu* cpu) : IOpcode(cpu) {}
 
 bool SEI::operator()() {
   mCpu->status.i = true;
   return 0;
 }
 
-const char* SEI::Name() {
-  return "SEI";
-}
+const char* SEI::Name() { return "SEI"; }

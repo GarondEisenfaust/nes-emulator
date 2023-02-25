@@ -1,9 +1,9 @@
 #include "addressing-modes/ABX.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-ABX::ABX(Processor6502* cpu) : IAddressingMode(cpu) {}
+ABX::ABX(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool ABX::operator()() {
   uint16_t low = mCpu->Read(mCpu->pc);

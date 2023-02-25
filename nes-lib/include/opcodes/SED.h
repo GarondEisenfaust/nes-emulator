@@ -3,7 +3,7 @@
 
 class SED : public IOpcode {
  public:
-  SED(Processor6502* cpu);
+  SED(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

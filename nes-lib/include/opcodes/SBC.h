@@ -3,7 +3,7 @@
 
 class SBC : public IOpcode {
  public:
-  SBC(Processor6502* cpu);
+  SBC(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

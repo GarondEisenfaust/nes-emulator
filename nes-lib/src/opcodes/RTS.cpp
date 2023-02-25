@@ -1,7 +1,7 @@
 #include "opcodes/RTS.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-RTS::RTS(Processor6502* cpu) : IOpcode(cpu) {}
+RTS::RTS(Cpu* cpu) : IOpcode(cpu) {}
 
 bool RTS::operator()() {
   mCpu->pc = mCpu->PopFromStack();
@@ -11,6 +11,4 @@ bool RTS::operator()() {
   return 0;
 }
 
-const char* RTS::Name() {
-  return "RTS";
-}
+const char* RTS::Name() { return "RTS"; }

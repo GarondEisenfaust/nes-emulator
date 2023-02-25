@@ -1,18 +1,18 @@
 #pragma once
+#include "Cpu.h"
 #include "GuiWindow.h"
-#include "Processor6502.h"
 #include <cstdint>
 #include <map>
 #include <string>
 
 class DisassamblerWindow : public GuiWindow {
  public:
-  DisassamblerWindow(Processor6502* cpu);
+  DisassamblerWindow(Cpu* cpu);
 
  protected:
   virtual void Content() override;
 
  private:
-  Processor6502* mCpu;
+  Cpu* mCpu;
   std::map<uint16_t, std::string> mDissasabledCode;
 };

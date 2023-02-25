@@ -1,7 +1,7 @@
 #include "opcodes/JSR.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-JSR::JSR(Processor6502* cpu) : IOpcode(cpu) {}
+JSR::JSR(Cpu* cpu) : IOpcode(cpu) {}
 
 bool JSR::operator()() {
   mCpu->pc--;
@@ -12,6 +12,4 @@ bool JSR::operator()() {
   return false;
 }
 
-const char* JSR::Name() {
-  return "JSR";
-}
+const char* JSR::Name() { return "JSR"; }

@@ -14,11 +14,11 @@
 #include "ZPX.h"
 #include "ZPY.h"
 
-class Processor6502;
+class Cpu;
 
 class AddressingModeContainer {
  public:
-  AddressingModeContainer(Processor6502* cpu);
+  AddressingModeContainer(Cpu* cpu);
   ABS abs;
   ABX abx;
   ABY aby;

@@ -3,7 +3,7 @@
 
 class ZPX : public IAddressingMode {
  public:
-  ZPX(Processor6502* cpu);
+  ZPX(Cpu* cpu);
   virtual bool operator()();
   virtual std::string Disassemble(uint32_t& current);
 };

@@ -1,7 +1,7 @@
 #include "opcodes/LDX.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-LDX::LDX(Processor6502* cpu) : IOpcode(cpu) {}
+LDX::LDX(Cpu* cpu) : IOpcode(cpu) {}
 
 bool LDX::operator()() {
   mCpu->Fetch();
@@ -11,6 +11,4 @@ bool LDX::operator()() {
   return true;
 }
 
-const char* LDX::Name() {
-  return "LDX";
-}
+const char* LDX::Name() { return "LDX"; }

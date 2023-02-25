@@ -1,7 +1,7 @@
 #include "opcodes/INC.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-INC::INC(Processor6502* cpu) : IOpcode(cpu) {}
+INC::INC(Cpu* cpu) : IOpcode(cpu) {}
 
 bool INC::operator()() {
   mCpu->Fetch();
@@ -12,6 +12,4 @@ bool INC::operator()() {
   return 0;
 }
 
-const char* INC::Name() {
-  return "INC";
-}
+const char* INC::Name() { return "INC"; }

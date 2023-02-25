@@ -3,7 +3,7 @@
 
 class CLV : public IOpcode {
  public:
-  CLV(Processor6502* cpu);
+  CLV(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

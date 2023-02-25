@@ -1,7 +1,7 @@
 #include "opcodes/INY.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-INY::INY(Processor6502* cpu) : IOpcode(cpu) {}
+INY::INY(Cpu* cpu) : IOpcode(cpu) {}
 
 bool INY::operator()() {
   mCpu->y++;
@@ -10,6 +10,4 @@ bool INY::operator()() {
   return false;
 }
 
-const char* INY::Name() {
-  return "INY";
-}
+const char* INY::Name() { return "INY"; }

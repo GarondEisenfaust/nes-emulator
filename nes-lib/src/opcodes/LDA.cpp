@@ -1,7 +1,7 @@
 #include "opcodes/LDA.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-LDA::LDA(Processor6502* cpu) : IOpcode(cpu) {}
+LDA::LDA(Cpu* cpu) : IOpcode(cpu) {}
 
 bool LDA::operator()() {
   mCpu->Fetch();
@@ -11,6 +11,4 @@ bool LDA::operator()() {
   return true;
 }
 
-const char* LDA::Name() {
-  return "LDA";
-}
+const char* LDA::Name() { return "LDA"; }

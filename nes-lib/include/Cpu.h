@@ -13,10 +13,10 @@
 
 class Bus;
 
-class Processor6502 {
+class Cpu {
  public:
-  Processor6502();
-  virtual ~Processor6502() = default;
+  Cpu();
+  virtual ~Cpu() = default;
 
   uint8_t Read(uint16_t addr);
   uint8_t PopFromStack();

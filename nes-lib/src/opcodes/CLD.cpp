@@ -1,13 +1,11 @@
 #include "opcodes/CLD.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-CLD::CLD(Processor6502* cpu) : IOpcode(cpu) {}
+CLD::CLD(Cpu* cpu) : IOpcode(cpu) {}
 
 bool CLD::operator()() {
   mCpu->status.d = false;
   return false;
 }
 
-const char* CLD::Name() {
-  return "CLD";
-}
+const char* CLD::Name() { return "CLD"; }

@@ -1,9 +1,9 @@
 #include "Bus.h"
 #include "Cartridge.h"
 #include "Controller.h"
+#include "Cpu.h"
 #include "Definitions.h"
 #include "PixelProcessingUnit.h"
-#include "Processor6502.h"
 #include "Util.h"
 #include "fmt/format.h"
 #include "imgui.h"
@@ -60,7 +60,7 @@ int main() {
 
   auto ram = std::make_unique<RAM>();
   Bus bus(ram.get());
-  Processor6502 cpu;
+  Cpu cpu;
   PixelProcessingUnit ppu(grid);
   Controller controller(renderContext.GetWindow());
 

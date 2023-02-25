@@ -3,7 +3,7 @@
 
 class STY : public IOpcode {
  public:
-  STY(Processor6502* cpu);
+  STY(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

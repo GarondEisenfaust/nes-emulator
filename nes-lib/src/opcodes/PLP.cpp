@@ -1,7 +1,7 @@
 #include "opcodes/PLP.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-PLP::PLP(Processor6502* cpu) : IOpcode(cpu) {}
+PLP::PLP(Cpu* cpu) : IOpcode(cpu) {}
 
 bool PLP::operator()() {
   mCpu->status.reg = mCpu->PopFromStack();
@@ -9,6 +9,4 @@ bool PLP::operator()() {
   return 0;
 }
 
-const char* PLP::Name() {
-  return "PLP";
-}
+const char* PLP::Name() { return "PLP"; }

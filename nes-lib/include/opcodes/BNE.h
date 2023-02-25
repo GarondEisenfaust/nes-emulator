@@ -3,7 +3,7 @@
 
 class BNE : public IOpcode {
  public:
-  BNE(Processor6502* cpu);
+  BNE(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

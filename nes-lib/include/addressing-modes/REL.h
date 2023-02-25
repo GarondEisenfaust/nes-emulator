@@ -3,7 +3,7 @@
 
 class REL : public IAddressingMode {
  public:
-  REL(Processor6502* cpu);
+  REL(Cpu* cpu);
   virtual bool operator()();
   virtual std::string Disassemble(uint32_t& current);
 };

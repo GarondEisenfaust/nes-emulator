@@ -1,7 +1,7 @@
 #include "opcodes/TAY.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-TAY::TAY(Processor6502* cpu) : IOpcode(cpu) {}
+TAY::TAY(Cpu* cpu) : IOpcode(cpu) {}
 
 bool TAY::operator()() {
   mCpu->y = mCpu->a;
@@ -10,6 +10,4 @@ bool TAY::operator()() {
   return false;
 }
 
-const char* TAY::Name() {
-  return "TAY";
-}
+const char* TAY::Name() { return "TAY"; }

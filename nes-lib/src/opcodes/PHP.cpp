@@ -1,7 +1,7 @@
 #include "opcodes/PHP.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-PHP::PHP(Processor6502* cpu) : IOpcode(cpu) {}
+PHP::PHP(Cpu* cpu) : IOpcode(cpu) {}
 
 bool PHP::operator()() {
   mCpu->PushToStack(mCpu->status.reg | B | U);
@@ -10,6 +10,4 @@ bool PHP::operator()() {
   return 0;
 }
 
-const char* PHP::Name() {
-  return "PHP";
-}
+const char* PHP::Name() { return "PHP"; }

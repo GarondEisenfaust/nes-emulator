@@ -1,9 +1,9 @@
 #include "addressing-modes/REL.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-REL::REL(Processor6502* cpu) : IAddressingMode(cpu) {}
+REL::REL(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool REL::operator()() {
   mCpu->addrRel = mCpu->Read(mCpu->pc);

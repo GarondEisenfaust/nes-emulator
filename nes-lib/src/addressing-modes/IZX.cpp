@@ -1,9 +1,9 @@
 #include "addressing-modes/IZX.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-IZX::IZX(Processor6502* cpu) : IAddressingMode(cpu) {}
+IZX::IZX(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool IZX::operator()() {
   uint16_t t = mCpu->Read(mCpu->pc);

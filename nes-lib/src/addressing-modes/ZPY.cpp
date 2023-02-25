@@ -1,9 +1,9 @@
 #include "addressing-modes/ZPY.h"
 #include "Bus.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 #include "fmt/format.h"
 
-ZPY::ZPY(Processor6502* cpu) : IAddressingMode(cpu) {}
+ZPY::ZPY(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool ZPY::operator()() {
   mCpu->addrAbs = mCpu->Read(mCpu->pc) + mCpu->y;

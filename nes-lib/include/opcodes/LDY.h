@@ -3,7 +3,7 @@
 
 class LDY : public IOpcode {
  public:
-  LDY(Processor6502* cpu);
+  LDY(Cpu* cpu);
   virtual bool operator()();
-    virtual const char* Name();
+  virtual const char* Name();
 };

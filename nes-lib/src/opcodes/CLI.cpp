@@ -1,13 +1,11 @@
 #include "opcodes/CLI.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-CLI::CLI(Processor6502* cpu) : IOpcode(cpu) {}
+CLI::CLI(Cpu* cpu) : IOpcode(cpu) {}
 
 bool CLI::operator()() {
   mCpu->status.i = false;
   return false;
 }
 
-const char* CLI::Name() {
-  return "CLI";
-}
+const char* CLI::Name() { return "CLI"; }

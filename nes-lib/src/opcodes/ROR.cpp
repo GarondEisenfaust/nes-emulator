@@ -1,7 +1,7 @@
 #include "opcodes/ROR.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-ROR::ROR(Processor6502* cpu) : IOpcode(cpu) {}
+ROR::ROR(Cpu* cpu) : IOpcode(cpu) {}
 
 bool ROR::operator()() {
   mCpu->Fetch();

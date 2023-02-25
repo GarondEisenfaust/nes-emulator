@@ -1,7 +1,7 @@
 #include "opcodes/PLA.h"
-#include "Processor6502.h"
+#include "Cpu.h"
 
-PLA::PLA(Processor6502* cpu) : IOpcode(cpu) {}
+PLA::PLA(Cpu* cpu) : IOpcode(cpu) {}
 
 bool PLA::operator()() {
   mCpu->a = mCpu->PopFromStack();
@@ -10,6 +10,4 @@ bool PLA::operator()() {
   return 0;
 }
 
-const char* PLA::Name() {
-  return "PLA";
-}
+const char* PLA::Name() { return "PLA"; }
