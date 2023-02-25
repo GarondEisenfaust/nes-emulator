@@ -35,3 +35,4 @@ libxcb-dri3-dev
 libxcb-util-dev
 xtrans-dev
 xkb-data
+libudev-dev
