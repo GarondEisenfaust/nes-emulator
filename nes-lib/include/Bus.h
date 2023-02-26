@@ -30,10 +30,11 @@ class Bus {
   RAM& mRam;
   Controller* mController;
 
-  uint8_t mDmaPage = 0x00;
-  uint8_t mDmaAddr = 0x00;
-  uint8_t mDmaData = 0x00;
-
-  bool mDmaTransfer = false;
-  bool mDmaDummy = false;
+  struct {
+    uint8_t page = 0x00;
+    uint8_t addr = 0x00;
+    uint8_t data = 0x00;
+    bool transfer = false;
+    bool dummy = false;
+  } mDma;
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+#include <array>
 #include <cstdint>
 
 class GLFWwindow;
@@ -29,8 +30,8 @@ class Controller {
   };
 
   GLFWwindow* mWindow;
-  uint8_t controllerBuffer[2];
-  ControllerRegister mControllerRegister[2];
+  std::array<uint8_t, 2> controllerBuffer;
+  std::array<ControllerRegister, 2> mControllerRegister;
 
   GLFWgamepadstate mGamepadState;
 

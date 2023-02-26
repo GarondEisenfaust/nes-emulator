@@ -45,10 +45,10 @@ class Ppu {
 
   bool nmi;
 
-  uint8_t* mOamPtr = (uint8_t*)mOam;
+  uint8_t* mOamPtr = (uint8_t*)mOam.data();
   uint8_t mOamAddr = 0x00;
-  uint8_t mSpriteShifterPatternLo[8];
-  uint8_t mSpriteShifterPatternHi[8];
+  std::array<uint8_t, 8> mSpriteShifterPatternLo;
+  std::array<uint8_t, 8> mSpriteShifterPatternHi;
 
  private:
   void IncrementScrollX();
@@ -71,9 +71,9 @@ class Ppu {
   IRenderer& mRenderer;
   std::unique_ptr<ColorPalette> mColorPalette;
 
-  uint8_t tblName[2][1024];
-  uint8_t tblPattern[2][4096];
-  uint8_t tblPalette[32];
+  std::array<std::array<uint8_t, 1024>, 2> tblName;
+  std::array<std::array<uint8_t, 4096>, 2> tblPattern;
+  std::array<uint8_t, 32> tblPalette;
 
   StatusRegister mStatusRegister;
   MaskRegister mMaskRegister;
@@ -96,8 +96,8 @@ class Ppu {
   uint16_t mBgShifterAttributeLow = 0x0000;
   uint16_t mBgShifterAttributeHigh = 0x0000;
 
-  ObjectAttributeEntry mOam[64];
-  ObjectAttributeEntry mSpriteOnScanline[8];
+  std::array<ObjectAttributeEntry, 64> mOam;
+  std::array<ObjectAttributeEntry, 8> mSpriteOnScanline;
   uint8_t mSpriteCount;
 
   bool bSpriteZeroHitPossible = false;
