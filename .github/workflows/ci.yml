@@ -15,15 +15,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup venv
-        run: python -m venv venv 
-
-      - name: Activate venv
-        run: source venv/bin/activate 
-
-      - name: Install requirements
-        run: pip install -r requirements.txt
-
       - name: Updates package list
         run: sudo apt-get update
 

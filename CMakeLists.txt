@@ -10,6 +10,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Include cmake utilities
+include(cmake/python.cmake)
 include(cmake/macros.cmake)
 include(cmake/conan.cmake)
 include(cmake/download_roms.cmake)
