@@ -9,7 +9,7 @@
 
 class Bus {
  public:
-  Bus(RAM* ram);
+  Bus(RAM& ram);
   ~Bus();
 
   void InsertCartridge(Cartridge* cartridge);
@@ -27,7 +27,7 @@ class Bus {
  private:
   Cartridge* mCartridge;
   uint32_t mSystemClockCounter;
-  RAM* mRam;
+  RAM& mRam;
   Controller* mController;
 
   uint8_t mDmaPage = 0x00;

@@ -21,7 +21,6 @@
 #include <thread>
 
 void RenderCompleteFrame(Bus& bus, Grid& grid) {
-  auto* ppu = bus.mPpu;
   while (!grid.FrameComplete()) {
     bus.Clock();
   }
@@ -59,7 +58,7 @@ int main() {
   renderContext.AddVertexArray(vertexArray);
 
   auto ram = std::make_unique<RAM>();
-  Bus bus(ram.get());
+  Bus bus(*ram);
   Cpu cpu;
   Ppu ppu(grid);
   Controller controller(renderContext.GetWindow());

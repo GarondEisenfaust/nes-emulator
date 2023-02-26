@@ -85,7 +85,7 @@ void VisibleScreenSpaceState::Execute() {
     mPpu.TransferAddressY();
   }
   if (mPpu.mCycle == 257 && mPpu.mScanline >= 0) {
-    std::memset(mPpu.mSpriteOnScanline, 0xFF, 8 * sizeof(Ppu::ObjectAttributeEntry));
+    std::memset(mPpu.mSpriteOnScanline, 0xFF, 8 * sizeof(ObjectAttributeEntry));
     mPpu.mSpriteCount = 0;
 
     for (uint8_t i = 0; i < 8; i++) {
@@ -105,8 +105,7 @@ void VisibleScreenSpaceState::Execute() {
             mPpu.bSpriteZeroHitPossible = true;
           }
 
-          std::memcpy(&mPpu.mSpriteOnScanline[mPpu.mSpriteCount], &mPpu.mOam[nOAMEntry],
-                      sizeof(Ppu::ObjectAttributeEntry));
+          std::memcpy(&mPpu.mSpriteOnScanline[mPpu.mSpriteCount], &mPpu.mOam[nOAMEntry], sizeof(ObjectAttributeEntry));
           mPpu.mSpriteCount++;
         }
       }

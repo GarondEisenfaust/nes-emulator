@@ -250,88 +250,9 @@ void Ppu::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
 void Ppu::Clock() {
   mState->Execute();
 
-  uint8_t bgPixel = 0x00;
-  uint8_t bgPalette = 0x00;
-
-  if (mMaskRegister.renderBackground) {
-    uint16_t bitMux = 0x8000 >> fineX;
-
-    uint8_t p0Pixel = (mBgShifterPatternLow & bitMux) > 0;
-    uint8_t p1Pixel = (mBgShifterPatternHigh & bitMux) > 0;
-
-    bgPixel = (p1Pixel << 1) | p0Pixel;
-
-    uint8_t bgPal0 = (mBgShifterAttributeLow & bitMux) > 0;
-    uint8_t bgPal1 = (mBgShifterAttributeHigh & bitMux) > 0;
-    bgPalette = (bgPal1 << 1) | bgPal0;
-  }
-
-  uint8_t fgPixel = 0x00;
-  uint8_t fgPalette = 0x00;
-  uint8_t fgPriority = 0x00;
-
-  if (mMaskRegister.renderSprites) {
-    bSpriteZeroBeingRendered = false;
-
-    for (uint8_t i = 0; i < mSpriteCount; i++) {
-      if (mSpriteOnScanline[i].x == 0) {
-        uint8_t fgPixelLo = (mSpriteShifterPatternLo[i] & 0x80) > 0;
-        uint8_t fgPixelHi = (mSpriteShifterPatternHi[i] & 0x80) > 0;
-        fgPixel = (fgPixelHi << 1) | fgPixelLo;
-
-        fgPalette = (mSpriteOnScanline[i].attribute & 0x03) + 0x04;
-        fgPriority = (mSpriteOnScanline[i].attribute & 0x20) == 0;
-
-        if (fgPixel != 0) {
-          if (i == 0) {
-            bSpriteZeroBeingRendered = true;
-          }
-
-          break;
-        }
-      }
-    }
-  }
-
-  uint8_t pixel = 0x00;
-  uint8_t palette = 0x00;
-
-  if (bgPixel == 0 && fgPixel == 0) {
-    pixel = 0x00;
-    palette = 0x00;
-  } else if (bgPixel == 0 && fgPixel > 0) {
-    pixel = fgPixel;
-    palette = fgPalette;
-  } else if (bgPixel > 0 && fgPixel == 0) {
-    pixel = bgPixel;
-    palette = bgPalette;
-  } else if (bgPixel > 0 && fgPixel > 0) {
-    if (fgPriority) {
-      pixel = fgPixel;
-      palette = fgPalette;
-    } else {
-      pixel = bgPixel;
-      palette = bgPalette;
-    }
-
-    if (bSpriteZeroHitPossible && bSpriteZeroBeingRendered) {
-      if (mMaskRegister.renderBackground & mMaskRegister.renderSprites) {
-        if (~(mMaskRegister.renderBackgroundLeft | mMaskRegister.renderSpritesLeft)) {
-          if (mCycle >= 9 && mCycle < 258) {
-            mStatusRegister.spriteZeroHit = 1;
-          }
-        } else {
-          if (mCycle >= 1 && mCycle < 258) {
-            mStatusRegister.spriteZeroHit = 1;
-          }
-        }
-      }
-    }
-  }
-
   auto xPos = mCycle - 1;
   auto yPos = mScanline;
-  auto& color = GetColorFromPalette(palette, pixel);
+  auto& color = CalculatePixelColor();
   mRenderer.SetPixelColor(xPos, yPos, color);
 
   mCycle++;
@@ -500,4 +421,86 @@ void Ppu::UpdateShifters() {
       }
     }
   }
+}
+
+PixelColor& Ppu::CalculatePixelColor() {
+  uint8_t bgPixel = 0x00;
+  uint8_t bgPalette = 0x00;
+
+  if (mMaskRegister.renderBackground) {
+    uint16_t bitMux = 0x8000 >> fineX;
+
+    uint8_t p0Pixel = (mBgShifterPatternLow & bitMux) > 0;
+    uint8_t p1Pixel = (mBgShifterPatternHigh & bitMux) > 0;
+
+    bgPixel = (p1Pixel << 1) | p0Pixel;
+
+    uint8_t bgPal0 = (mBgShifterAttributeLow & bitMux) > 0;
+    uint8_t bgPal1 = (mBgShifterAttributeHigh & bitMux) > 0;
+    bgPalette = (bgPal1 << 1) | bgPal0;
+  }
+
+  uint8_t fgPixel = 0x00;
+  uint8_t fgPalette = 0x00;
+  uint8_t fgPriority = 0x00;
+
+  if (mMaskRegister.renderSprites) {
+    bSpriteZeroBeingRendered = false;
+
+    for (uint8_t i = 0; i < mSpriteCount; i++) {
+      if (mSpriteOnScanline[i].x == 0) {
+        uint8_t fgPixelLo = (mSpriteShifterPatternLo[i] & 0x80) > 0;
+        uint8_t fgPixelHi = (mSpriteShifterPatternHi[i] & 0x80) > 0;
+        fgPixel = (fgPixelHi << 1) | fgPixelLo;
+
+        fgPalette = (mSpriteOnScanline[i].attribute & 0x03) + 0x04;
+        fgPriority = (mSpriteOnScanline[i].attribute & 0x20) == 0;
+
+        if (fgPixel != 0) {
+          if (i == 0) {
+            bSpriteZeroBeingRendered = true;
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
+  uint8_t pixel = 0x00;
+  uint8_t palette = 0x00;
+
+  if (bgPixel == 0 && fgPixel == 0) {
+    pixel = 0x00;
+    palette = 0x00;
+  } else if (bgPixel == 0 && fgPixel > 0) {
+    pixel = fgPixel;
+    palette = fgPalette;
+  } else if (bgPixel > 0 && fgPixel == 0) {
+    pixel = bgPixel;
+    palette = bgPalette;
+  } else if (bgPixel > 0 && fgPixel > 0) {
+    if (fgPriority) {
+      pixel = fgPixel;
+      palette = fgPalette;
+    } else {
+      pixel = bgPixel;
+      palette = bgPalette;
+    }
+
+    if (bSpriteZeroHitPossible && bSpriteZeroBeingRendered) {
+      if (mMaskRegister.renderBackground & mMaskRegister.renderSprites) {
+        if (~(mMaskRegister.renderBackgroundLeft | mMaskRegister.renderSpritesLeft)) {
+          if (mCycle >= 9 && mCycle < 258) {
+            mStatusRegister.spriteZeroHit = 1;
+          }
+        } else {
+          if (mCycle >= 1 && mCycle < 258) {
+            mStatusRegister.spriteZeroHit = 1;
+          }
+        }
+      }
+    }
+  }
+  return GetColorFromPalette(palette, pixel);
 };

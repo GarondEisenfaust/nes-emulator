@@ -2,6 +2,7 @@
 #include "Cartridge.h"
 #include "ColorPalette.h"
 #include "IRenderer.h"
+#include "ObjectAttributeEntry.h"
 #include "PixelColor.h"
 #include "PpuRegisterDefinitions.h"
 #include "Sprite.h"
@@ -56,6 +57,7 @@ class Ppu {
   void TransferAddressY();
   void LoadBackgroundShifters();
   void UpdateShifters();
+  PixelColor& CalculatePixelColor();
 
   template <class STATE>
   void Transition() {
@@ -94,13 +96,7 @@ class Ppu {
   uint16_t mBgShifterAttributeLow = 0x0000;
   uint16_t mBgShifterAttributeHigh = 0x0000;
 
-  struct ObjectAttributeEntry {
-    uint8_t y;
-    uint8_t id;
-    uint8_t attribute;
-    uint8_t x;
-  } mOam[64];
-
+  ObjectAttributeEntry mOam[64];
   ObjectAttributeEntry mSpriteOnScanline[8];
   uint8_t mSpriteCount;
 

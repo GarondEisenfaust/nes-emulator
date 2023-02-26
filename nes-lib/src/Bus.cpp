@@ -2,14 +2,14 @@
 #include "Definitions.h"
 #include "IRenderer.h"
 
-Bus::Bus(RAM* ram) : mRam(ram), mSystemClockCounter(0) {}
+Bus::Bus(RAM& ram) : mRam(ram), mSystemClockCounter(0) {}
 
 Bus::~Bus() {}
 
 void Bus::CpuWrite(uint16_t addr, uint8_t data) {
   if (mCartridge->CpuWrite(addr, data)) {
   } else if (RAM_START <= addr && addr <= RAM_END) {
-    mRam->at(addr & RAM_SIZE) = data;
+    mRam[addr & RAM_SIZE] = data;
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     mPpu->CpuWrite(addr & PPU_RAM_SIZE, data);
   } else if (0x4014 == addr) {
@@ -26,7 +26,7 @@ uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
 
   if (mCartridge->CpuRead(addr, data)) {
   } else if (RAM_START <= addr && addr <= RAM_END) {
-    data = mRam->at(addr & RAM_SIZE);
+    data = mRam[addr & RAM_SIZE];
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     data = mPpu->CpuRead(addr & PPU_RAM_SIZE, bReadOnly);
   } else if (0x4016 <= addr && addr <= 0x4017) {
