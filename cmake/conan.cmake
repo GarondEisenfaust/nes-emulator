@@ -14,6 +14,8 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 
 conan_cmake_autodetect(settings)
 conan_cmake_run(
+  CONAN_COMMAND
+  ${VENV_PATH}/bin/conan
   CONANFILE
   ${CMAKE_CURRENT_SOURCE_DIR}/conanfile.py
   BASIC_SETUP
