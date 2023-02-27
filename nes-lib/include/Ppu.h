@@ -79,7 +79,7 @@ class Ppu {
   MaskRegister mMaskRegister;
   ControlRegister mControlRegister;
 
-  uint8_t mAddressLatch = 0x00;
+  bool mAddressLatch = false;
   uint8_t mPpuDataBuffer = 0x00;
 
   LoopyRegister vRamAddr;
@@ -87,14 +87,16 @@ class Ppu {
 
   uint8_t fineX = 0x00;
 
-  uint8_t mBgNextTileId = 0x00;
-  uint8_t mBgNextTileAttribute = 0x00;
-  uint8_t mBgNextTileLsb = 0x00;
-  uint8_t mBgNextTileMsb = 0x00;
-  uint16_t mBgShifterPatternLow = 0x0000;
-  uint16_t mBgShifterPatternHigh = 0x0000;
-  uint16_t mBgShifterAttributeLow = 0x0000;
-  uint16_t mBgShifterAttributeHigh = 0x0000;
+  struct {
+    uint8_t nextTileId = 0x00;
+    uint8_t nextTileAttribute = 0x00;
+    uint8_t nextTileLsb = 0x00;
+    uint8_t nextTileMsb = 0x00;
+    uint16_t shifterPatternLow = 0x0000;
+    uint16_t shifterPatternHigh = 0x0000;
+    uint16_t shifterAttributeLow = 0x0000;
+    uint16_t shifterAttributeHigh = 0x0000;
+  } mBg;
 
   std::array<ObjectAttributeEntry, 64> mOam;
   std::array<ObjectAttributeEntry, 8> mSpriteOnScanline;

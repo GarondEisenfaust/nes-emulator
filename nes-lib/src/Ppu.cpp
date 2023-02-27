@@ -32,24 +32,24 @@ void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
       mOamPtr[mOamAddr] = data;
       break;
     case 0x0005:  // Scroll
-      if (mAddressLatch == 0) {
-        fineX = data & 0x07;
+      if (!mAddressLatch) {
+        fineX = data & 0b111;
         tRamAddr.coarseX = data >> 3;
-        mAddressLatch = 1;
+        mAddressLatch = true;
       } else {
-        tRamAddr.fineY = data & 0x07;
+        tRamAddr.fineY = data & 0b111;
         tRamAddr.coarseY = data >> 3;
-        mAddressLatch = 0;
+        mAddressLatch = false;
       }
       break;
     case 0x0006:  // PPU Address
-      if (mAddressLatch == 0) {
-        tRamAddr.reg = static_cast<uint16_t>(tRamAddr.reg & 0x00FF) | (static_cast<uint16_t>(data & 0x3F) << 8);
-        mAddressLatch = 1;
+      if (!mAddressLatch) {
+        tRamAddr.reg = static_cast<uint16_t>(tRamAddr.reg & 0x00FF) | (static_cast<uint16_t>(data & 0b111111) << 8);
+        mAddressLatch = true;
       } else {
         tRamAddr.reg = static_cast<uint16_t>(tRamAddr.reg & 0xFF00) | static_cast<uint16_t>(data);
         vRamAddr = tRamAddr;
-        mAddressLatch = 0;
+        mAddressLatch = false;
       }
       break;
     case 0x0007:  // PPU Data
@@ -284,14 +284,14 @@ void Ppu::Reset() {
   mPpuDataBuffer = 0x00;
   mScanline = 0;
   mCycle = 0;
-  mBgNextTileId = 0x00;
-  mBgNextTileAttribute = 0x00;
-  mBgNextTileLsb = 0x00;
-  mBgNextTileMsb = 0x00;
-  mBgShifterPatternLow = 0x0000;
-  mBgShifterPatternHigh = 0x0000;
-  mBgShifterAttributeLow = 0x0000;
-  mBgShifterAttributeHigh = 0x0000;
+  mBg.nextTileId = 0x00;
+  mBg.nextTileAttribute = 0x00;
+  mBg.nextTileLsb = 0x00;
+  mBg.nextTileMsb = 0x00;
+  mBg.shifterPatternLow = 0x0000;
+  mBg.shifterPatternHigh = 0x0000;
+  mBg.shifterAttributeLow = 0x0000;
+  mBg.shifterAttributeHigh = 0x0000;
   mStatusRegister.reg = 0x00;
   mMaskRegister.reg = 0x00;
   mControlRegister.reg = 0x00;
@@ -396,20 +396,20 @@ void Ppu::TransferAddressY() {
 };
 
 void Ppu::LoadBackgroundShifters() {
-  mBgShifterPatternLow = (mBgShifterPatternLow & 0xFF00) | mBgNextTileLsb;
-  mBgShifterPatternHigh = (mBgShifterPatternHigh & 0xFF00) | mBgNextTileMsb;
+  mBg.shifterPatternLow = (mBg.shifterPatternLow & 0xFF00) | mBg.nextTileLsb;
+  mBg.shifterPatternHigh = (mBg.shifterPatternHigh & 0xFF00) | mBg.nextTileMsb;
 
-  mBgShifterAttributeLow = (mBgShifterAttributeLow & 0xFF00) | ((mBgNextTileAttribute & 0b01) ? 0xFF : 0x00);
-  mBgShifterAttributeHigh = (mBgShifterAttributeHigh & 0xFF00) | ((mBgNextTileAttribute & 0b10) ? 0xFF : 0x00);
+  mBg.shifterAttributeLow = (mBg.shifterAttributeLow & 0xFF00) | ((mBg.nextTileAttribute & 0b01) ? 0xFF : 0x00);
+  mBg.shifterAttributeHigh = (mBg.shifterAttributeHigh & 0xFF00) | ((mBg.nextTileAttribute & 0b10) ? 0xFF : 0x00);
 };
 
 void Ppu::UpdateShifters() {
   if (mMaskRegister.renderBackground) {
-    mBgShifterPatternLow <<= 1;
-    mBgShifterPatternHigh <<= 1;
+    mBg.shifterPatternLow <<= 1;
+    mBg.shifterPatternHigh <<= 1;
 
-    mBgShifterAttributeLow <<= 1;
-    mBgShifterAttributeHigh <<= 1;
+    mBg.shifterAttributeLow <<= 1;
+    mBg.shifterAttributeHigh <<= 1;
   }
   if (mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258) {
     for (int i = 0; i < mSpriteCount; i++) {
@@ -430,13 +430,13 @@ PixelColor& Ppu::CalculatePixelColor() {
   if (mMaskRegister.renderBackground) {
     uint16_t bitMux = 0x8000 >> fineX;
 
-    uint8_t p0Pixel = (mBgShifterPatternLow & bitMux) > 0;
-    uint8_t p1Pixel = (mBgShifterPatternHigh & bitMux) > 0;
+    uint8_t p0Pixel = (mBg.shifterPatternLow & bitMux) > 0;
+    uint8_t p1Pixel = (mBg.shifterPatternHigh & bitMux) > 0;
 
     bgPixel = (p1Pixel << 1) | p0Pixel;
 
-    uint8_t bgPal0 = (mBgShifterAttributeLow & bitMux) > 0;
-    uint8_t bgPal1 = (mBgShifterAttributeHigh & bitMux) > 0;
+    uint8_t bgPal0 = (mBg.shifterAttributeLow & bitMux) > 0;
+    uint8_t bgPal1 = (mBg.shifterAttributeHigh & bitMux) > 0;
     bgPalette = (bgPal1 << 1) | bgPal0;
   }
 

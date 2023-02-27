@@ -32,33 +32,33 @@ void VisibleScreenSpaceState::Execute() {
     switch ((mPpu.mCycle - 1) % 8) {
       case 0: {
         mPpu.LoadBackgroundShifters();
-        mPpu.mBgNextTileId = mPpu.PpuRead(0x2000 | (mPpu.vRamAddr.reg & 0x0FFF));
+        mPpu.mBg.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.vRamAddr.reg & 0x0FFF));
         break;
       }
       case 2: {
-        mPpu.mBgNextTileAttribute =
+        mPpu.mBg.nextTileAttribute =
             mPpu.PpuRead(0x23C0 | (mPpu.vRamAddr.nameTableY << 11) | (mPpu.vRamAddr.nameTableX << 10) |
                          ((mPpu.vRamAddr.coarseY >> 2) << 3) | (mPpu.vRamAddr.coarseX >> 2));
 
         if (mPpu.vRamAddr.coarseY & 0x02) {
-          mPpu.mBgNextTileAttribute >>= 4;
+          mPpu.mBg.nextTileAttribute >>= 4;
         }
         if (mPpu.vRamAddr.coarseX & 0x02) {
-          mPpu.mBgNextTileAttribute >>= 2;
+          mPpu.mBg.nextTileAttribute >>= 2;
         }
-        mPpu.mBgNextTileAttribute &= 0x03;
+        mPpu.mBg.nextTileAttribute &= 0x03;
         break;
       }
       case 4: {
         auto toReadFrom = (mPpu.mControlRegister.patternBackground << 12) +
-                          (static_cast<uint16_t>(mPpu.mBgNextTileId) << 4) + (mPpu.vRamAddr.fineY + 0);
-        mPpu.mBgNextTileLsb = mPpu.PpuRead(toReadFrom);
+                          (static_cast<uint16_t>(mPpu.mBg.nextTileId) << 4) + (mPpu.vRamAddr.fineY + 0);
+        mPpu.mBg.nextTileLsb = mPpu.PpuRead(toReadFrom);
         break;
       }
       case 6: {
         auto toReadFrom = (mPpu.mControlRegister.patternBackground << 12) +
-                          (static_cast<uint16_t>(mPpu.mBgNextTileId) << 4) + (mPpu.vRamAddr.fineY + 8);
-        mPpu.mBgNextTileMsb = mPpu.PpuRead(toReadFrom);
+                          (static_cast<uint16_t>(mPpu.mBg.nextTileId) << 4) + (mPpu.vRamAddr.fineY + 8);
+        mPpu.mBg.nextTileMsb = mPpu.PpuRead(toReadFrom);
         break;
       }
       case 7: {
@@ -78,7 +78,7 @@ void VisibleScreenSpaceState::Execute() {
   }
 
   if (mPpu.mCycle == 338 || mPpu.mCycle == 340) {
-    mPpu.mBgNextTileId = mPpu.PpuRead(0x2000 | (mPpu.vRamAddr.reg & 0x0FFF));
+    mPpu.mBg.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.vRamAddr.reg & 0x0FFF));
   }
 
   if (mPpu.mScanline == -1 && mPpu.mCycle >= 280 && mPpu.mCycle < 305) {
@@ -118,56 +118,58 @@ void VisibleScreenSpaceState::Execute() {
 
   if (mPpu.mCycle == 340) {
     for (uint8_t i = 0; i < mPpu.mSpriteCount; i++) {
-      uint8_t spritePatternBitsLo;
-      uint8_t spritePatternBitsHi;
-      uint16_t spritePatternAddrLo;
-      uint16_t spritePatternAddrHi;
+      struct {
+        uint8_t bitsLo;
+        uint8_t bitsHi;
+        uint16_t addrLo;
+        uint16_t addrHi;
+      } spritePattern;
 
       if (!mPpu.mControlRegister.spriteSize) {
         if (!(mPpu.mSpriteOnScanline[i].attribute & 0x80)) {
-          spritePatternAddrLo = (mPpu.mControlRegister.patternSprite << 12) | (mPpu.mSpriteOnScanline[i].id << 4) |
-                                (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y);
+          spritePattern.addrLo = (mPpu.mControlRegister.patternSprite << 12) | (mPpu.mSpriteOnScanline[i].id << 4) |
+                                 (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y);
 
         } else {
-          spritePatternAddrLo = (mPpu.mControlRegister.patternSprite << 12) | (mPpu.mSpriteOnScanline[i].id << 4) |
-                                (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y));
+          spritePattern.addrLo = (mPpu.mControlRegister.patternSprite << 12) | (mPpu.mSpriteOnScanline[i].id << 4) |
+                                 (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y));
         }
 
       } else {
         if (!(mPpu.mSpriteOnScanline[i].attribute & 0x80)) {
           if (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y < 8) {
-            spritePatternAddrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
-                                  ((mPpu.mSpriteOnScanline[i].id & 0xFE) << 4) |
-                                  ((mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
+            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
+                                   ((mPpu.mSpriteOnScanline[i].id & 0xFE) << 4) |
+                                   ((mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
           } else {
-            spritePatternAddrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
-                                  (((mPpu.mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
-                                  ((mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
+            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
+                                   (((mPpu.mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
+                                   ((mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
           }
         } else {
           if (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y < 8) {
-            spritePatternAddrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
-                                  (((mPpu.mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
-                                  (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
+            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
+                                   (((mPpu.mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
+                                   (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
           } else {
-            spritePatternAddrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
-                                  ((mPpu.mSpriteOnScanline[i].id & 0xFE) << 4) |
-                                  (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
+            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
+                                   ((mPpu.mSpriteOnScanline[i].id & 0xFE) << 4) |
+                                   (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
           }
         }
       }
 
-      spritePatternAddrHi = spritePatternAddrLo + 8;
+      spritePattern.addrHi = spritePattern.addrLo + 8;
 
-      spritePatternBitsLo = mPpu.PpuRead(spritePatternAddrLo);
-      spritePatternBitsHi = mPpu.PpuRead(spritePatternAddrHi);
+      spritePattern.bitsLo = mPpu.PpuRead(spritePattern.addrLo);
+      spritePattern.bitsHi = mPpu.PpuRead(spritePattern.addrHi);
 
       if (mPpu.mSpriteOnScanline[i].attribute & 0x40) {
-        spritePatternBitsLo = FlipByte(spritePatternBitsLo);
-        spritePatternBitsHi = FlipByte(spritePatternBitsHi);
+        spritePattern.bitsLo = FlipByte(spritePattern.bitsLo);
+        spritePattern.bitsHi = FlipByte(spritePattern.bitsHi);
       }
-      mPpu.mSpriteShifterPatternLo[i] = spritePatternBitsLo;
-      mPpu.mSpriteShifterPatternHi[i] = spritePatternBitsHi;
+      mPpu.mSpriteShifterPatternLo[i] = spritePattern.bitsLo;
+      mPpu.mSpriteShifterPatternHi[i] = spritePattern.bitsHi;
     }
   }
 
