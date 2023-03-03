@@ -1,8 +1,8 @@
-#include "ppu-states/Rendering.h"
+#include "ppu-states/RenderingState.h"
 #include "Ppu.h"
 #include <cstring>
 
-Rendering::Rendering(Ppu& ppu) : IPpuState(ppu) {}
+RenderingState::RenderingState(Ppu& ppu) : IPpuState(ppu) {}
 
 uint8_t FlipByte(uint8_t b) {
   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
@@ -11,7 +11,7 @@ uint8_t FlipByte(uint8_t b) {
   return b;
 };
 
-void Rendering::Execute() {
+void RenderingState::Execute() {
   if (mPpu.mScanline == 0 && mPpu.mCycle == 0) {
     mPpu.mCycle = 1;
   }
@@ -21,17 +21,15 @@ void Rendering::Execute() {
 
     mPpu.mStatusRegister.spriteZeroHit = 0;
 
-    for (int i = 0; i < 8; i++) {
-      mPpu.mSpriteShifterPatternLo[i] = 0;
-      mPpu.mSpriteShifterPatternHi[i] = 0;
-    }
+    mPpu.mSpriteShifterPatternLo = {0};
+    mPpu.mSpriteShifterPatternHi = {0};
   }
 
   if ((mPpu.mCycle >= 2 && mPpu.mCycle < 258) || (mPpu.mCycle >= 321 && mPpu.mCycle < 338)) {
-    mPpu.UpdateShifters();
+    UpdateShifters();
     switch ((mPpu.mCycle - 1) % 8) {
       case 0: {
-        mPpu.LoadBackgroundShifters();
+        LoadBackgroundShifters();
         mPpu.mBg.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.vRamAddr.reg & 0x0FFF));
         break;
       }
@@ -62,19 +60,19 @@ void Rendering::Execute() {
         break;
       }
       case 7: {
-        mPpu.IncrementScrollX();
+        IncrementScrollX();
         break;
       }
     }
   }
 
   if (mPpu.mCycle == 256) {
-    mPpu.IncrementScrollY();
+    IncrementScrollY();
   }
 
   if (mPpu.mCycle == 257) {
-    mPpu.LoadBackgroundShifters();
-    mPpu.TransferAddressX();
+    LoadBackgroundShifters();
+    TransferAddressX();
   }
 
   if (mPpu.mCycle == 338 || mPpu.mCycle == 340) {
@@ -82,7 +80,7 @@ void Rendering::Execute() {
   }
 
   if (mPpu.mScanline == -1 && mPpu.mCycle >= 280 && mPpu.mCycle < 305) {
-    mPpu.TransferAddressY();
+    TransferAddressY();
   }
   if (mPpu.mCycle == 257 && mPpu.mScanline >= 0) {
     std::memset(mPpu.mSpriteOnScanline.data(), 0xFF, 8 * sizeof(ObjectAttributeEntry));
@@ -173,9 +171,81 @@ void Rendering::Execute() {
     }
   }
 
-  if (mPpu.mScanline == 241 && mPpu.mCycle == 1) {
-    mPpu.Transition<VerticalBlankStateBegin>();
-  } else if (!(mPpu.mScanline >= -1 && mPpu.mScanline < 240)) {
+  if (!(mPpu.mScanline >= -1 && mPpu.mScanline < 240)) {
     mPpu.Transition<VerticalBlankState>();
+  }
+}
+
+void RenderingState::IncrementScrollX() {
+  if (mPpu.mMaskRegister.renderBackground || mPpu.mMaskRegister.renderSprites) {
+    if (mPpu.vRamAddr.coarseX == 31) {
+      mPpu.vRamAddr.coarseX = 0;
+      mPpu.vRamAddr.nameTableX = !mPpu.vRamAddr.nameTableX;
+    } else {
+      mPpu.vRamAddr.coarseX++;
+    }
+  }
+};
+
+void RenderingState::IncrementScrollY() {
+  if (mPpu.mMaskRegister.renderBackground || mPpu.mMaskRegister.renderSprites) {
+    if (mPpu.vRamAddr.fineY < 7) {
+      mPpu.vRamAddr.fineY++;
+    } else {
+      mPpu.vRamAddr.fineY = 0;
+      if (mPpu.vRamAddr.coarseY == 29) {
+        mPpu.vRamAddr.coarseY = 0;
+        mPpu.vRamAddr.nameTableY = !mPpu.vRamAddr.nameTableY;
+      } else if (mPpu.vRamAddr.coarseY == 31) {
+        mPpu.vRamAddr.coarseY = 0;
+      } else {
+        mPpu.vRamAddr.coarseY++;
+      }
+    }
+  }
+};
+
+void RenderingState::TransferAddressX() {
+  if (mPpu.mMaskRegister.renderBackground || mPpu.mMaskRegister.renderSprites) {
+    mPpu.vRamAddr.nameTableX = mPpu.tRamAddr.nameTableX;
+    mPpu.vRamAddr.coarseX = mPpu.tRamAddr.coarseX;
+  }
+};
+
+void RenderingState::TransferAddressY() {
+  if (mPpu.mMaskRegister.renderBackground || mPpu.mMaskRegister.renderSprites) {
+    mPpu.vRamAddr.fineY = mPpu.tRamAddr.fineY;
+    mPpu.vRamAddr.nameTableY = mPpu.tRamAddr.nameTableY;
+    mPpu.vRamAddr.coarseY = mPpu.tRamAddr.coarseY;
+  }
+};
+
+void RenderingState::LoadBackgroundShifters() {
+  mPpu.mBg.shifterPatternLow = (mPpu.mBg.shifterPatternLow & 0xFF00) | mPpu.mBg.nextTileLsb;
+  mPpu.mBg.shifterPatternHigh = (mPpu.mBg.shifterPatternHigh & 0xFF00) | mPpu.mBg.nextTileMsb;
+
+  mPpu.mBg.shifterAttributeLow =
+      (mPpu.mBg.shifterAttributeLow & 0xFF00) | ((mPpu.mBg.nextTileAttribute & 0b01) ? 0xFF : 0x00);
+  mPpu.mBg.shifterAttributeHigh =
+      (mPpu.mBg.shifterAttributeHigh & 0xFF00) | ((mPpu.mBg.nextTileAttribute & 0b10) ? 0xFF : 0x00);
+};
+
+void RenderingState::UpdateShifters() {
+  if (mPpu.mMaskRegister.renderBackground) {
+    mPpu.mBg.shifterPatternLow <<= 1;
+    mPpu.mBg.shifterPatternHigh <<= 1;
+
+    mPpu.mBg.shifterAttributeLow <<= 1;
+    mPpu.mBg.shifterAttributeHigh <<= 1;
+  }
+  if (mPpu.mMaskRegister.renderBackground && mPpu.mCycle >= 1 && mPpu.mCycle < 258) {
+    for (int i = 0; i < mPpu.mSpriteCount; i++) {
+      if (mPpu.mSpriteOnScanline[i].x > 0) {
+        mPpu.mSpriteOnScanline[i].x--;
+      } else {
+        mPpu.mSpriteShifterPatternLo[i] <<= 1;
+        mPpu.mSpriteShifterPatternHi[i] <<= 1;
+      }
+    }
   }
 }

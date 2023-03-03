@@ -297,7 +297,7 @@ void Ppu::Reset() {
   mControlRegister.reg = 0x00;
   vRamAddr.reg = 0x0000;
   tRamAddr.reg = 0x0000;
-  Transition<Rendering>();
+  Transition<RenderingState>();
 }
 
 void Ppu::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette) {
@@ -349,78 +349,6 @@ void Ppu::WriteColorPaletteToImage(const char* path) {
   }
 
   lodepng::encode(path, image.data(), paletteSize, numPalettes, LCT_RGB);
-}
-
-void Ppu::IncrementScrollX() {
-  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    if (vRamAddr.coarseX == 31) {
-      vRamAddr.coarseX = 0;
-      vRamAddr.nameTableX = !vRamAddr.nameTableX;
-    } else {
-      vRamAddr.coarseX++;
-    }
-  }
-};
-
-void Ppu::IncrementScrollY() {
-  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    if (vRamAddr.fineY < 7) {
-      vRamAddr.fineY++;
-    } else {
-      vRamAddr.fineY = 0;
-      if (vRamAddr.coarseY == 29) {
-        vRamAddr.coarseY = 0;
-        vRamAddr.nameTableY = !vRamAddr.nameTableY;
-      } else if (vRamAddr.coarseY == 31) {
-        vRamAddr.coarseY = 0;
-      } else {
-        vRamAddr.coarseY++;
-      }
-    }
-  }
-};
-
-void Ppu::TransferAddressX() {
-  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    vRamAddr.nameTableX = tRamAddr.nameTableX;
-    vRamAddr.coarseX = tRamAddr.coarseX;
-  }
-};
-
-void Ppu::TransferAddressY() {
-  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    vRamAddr.fineY = tRamAddr.fineY;
-    vRamAddr.nameTableY = tRamAddr.nameTableY;
-    vRamAddr.coarseY = tRamAddr.coarseY;
-  }
-};
-
-void Ppu::LoadBackgroundShifters() {
-  mBg.shifterPatternLow = (mBg.shifterPatternLow & 0xFF00) | mBg.nextTileLsb;
-  mBg.shifterPatternHigh = (mBg.shifterPatternHigh & 0xFF00) | mBg.nextTileMsb;
-
-  mBg.shifterAttributeLow = (mBg.shifterAttributeLow & 0xFF00) | ((mBg.nextTileAttribute & 0b01) ? 0xFF : 0x00);
-  mBg.shifterAttributeHigh = (mBg.shifterAttributeHigh & 0xFF00) | ((mBg.nextTileAttribute & 0b10) ? 0xFF : 0x00);
-};
-
-void Ppu::UpdateShifters() {
-  if (mMaskRegister.renderBackground) {
-    mBg.shifterPatternLow <<= 1;
-    mBg.shifterPatternHigh <<= 1;
-
-    mBg.shifterAttributeLow <<= 1;
-    mBg.shifterAttributeHigh <<= 1;
-  }
-  if (mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258) {
-    for (int i = 0; i < mSpriteCount; i++) {
-      if (mSpriteOnScanline[i].x > 0) {
-        mSpriteOnScanline[i].x--;
-      } else {
-        mSpriteShifterPatternLo[i] <<= 1;
-        mSpriteShifterPatternHi[i] <<= 1;
-      }
-    }
-  }
 }
 
 PixelColor& Ppu::CalculatePixelColor() {

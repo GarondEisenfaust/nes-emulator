@@ -7,9 +7,8 @@
 #include "PpuRegisterDefinitions.h"
 #include "Sprite.h"
 #include "ppu-states/IPpuState.h"
-#include "ppu-states/Rendering.h"
+#include "ppu-states/RenderingState.h"
 #include "ppu-states/VerticalBlankState.h"
-#include "ppu-states/VerticalBlankStateBegin.h"
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -51,12 +50,6 @@ class Ppu {
   std::array<uint8_t, 8> mSpriteShifterPatternHi;
 
  private:
-  void IncrementScrollX();
-  void IncrementScrollY();
-  void TransferAddressX();
-  void TransferAddressY();
-  void LoadBackgroundShifters();
-  void UpdateShifters();
   PixelColor& CalculatePixelColor();
 
   template <class STATE>
@@ -107,7 +100,6 @@ class Ppu {
 
   std::unique_ptr<IPpuState> mState;
 
-  friend Rendering;
+  friend RenderingState;
   friend VerticalBlankState;
-  friend VerticalBlankStateBegin;
 };
