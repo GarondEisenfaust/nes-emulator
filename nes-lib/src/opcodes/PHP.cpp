@@ -4,7 +4,11 @@
 PHP::PHP(Cpu* cpu) : IOpcode(cpu) {}
 
 bool PHP::operator()() {
-  mCpu->PushToStack(mCpu->status.reg | B | U);
+  auto tempStatus = mCpu->status;
+  tempStatus.b = true;
+  tempStatus.u = true;
+
+  mCpu->PushToStack(tempStatus.reg);
   mCpu->status.b = false;
   mCpu->status.u = false;
   return 0;

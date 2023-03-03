@@ -1,12 +1,10 @@
 #include "Cpu.h"
 #include "Bus.h"
 #include "Definitions.h"
-#include "Util.h"
 #include "fmt/format.h"
 #include <cstdint>
 #include <iostream>
 
-// Constructor
 Cpu::Cpu() : addressingModes(this), opcodes(this) { lookup = std::move(MakeLookupTable(addressingModes, opcodes)); }
 
 void Cpu::ConnectBus(Bus* bus) {

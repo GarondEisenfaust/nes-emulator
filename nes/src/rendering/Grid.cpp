@@ -1,5 +1,4 @@
 #include "rendering/Grid.h"
-#include "Util.h"
 
 Grid::Grid(int width, int height, int gridWidth, int gridHeight)
     : mWidth(width), mHeight(height), mGridWidth(gridWidth), mGridHeight(gridHeight), mFrameComplete(false) {

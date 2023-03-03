@@ -1,6 +1,5 @@
 #include "rendering/RenderContext.h"
 #include "Definitions.h"
-#include "Util.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"

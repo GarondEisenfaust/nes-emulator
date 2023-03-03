@@ -4,7 +4,6 @@
 #include "Cpu.h"
 #include "Definitions.h"
 #include "Ppu.h"
-#include "Util.h"
 #include "fmt/format.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"

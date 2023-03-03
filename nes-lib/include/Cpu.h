@@ -1,5 +1,4 @@
 #pragma once
-#include "FLAGS6502.h"
 #include "Instruction.h"
 #include "LookupTable.h"
 #include "addressing-modes/AddressingModeContainer.h"
