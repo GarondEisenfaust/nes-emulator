@@ -52,6 +52,11 @@ class Ppu {
  private:
   PixelColor& CalculatePixelColor();
 
+  void VRamFetch();
+  void IncrementScrollX();
+  void LoadBackgroundShifters();
+  void UpdateShifters();
+
   template <class STATE>
   void Transition() {
     mState = std::make_unique<STATE>(*this);

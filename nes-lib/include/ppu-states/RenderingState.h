@@ -7,10 +7,7 @@ class RenderingState : public IPpuState {
   void Execute() override;
 
  private:
-  void IncrementScrollX();
   void IncrementScrollY();
   void TransferAddressX();
   void TransferAddressY();
-  void LoadBackgroundShifters();
-  void UpdateShifters();
 };

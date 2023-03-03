@@ -432,3 +432,82 @@ PixelColor& Ppu::CalculatePixelColor() {
   }
   return GetColorFromPalette(palette, pixel);
 };
+
+void Ppu::VRamFetch() {
+  UpdateShifters();
+  switch ((mCycle - 1) % 8) {
+    case 0: {
+      LoadBackgroundShifters();
+      mBg.nextTileId = PpuRead(0x2000 | (vRamAddr.reg & 0x0FFF));
+      break;
+    }
+    case 2: {
+      mBg.nextTileAttribute = PpuRead(0x23C0 | (vRamAddr.nameTableY << 11) | (vRamAddr.nameTableX << 10) |
+                                      ((vRamAddr.coarseY >> 2) << 3) | (vRamAddr.coarseX >> 2));
+
+      if (vRamAddr.coarseY & 0x02) {
+        mBg.nextTileAttribute >>= 4;
+      }
+      if (vRamAddr.coarseX & 0x02) {
+        mBg.nextTileAttribute >>= 2;
+      }
+      mBg.nextTileAttribute &= 0x03;
+      break;
+    }
+    case 4: {
+      auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBg.nextTileId) << 4) +
+                        (vRamAddr.fineY + 0);
+      mBg.nextTileLsb = PpuRead(toReadFrom);
+      break;
+    }
+    case 6: {
+      auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBg.nextTileId) << 4) +
+                        (vRamAddr.fineY + 8);
+      mBg.nextTileMsb = PpuRead(toReadFrom);
+      break;
+    }
+    case 7: {
+      IncrementScrollX();
+      break;
+    }
+  }
+}
+
+void Ppu::IncrementScrollX() {
+  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
+    if (vRamAddr.coarseX == 31) {
+      vRamAddr.coarseX = 0;
+      vRamAddr.nameTableX = !vRamAddr.nameTableX;
+    } else {
+      vRamAddr.coarseX++;
+    }
+  }
+};
+
+void Ppu::UpdateShifters() {
+  if (mMaskRegister.renderBackground) {
+    mBg.shifterPatternLow <<= 1;
+    mBg.shifterPatternHigh <<= 1;
+
+    mBg.shifterAttributeLow <<= 1;
+    mBg.shifterAttributeHigh <<= 1;
+  }
+  if (mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258) {
+    for (int i = 0; i < mSpriteCount; i++) {
+      if (mSpriteOnScanline[i].x > 0) {
+        mSpriteOnScanline[i].x--;
+      } else {
+        mSpriteShifterPatternLo[i] <<= 1;
+        mSpriteShifterPatternHi[i] <<= 1;
+      }
+    }
+  }
+}
+
+void Ppu::LoadBackgroundShifters() {
+  mBg.shifterPatternLow = (mBg.shifterPatternLow & 0xFF00) | mBg.nextTileLsb;
+  mBg.shifterPatternHigh = (mBg.shifterPatternHigh & 0xFF00) | mBg.nextTileMsb;
+
+  mBg.shifterAttributeLow = (mBg.shifterAttributeLow & 0xFF00) | ((mBg.nextTileAttribute & 0b01) ? 0xFF : 0x00);
+  mBg.shifterAttributeHigh = (mBg.shifterAttributeHigh & 0xFF00) | ((mBg.nextTileAttribute & 0b10) ? 0xFF : 0x00);
+};

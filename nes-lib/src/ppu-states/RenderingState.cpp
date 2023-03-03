@@ -15,6 +15,7 @@ void RenderingState::Execute() {
   if (mPpu.mScanline == 0 && mPpu.mCycle == 0) {
     mPpu.mCycle = 1;
   }
+
   if (mPpu.mScanline == -1 && mPpu.mCycle == 1) {
     mPpu.mStatusRegister.verticalBlank = 0;
     mPpu.mStatusRegister.spriteOverflow = 0;
@@ -25,45 +26,8 @@ void RenderingState::Execute() {
     mPpu.mSpriteShifterPatternHi = {0};
   }
 
-  if ((mPpu.mCycle >= 2 && mPpu.mCycle < 258) || (mPpu.mCycle >= 321 && mPpu.mCycle < 338)) {
-    UpdateShifters();
-    switch ((mPpu.mCycle - 1) % 8) {
-      case 0: {
-        LoadBackgroundShifters();
-        mPpu.mBg.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.vRamAddr.reg & 0x0FFF));
-        break;
-      }
-      case 2: {
-        mPpu.mBg.nextTileAttribute =
-            mPpu.PpuRead(0x23C0 | (mPpu.vRamAddr.nameTableY << 11) | (mPpu.vRamAddr.nameTableX << 10) |
-                         ((mPpu.vRamAddr.coarseY >> 2) << 3) | (mPpu.vRamAddr.coarseX >> 2));
-
-        if (mPpu.vRamAddr.coarseY & 0x02) {
-          mPpu.mBg.nextTileAttribute >>= 4;
-        }
-        if (mPpu.vRamAddr.coarseX & 0x02) {
-          mPpu.mBg.nextTileAttribute >>= 2;
-        }
-        mPpu.mBg.nextTileAttribute &= 0x03;
-        break;
-      }
-      case 4: {
-        auto toReadFrom = (mPpu.mControlRegister.patternBackground << 12) +
-                          (static_cast<uint16_t>(mPpu.mBg.nextTileId) << 4) + (mPpu.vRamAddr.fineY + 0);
-        mPpu.mBg.nextTileLsb = mPpu.PpuRead(toReadFrom);
-        break;
-      }
-      case 6: {
-        auto toReadFrom = (mPpu.mControlRegister.patternBackground << 12) +
-                          (static_cast<uint16_t>(mPpu.mBg.nextTileId) << 4) + (mPpu.vRamAddr.fineY + 8);
-        mPpu.mBg.nextTileMsb = mPpu.PpuRead(toReadFrom);
-        break;
-      }
-      case 7: {
-        IncrementScrollX();
-        break;
-      }
-    }
+  if ((2 <= mPpu.mCycle && mPpu.mCycle < 258) || (321 <= mPpu.mCycle && mPpu.mCycle < 338)) {
+    mPpu.VRamFetch();
   }
 
   if (mPpu.mCycle == 256) {
@@ -71,7 +35,7 @@ void RenderingState::Execute() {
   }
 
   if (mPpu.mCycle == 257) {
-    LoadBackgroundShifters();
+    mPpu.LoadBackgroundShifters();
     TransferAddressX();
   }
 
@@ -79,25 +43,25 @@ void RenderingState::Execute() {
     mPpu.mBg.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.vRamAddr.reg & 0x0FFF));
   }
 
-  if (mPpu.mScanline == -1 && mPpu.mCycle >= 280 && mPpu.mCycle < 305) {
+  if (mPpu.mScanline == -1 && 280 <= mPpu.mCycle && mPpu.mCycle < 305) {
     TransferAddressY();
   }
-  if (mPpu.mCycle == 257 && mPpu.mScanline >= 0) {
+
+  if (mPpu.mCycle == 257 && 0 <= mPpu.mScanline) {
     std::memset(mPpu.mSpriteOnScanline.data(), 0xFF, 8 * sizeof(ObjectAttributeEntry));
     mPpu.mSpriteCount = 0;
 
-    for (uint8_t i = 0; i < 8; i++) {
-      mPpu.mSpriteShifterPatternLo[i] = 0;
-      mPpu.mSpriteShifterPatternHi[i] = 0;
-    }
+    mPpu.mSpriteShifterPatternLo = {0};
+    mPpu.mSpriteShifterPatternHi = {0};
+
     uint8_t nOAMEntry = 0;
 
     mPpu.bSpriteZeroHitPossible = false;
 
     while (nOAMEntry < 64 && mPpu.mSpriteCount < 9) {
-      int16_t diff = ((int16_t)mPpu.mScanline - (int16_t)mPpu.mOam[nOAMEntry].y);
+      int16_t diff = (mPpu.mScanline - static_cast<int16_t>(mPpu.mOam[nOAMEntry].y));
 
-      if (diff >= 0 && diff < (mPpu.mControlRegister.spriteSize ? 16 : 8)) {
+      if (0 <= diff && diff < (mPpu.mControlRegister.spriteSize ? 16 : 8)) {
         if (mPpu.mSpriteCount < 8) {
           if (nOAMEntry == 0) {
             mPpu.bSpriteZeroHitPossible = true;
@@ -107,10 +71,8 @@ void RenderingState::Execute() {
           mPpu.mSpriteCount++;
         }
       }
-
       nOAMEntry++;
     }
-
     mPpu.mStatusRegister.spriteOverflow = (mPpu.mSpriteCount > 8);
   }
 
@@ -171,21 +133,10 @@ void RenderingState::Execute() {
     }
   }
 
-  if (!(mPpu.mScanline >= -1 && mPpu.mScanline < 240)) {
+  if (!(-1 <= mPpu.mScanline && mPpu.mScanline < 240)) {
     mPpu.Transition<VerticalBlankState>();
   }
 }
-
-void RenderingState::IncrementScrollX() {
-  if (mPpu.mMaskRegister.renderBackground || mPpu.mMaskRegister.renderSprites) {
-    if (mPpu.vRamAddr.coarseX == 31) {
-      mPpu.vRamAddr.coarseX = 0;
-      mPpu.vRamAddr.nameTableX = !mPpu.vRamAddr.nameTableX;
-    } else {
-      mPpu.vRamAddr.coarseX++;
-    }
-  }
-};
 
 void RenderingState::IncrementScrollY() {
   if (mPpu.mMaskRegister.renderBackground || mPpu.mMaskRegister.renderSprites) {
@@ -219,33 +170,3 @@ void RenderingState::TransferAddressY() {
     mPpu.vRamAddr.coarseY = mPpu.tRamAddr.coarseY;
   }
 };
-
-void RenderingState::LoadBackgroundShifters() {
-  mPpu.mBg.shifterPatternLow = (mPpu.mBg.shifterPatternLow & 0xFF00) | mPpu.mBg.nextTileLsb;
-  mPpu.mBg.shifterPatternHigh = (mPpu.mBg.shifterPatternHigh & 0xFF00) | mPpu.mBg.nextTileMsb;
-
-  mPpu.mBg.shifterAttributeLow =
-      (mPpu.mBg.shifterAttributeLow & 0xFF00) | ((mPpu.mBg.nextTileAttribute & 0b01) ? 0xFF : 0x00);
-  mPpu.mBg.shifterAttributeHigh =
-      (mPpu.mBg.shifterAttributeHigh & 0xFF00) | ((mPpu.mBg.nextTileAttribute & 0b10) ? 0xFF : 0x00);
-};
-
-void RenderingState::UpdateShifters() {
-  if (mPpu.mMaskRegister.renderBackground) {
-    mPpu.mBg.shifterPatternLow <<= 1;
-    mPpu.mBg.shifterPatternHigh <<= 1;
-
-    mPpu.mBg.shifterAttributeLow <<= 1;
-    mPpu.mBg.shifterAttributeHigh <<= 1;
-  }
-  if (mPpu.mMaskRegister.renderBackground && mPpu.mCycle >= 1 && mPpu.mCycle < 258) {
-    for (int i = 0; i < mPpu.mSpriteCount; i++) {
-      if (mPpu.mSpriteOnScanline[i].x > 0) {
-        mPpu.mSpriteOnScanline[i].x--;
-      } else {
-        mPpu.mSpriteShifterPatternLo[i] <<= 1;
-        mPpu.mSpriteShifterPatternHi[i] <<= 1;
-      }
-    }
-  }
-}
