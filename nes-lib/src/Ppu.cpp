@@ -297,7 +297,7 @@ void Ppu::Reset() {
   mControlRegister.reg = 0x00;
   vRamAddr.reg = 0x0000;
   tRamAddr.reg = 0x0000;
-  Transition<VisibleScreenSpaceState>();
+  Transition<Rendering>();
 }
 
 void Ppu::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette) {

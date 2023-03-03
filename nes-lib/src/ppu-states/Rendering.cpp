@@ -1,8 +1,8 @@
-#include "ppu-states/VisibleScreenSpaceState.h"
+#include "ppu-states/Rendering.h"
 #include "Ppu.h"
 #include <cstring>
 
-VisibleScreenSpaceState::VisibleScreenSpaceState(Ppu& ppu) : IPpuState(ppu) {}
+Rendering::Rendering(Ppu& ppu) : IPpuState(ppu) {}
 
 uint8_t FlipByte(uint8_t b) {
   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
@@ -11,7 +11,7 @@ uint8_t FlipByte(uint8_t b) {
   return b;
 };
 
-void VisibleScreenSpaceState::Execute() {
+void Rendering::Execute() {
   if (mPpu.mScanline == 0 && mPpu.mCycle == 0) {
     mPpu.mCycle = 1;
   }
@@ -174,8 +174,8 @@ void VisibleScreenSpaceState::Execute() {
   }
 
   if (mPpu.mScanline == 241 && mPpu.mCycle == 1) {
-    mPpu.Transition<VerticalBlankState>();
+    mPpu.Transition<VerticalBlankStateBegin>();
   } else if (!(mPpu.mScanline >= -1 && mPpu.mScanline < 240)) {
-    mPpu.Transition<NotVisibleScreenSpaceState>();
+    mPpu.Transition<VerticalBlankState>();
   }
 }

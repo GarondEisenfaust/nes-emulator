@@ -7,9 +7,9 @@
 #include "PpuRegisterDefinitions.h"
 #include "Sprite.h"
 #include "ppu-states/IPpuState.h"
-#include "ppu-states/NotVisibleScreenSpaceState.h"
+#include "ppu-states/Rendering.h"
 #include "ppu-states/VerticalBlankState.h"
-#include "ppu-states/VisibleScreenSpaceState.h"
+#include "ppu-states/VerticalBlankStateBegin.h"
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -107,7 +107,7 @@ class Ppu {
 
   std::unique_ptr<IPpuState> mState;
 
-  friend VisibleScreenSpaceState;
-  friend NotVisibleScreenSpaceState;
+  friend Rendering;
   friend VerticalBlankState;
+  friend VerticalBlankStateBegin;
 };
