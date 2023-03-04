@@ -9,7 +9,7 @@ void Controller::Write(uint16_t address) {
 
 uint8_t Controller::Read(uint16_t address) {
   const auto controllerIndex = address & 0x0001;
-  uint8_t data = (controllerBuffer[controllerIndex] & 0x80) > 0;
+  uint8_t data = (controllerBuffer[controllerIndex] & (1 << 7)) > 0;
   controllerBuffer[controllerIndex] <<= 1;
   return data;
 }

@@ -7,8 +7,8 @@ bool ASL::operator()() {
   mCpu->Fetch();
   auto temp = mCpu->fetched << 1;
   mCpu->status.c = (temp & 0xFF00) > 0;
-  mCpu->status.z = (temp & 0x00FF) == 0x00;
-  mCpu->status.n = temp & 0x80;
+  mCpu->status.z = (temp & 0x00FF) == 0;
+  mCpu->status.n = temp & (1 << 7);
 
   if (mCpu->lookup->at(mCpu->opcode).addrMode == &mCpu->addressingModes.imp) {
     mCpu->a = temp & 0x00FF;

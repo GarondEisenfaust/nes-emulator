@@ -72,7 +72,7 @@ void HorizontalBlankState::Execute() {
       } spritePattern;
 
       if (!mPpu.mControlRegister.spriteSize) {
-        if (!(mPpu.mSpriteOnScanline[i].attribute & 0x80)) {
+        if (!(mPpu.mSpriteOnScanline[i].attribute & (1 << 7))) {
           spritePattern.addrLo = (mPpu.mControlRegister.patternSprite << 12) | (mPpu.mSpriteOnScanline[i].id << 4) |
                                  (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y);
 
@@ -82,7 +82,7 @@ void HorizontalBlankState::Execute() {
         }
 
       } else {
-        if (!(mPpu.mSpriteOnScanline[i].attribute & 0x80)) {
+        if (!(mPpu.mSpriteOnScanline[i].attribute & (1 << 7))) {
           if (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y < 8) {
             spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
                                    ((mPpu.mSpriteOnScanline[i].id & 0xFE) << 4) |

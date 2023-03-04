@@ -5,8 +5,8 @@ TXA::TXA(Cpu* cpu) : IOpcode(cpu) {}
 
 bool TXA::operator()() {
   mCpu->a = mCpu->x;
-  mCpu->status.z = mCpu->a == 0x00;
-  mCpu->status.n = mCpu->a & 0x80;
+  mCpu->status.z = mCpu->a == 0;
+  mCpu->status.n = mCpu->a & (1 << 7);
   return 0;
 }
 
