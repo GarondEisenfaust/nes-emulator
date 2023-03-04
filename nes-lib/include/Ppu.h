@@ -47,8 +47,11 @@ class Ppu {
 
   uint8_t* mOamPtr = (uint8_t*)mOam.data();
   uint8_t mOamAddr;
-  std::array<uint8_t, 8> mSpriteShifterPatternLo;
-  std::array<uint8_t, 8> mSpriteShifterPatternHi;
+
+  struct {
+    std::array<uint8_t, 8> low;
+    std::array<uint8_t, 8> high;
+  } mSpriteShifterPattern;
 
  private:
   PixelColor& CalculatePixelColor();

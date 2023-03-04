@@ -37,8 +37,8 @@ void HorizontalBlankState::Execute() {
     std::memset(mPpu.mSpriteOnScanline.data(), 0xFF, 8 * sizeof(ObjectAttributeEntry));
     mPpu.mSpriteCount = 0;
 
-    mPpu.mSpriteShifterPatternLo = {0};
-    mPpu.mSpriteShifterPatternHi = {0};
+    mPpu.mSpriteShifterPattern.low = {0};
+    mPpu.mSpriteShifterPattern.high = {0};
 
     uint8_t nOAMEntry = 0;
 
@@ -114,8 +114,8 @@ void HorizontalBlankState::Execute() {
         spritePattern.bitsLo = ReverseOrder(spritePattern.bitsLo);
         spritePattern.bitsHi = ReverseOrder(spritePattern.bitsHi);
       }
-      mPpu.mSpriteShifterPatternLo[i] = spritePattern.bitsLo;
-      mPpu.mSpriteShifterPatternHi[i] = spritePattern.bitsHi;
+      mPpu.mSpriteShifterPattern.low[i] = spritePattern.bitsLo;
+      mPpu.mSpriteShifterPattern.high[i] = spritePattern.bitsHi;
     }
   }
 }

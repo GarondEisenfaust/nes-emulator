@@ -386,8 +386,8 @@ PixelColor& Ppu::CalculatePixelColor() {
 
     for (uint8_t i = 0; i < mSpriteCount; i++) {
       if (mSpriteOnScanline[i].x == 0) {
-        uint8_t fgPixelLo = (mSpriteShifterPatternLo[i] & (1 << 7)) > 0;
-        uint8_t fgPixelHi = (mSpriteShifterPatternHi[i] & (1 << 7)) > 0;
+        uint8_t fgPixelLo = (mSpriteShifterPattern.low[i] & (1 << 7)) > 0;
+        uint8_t fgPixelHi = (mSpriteShifterPattern.high[i] & (1 << 7)) > 0;
         fgPixel = (fgPixelHi << 1) | fgPixelLo;
 
         fgPalette = (mSpriteOnScanline[i].attribute & 0b11) + 0x04;
@@ -539,8 +539,8 @@ void Ppu::UpdateShifters() {
       if (mSpriteOnScanline[i].x > 0) {
         mSpriteOnScanline[i].x--;
       } else {
-        mSpriteShifterPatternLo[i] <<= 1;
-        mSpriteShifterPatternHi[i] <<= 1;
+        mSpriteShifterPattern.low[i] <<= 1;
+        mSpriteShifterPattern.high[i] <<= 1;
       }
     }
   }

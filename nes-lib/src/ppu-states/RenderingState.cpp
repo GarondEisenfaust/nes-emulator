@@ -13,8 +13,8 @@ void RenderingState::Execute() {
     mPpu.mStatusRegister.verticalBlank = false;
     mPpu.mStatusRegister.spriteOverflow = false;
     mPpu.mStatusRegister.spriteZeroHit = false;
-    mPpu.mSpriteShifterPatternLo = {0};
-    mPpu.mSpriteShifterPatternHi = {0};
+    mPpu.mSpriteShifterPattern.low = {0};
+    mPpu.mSpriteShifterPattern.high = {0};
   }
 
   if (mPpu.mCycle >= 2) {
