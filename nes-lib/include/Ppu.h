@@ -46,7 +46,7 @@ class Ppu {
   bool nmi;
 
   uint8_t* mOamPtr = (uint8_t*)mOam.data();
-  uint8_t mOamAddr = 0x00;
+  uint8_t mOamAddr;
   std::array<uint8_t, 8> mSpriteShifterPatternLo;
   std::array<uint8_t, 8> mSpriteShifterPatternHi;
 
@@ -70,39 +70,39 @@ class Ppu {
   IRenderer& mRenderer;
   std::unique_ptr<ColorPalette> mColorPalette;
 
-  std::array<std::array<uint8_t, 1024>, 2> tblName;
-  std::array<std::array<uint8_t, 4096>, 2> tblPattern;
-  std::array<uint8_t, 32> tblPalette;
+  std::array<std::array<uint8_t, 1024>, 2> mNameTable;
+  std::array<std::array<uint8_t, 4096>, 2> mPatternTable;
+  std::array<uint8_t, 32> mPaletteTable;
 
   StatusRegister mStatusRegister;
   MaskRegister mMaskRegister;
   ControlRegister mControlRegister;
 
-  bool mAddressLatch = false;
-  uint8_t mPpuDataBuffer = 0x00;
+  bool mAddressLatch;
+  uint8_t mPpuDataBuffer;
 
-  LoopyRegister vRamAddr;
-  LoopyRegister tRamAddr;
+  LoopyRegister mVRamAddr;
+  LoopyRegister mTRamAddr;
 
-  uint8_t fineX = 0x00;
+  uint8_t mFineX;
 
   struct {
-    uint8_t nextTileId = 0x00;
-    uint8_t nextTileAttribute = 0x00;
-    uint8_t nextTileLsb = 0x00;
-    uint8_t nextTileMsb = 0x00;
-    uint16_t shifterPatternLow = 0x0000;
-    uint16_t shifterPatternHigh = 0x0000;
-    uint16_t shifterAttributeLow = 0x0000;
-    uint16_t shifterAttributeHigh = 0x0000;
+    uint8_t nextTileId;
+    uint8_t nextTileAttribute;
+    uint8_t nextTileLsb;
+    uint8_t nextTileMsb;
+    uint16_t shifterPatternLow;
+    uint16_t shifterPatternHigh;
+    uint16_t shifterAttributeLow;
+    uint16_t shifterAttributeHigh;
   } mBg;
 
   std::array<ObjectAttributeEntry, 64> mOam;
   std::array<ObjectAttributeEntry, 8> mSpriteOnScanline;
   uint8_t mSpriteCount;
 
-  bool bSpriteZeroHitPossible = false;
-  bool bSpriteZeroBeingRendered = false;
+  bool mSpriteZeroHitPossible;
+  bool mSpriteZeroBeingRendered;
 
   IPpuState* mState;
 

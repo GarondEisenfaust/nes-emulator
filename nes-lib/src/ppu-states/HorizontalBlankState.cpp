@@ -26,7 +26,7 @@ void HorizontalBlankState::Execute() {
   }
 
   if (mPpu.mCycle == 338 || mPpu.mCycle == 340) {
-    mPpu.mBg.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.vRamAddr.reg & 0x0FFF));
+    mPpu.mBg.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.mVRamAddr.reg & 0x0FFF));
   }
 
   if (mPpu.mScanline == -1 && 280 <= mPpu.mCycle && mPpu.mCycle < 305) {
@@ -42,7 +42,7 @@ void HorizontalBlankState::Execute() {
 
     uint8_t nOAMEntry = 0;
 
-    mPpu.bSpriteZeroHitPossible = false;
+    mPpu.mSpriteZeroHitPossible = false;
 
     while (nOAMEntry < 64 && mPpu.mSpriteCount < 9) {
       int16_t diff = (mPpu.mScanline - static_cast<int16_t>(mPpu.mOam[nOAMEntry].y));
@@ -50,7 +50,7 @@ void HorizontalBlankState::Execute() {
       if (0 <= diff && diff < (mPpu.mControlRegister.spriteSize ? 16 : 8)) {
         if (mPpu.mSpriteCount < 8) {
           if (nOAMEntry == 0) {
-            mPpu.bSpriteZeroHitPossible = true;
+            mPpu.mSpriteZeroHitPossible = true;
           }
 
           std::memcpy(&mPpu.mSpriteOnScanline[mPpu.mSpriteCount], &mPpu.mOam[nOAMEntry], sizeof(ObjectAttributeEntry));

@@ -10,11 +10,9 @@ void RenderingState::Execute() {
   }
 
   if (mPpu.mScanline == -1 && mPpu.mCycle == 1) {
-    mPpu.mStatusRegister.verticalBlank = 0;
-    mPpu.mStatusRegister.spriteOverflow = 0;
-
-    mPpu.mStatusRegister.spriteZeroHit = 0;
-
+    mPpu.mStatusRegister.verticalBlank = false;
+    mPpu.mStatusRegister.spriteOverflow = false;
+    mPpu.mStatusRegister.spriteZeroHit = false;
     mPpu.mSpriteShifterPatternLo = {0};
     mPpu.mSpriteShifterPatternHi = {0};
   }

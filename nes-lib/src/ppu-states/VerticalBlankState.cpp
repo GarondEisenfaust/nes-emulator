@@ -6,7 +6,7 @@ VerticalBlankState::VerticalBlankState(Ppu& ppu) : IPpuState(ppu) {}
 
 void VerticalBlankState::Execute() {
   if (mPpu.mScanline == 241 && mPpu.mCycle == 1) {
-    mPpu.mStatusRegister.verticalBlank = 1;
+    mPpu.mStatusRegister.verticalBlank = true;
     if (mPpu.mControlRegister.enableNmi) {
       mPpu.nmi = true;
     }

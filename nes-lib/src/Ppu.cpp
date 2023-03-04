@@ -24,8 +24,8 @@ void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
     case 0x0000:  // Control
     {
       mControlRegister.reg = data;
-      tRamAddr.nameTableX = mControlRegister.nametableX;
-      tRamAddr.nameTableY = mControlRegister.nametableY;
+      mTRamAddr.nameTableX = mControlRegister.nametableX;
+      mTRamAddr.nameTableY = mControlRegister.nametableY;
       break;
     }
     case 0x0001:  // Mask
@@ -41,28 +41,28 @@ void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
       break;
     case 0x0005:  // Scroll
       if (!mAddressLatch) {
-        fineX = data & 0b111;
-        tRamAddr.coarseX = data >> 3;
+        mFineX = data & 0b111;
+        mTRamAddr.coarseX = data >> 3;
         mAddressLatch = true;
       } else {
-        tRamAddr.fineY = data & 0b111;
-        tRamAddr.coarseY = data >> 3;
+        mTRamAddr.fineY = data & 0b111;
+        mTRamAddr.coarseY = data >> 3;
         mAddressLatch = false;
       }
       break;
     case 0x0006:  // PPU Address
       if (!mAddressLatch) {
-        tRamAddr.reg = static_cast<uint16_t>(tRamAddr.reg & 0x00FF) | (static_cast<uint16_t>(data & 0b111111) << 8);
+        mTRamAddr.reg = static_cast<uint16_t>(mTRamAddr.reg & 0x00FF) | (static_cast<uint16_t>(data & 0b111111) << 8);
         mAddressLatch = true;
       } else {
-        tRamAddr.reg = static_cast<uint16_t>(tRamAddr.reg & 0xFF00) | static_cast<uint16_t>(data);
-        vRamAddr = tRamAddr;
+        mTRamAddr.reg = static_cast<uint16_t>(mTRamAddr.reg & 0xFF00) | static_cast<uint16_t>(data);
+        mVRamAddr = mTRamAddr;
         mAddressLatch = false;
       }
       break;
     case 0x0007:  // PPU Data
-      PpuWrite(vRamAddr.reg, data);
-      vRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
+      PpuWrite(mVRamAddr.reg, data);
+      mVRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
       break;
   }
 }
@@ -109,8 +109,8 @@ uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
       }
       case 0x0002: {  // Status
         data = (mStatusRegister.reg & 0xE0) | (mPpuDataBuffer & 0x1F);
-        mStatusRegister.verticalBlank = 0;
-        mAddressLatch = 0;
+        mStatusRegister.verticalBlank = false;
+        mAddressLatch = false;
         break;
       }
       case 0x0003: {  // OAM Address
@@ -128,11 +128,11 @@ uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
       }
       case 0x0007: {  // PPU Data
         data = mPpuDataBuffer;
-        mPpuDataBuffer = PpuRead(vRamAddr.reg);
-        if (vRamAddr.reg >= 0x3F00) {
+        mPpuDataBuffer = PpuRead(mVRamAddr.reg);
+        if (mVRamAddr.reg >= 0x3F00) {
           data = mPpuDataBuffer;
         }
-        vRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
+        mVRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
         break;
       }
     }
@@ -145,36 +145,36 @@ void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   if (mCartridge->PpuWrite(addr, data)) {
     //
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
-    tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
+    mPatternTable[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
     addr &= 0x0FFF;
     if (mCartridge->mMirror == Cartridge::MIRROR::VERTICAL) {
       // Vertical
       if (addr >= 0x0000 && addr <= 0x03FF) {
-        tblName[0][addr & 0x03FF] = data;
+        mNameTable[0][addr & 0x03FF] = data;
       }
       if (addr >= 0x0400 && addr <= 0x07FF) {
-        tblName[1][addr & 0x03FF] = data;
+        mNameTable[1][addr & 0x03FF] = data;
       }
       if (addr >= 0x0800 && addr <= 0x0BFF) {
-        tblName[0][addr & 0x03FF] = data;
+        mNameTable[0][addr & 0x03FF] = data;
       }
       if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        tblName[1][addr & 0x03FF] = data;
+        mNameTable[1][addr & 0x03FF] = data;
       }
     } else if (mCartridge->mMirror == Cartridge::MIRROR::HORIZONTAL) {
       // Horizontal
       if (addr >= 0x0000 && addr <= 0x03FF) {
-        tblName[0][addr & 0x03FF] = data;
+        mNameTable[0][addr & 0x03FF] = data;
       }
       if (addr >= 0x0400 && addr <= 0x07FF) {
-        tblName[0][addr & 0x03FF] = data;
+        mNameTable[0][addr & 0x03FF] = data;
       }
       if (addr >= 0x0800 && addr <= 0x0BFF) {
-        tblName[1][addr & 0x03FF] = data;
+        mNameTable[1][addr & 0x03FF] = data;
       }
       if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        tblName[1][addr & 0x03FF] = data;
+        mNameTable[1][addr & 0x03FF] = data;
       }
     }
   } else if (0x3F00 <= addr && addr <= 0x3FFF) {
@@ -191,7 +191,7 @@ void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
     if (addr == 0x001C) {
       addr = 0x000C;
     }
-    tblPalette[addr] = data;
+    mPaletteTable[addr] = data;
   }
 }
 
@@ -202,36 +202,36 @@ uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
   if (mCartridge->PpuRead(addr, data)) {
     //
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
-    data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
+    data = mPatternTable[(addr & 0x1000) >> 12][addr & 0x0FFF];
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
     addr &= 0x0FFF;
     if (mCartridge->mMirror == Cartridge::MIRROR::VERTICAL) {
       // Vertical
       if (addr >= 0x0000 && addr <= 0x03FF) {
-        data = tblName[0][addr & 0x03FF];
+        data = mNameTable[0][addr & 0x03FF];
       }
       if (addr >= 0x0400 && addr <= 0x07FF) {
-        data = tblName[1][addr & 0x03FF];
+        data = mNameTable[1][addr & 0x03FF];
       }
       if (addr >= 0x0800 && addr <= 0x0BFF) {
-        data = tblName[0][addr & 0x03FF];
+        data = mNameTable[0][addr & 0x03FF];
       }
       if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        data = tblName[1][addr & 0x03FF];
+        data = mNameTable[1][addr & 0x03FF];
       }
     } else if (mCartridge->mMirror == Cartridge::MIRROR::HORIZONTAL) {
       // Horizontal
       if (addr >= 0x0000 && addr <= 0x03FF) {
-        data = tblName[0][addr & 0x03FF];
+        data = mNameTable[0][addr & 0x03FF];
       }
       if (addr >= 0x0400 && addr <= 0x07FF) {
-        data = tblName[0][addr & 0x03FF];
+        data = mNameTable[0][addr & 0x03FF];
       }
       if (addr >= 0x0800 && addr <= 0x0BFF) {
-        data = tblName[1][addr & 0x03FF];
+        data = mNameTable[1][addr & 0x03FF];
       }
       if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        data = tblName[1][addr & 0x03FF];
+        data = mNameTable[1][addr & 0x03FF];
       }
     }
   } else if (0x3F00 <= addr && addr <= 0x3FFF) {
@@ -248,7 +248,7 @@ uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
     if (addr == 0x001C) {
       addr = 0x000C;
     }
-    data = tblPalette[addr] & (mMaskRegister.grayscale ? 0x30 : 0x3F);
+    data = mPaletteTable[addr] & (mMaskRegister.grayscale ? 0x30 : 0x3F);
   }
   return data;
 }
@@ -288,7 +288,7 @@ PixelColor& Ppu::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
 }
 
 void Ppu::Reset() {
-  fineX = 0x00;
+  mFineX = 0x00;
   mAddressLatch = 0x00;
   mPpuDataBuffer = 0x00;
   mScanline = 0;
@@ -304,8 +304,8 @@ void Ppu::Reset() {
   mStatusRegister.reg = 0x00;
   mMaskRegister.reg = 0x00;
   mControlRegister.reg = 0x00;
-  vRamAddr.reg = 0x0000;
-  tRamAddr.reg = 0x0000;
+  mVRamAddr.reg = 0x0000;
+  mTRamAddr.reg = 0x0000;
   mState = &mRenderingState;
 }
 
@@ -365,7 +365,7 @@ PixelColor& Ppu::CalculatePixelColor() {
   uint8_t bgPalette = 0x00;
 
   if (mMaskRegister.renderBackground) {
-    uint16_t bitMux = 0x8000 >> fineX;
+    uint16_t bitMux = 0x8000 >> mFineX;
 
     uint8_t p0Pixel = (mBg.shifterPatternLow & bitMux) > 0;
     uint8_t p1Pixel = (mBg.shifterPatternHigh & bitMux) > 0;
@@ -382,20 +382,20 @@ PixelColor& Ppu::CalculatePixelColor() {
   uint8_t fgPriority = 0x00;
 
   if (mMaskRegister.renderSprites) {
-    bSpriteZeroBeingRendered = false;
+    mSpriteZeroBeingRendered = false;
 
     for (uint8_t i = 0; i < mSpriteCount; i++) {
       if (mSpriteOnScanline[i].x == 0) {
-        uint8_t fgPixelLo = (mSpriteShifterPatternLo[i] & 0x80) > 0;
-        uint8_t fgPixelHi = (mSpriteShifterPatternHi[i] & 0x80) > 0;
+        uint8_t fgPixelLo = (mSpriteShifterPatternLo[i] & (1 << 7)) > 0;
+        uint8_t fgPixelHi = (mSpriteShifterPatternHi[i] & (1 << 7)) > 0;
         fgPixel = (fgPixelHi << 1) | fgPixelLo;
 
-        fgPalette = (mSpriteOnScanline[i].attribute & 0x03) + 0x04;
-        fgPriority = (mSpriteOnScanline[i].attribute & 0x20) == 0;
+        fgPalette = (mSpriteOnScanline[i].attribute & 0b11) + 0x04;
+        fgPriority = (mSpriteOnScanline[i].attribute & (1 << 5)) == 0;
 
         if (fgPixel != 0) {
           if (i == 0) {
-            bSpriteZeroBeingRendered = true;
+            mSpriteZeroBeingRendered = true;
           }
 
           break;
@@ -425,15 +425,15 @@ PixelColor& Ppu::CalculatePixelColor() {
       palette = bgPalette;
     }
 
-    if (bSpriteZeroHitPossible && bSpriteZeroBeingRendered) {
+    if (mSpriteZeroHitPossible && mSpriteZeroBeingRendered) {
       if (mMaskRegister.renderBackground & mMaskRegister.renderSprites) {
         if (~(mMaskRegister.renderBackgroundLeft | mMaskRegister.renderSpritesLeft)) {
           if (mCycle >= 9 && mCycle < 258) {
-            mStatusRegister.spriteZeroHit = 1;
+            mStatusRegister.spriteZeroHit = true;
           }
         } else {
           if (mCycle >= 1 && mCycle < 258) {
-            mStatusRegister.spriteZeroHit = 1;
+            mStatusRegister.spriteZeroHit = true;
           }
         }
       }
@@ -447,31 +447,31 @@ void Ppu::VRamFetch() {
   switch ((mCycle - 1) % 8) {
     case 0: {
       LoadBackgroundShifters();
-      mBg.nextTileId = PpuRead(0x2000 | (vRamAddr.reg & 0x0FFF));
+      mBg.nextTileId = PpuRead(0x2000 | (mVRamAddr.reg & 0x0FFF));
       break;
     }
     case 2: {
-      mBg.nextTileAttribute = PpuRead(0x23C0 | (vRamAddr.nameTableY << 11) | (vRamAddr.nameTableX << 10) |
-                                      ((vRamAddr.coarseY >> 2) << 3) | (vRamAddr.coarseX >> 2));
+      mBg.nextTileAttribute = PpuRead(0x23C0 | (mVRamAddr.nameTableY << 11) | (mVRamAddr.nameTableX << 10) |
+                                      ((mVRamAddr.coarseY >> 2) << 3) | (mVRamAddr.coarseX >> 2));
 
-      if (vRamAddr.coarseY & 0x02) {
+      if (mVRamAddr.coarseY & 0b10) {
         mBg.nextTileAttribute >>= 4;
       }
-      if (vRamAddr.coarseX & 0x02) {
+      if (mVRamAddr.coarseX & 0b10) {
         mBg.nextTileAttribute >>= 2;
       }
-      mBg.nextTileAttribute &= 0x03;
+      mBg.nextTileAttribute &= 0b11;
       break;
     }
     case 4: {
       auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBg.nextTileId) << 4) +
-                        (vRamAddr.fineY + 0);
+                        (mVRamAddr.fineY + 0);
       mBg.nextTileLsb = PpuRead(toReadFrom);
       break;
     }
     case 6: {
       auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBg.nextTileId) << 4) +
-                        (vRamAddr.fineY + 8);
+                        (mVRamAddr.fineY + 8);
       mBg.nextTileMsb = PpuRead(toReadFrom);
       break;
     }
@@ -484,17 +484,17 @@ void Ppu::VRamFetch() {
 
 void Ppu::IncrementScrollY() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    if (vRamAddr.fineY < 7) {
-      vRamAddr.fineY++;
+    if (mVRamAddr.fineY < 7) {
+      mVRamAddr.fineY++;
     } else {
-      vRamAddr.fineY = 0;
-      if (vRamAddr.coarseY == 29) {
-        vRamAddr.coarseY = 0;
-        vRamAddr.nameTableY = !vRamAddr.nameTableY;
-      } else if (vRamAddr.coarseY == 31) {
-        vRamAddr.coarseY = 0;
+      mVRamAddr.fineY = 0;
+      if (mVRamAddr.coarseY == 29) {
+        mVRamAddr.coarseY = 0;
+        mVRamAddr.nameTableY = !mVRamAddr.nameTableY;
+      } else if (mVRamAddr.coarseY == 31) {
+        mVRamAddr.coarseY = 0;
       } else {
-        vRamAddr.coarseY++;
+        mVRamAddr.coarseY++;
       }
     }
   }
@@ -502,27 +502,27 @@ void Ppu::IncrementScrollY() {
 
 void Ppu::IncrementScrollX() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    if (vRamAddr.coarseX == 31) {
-      vRamAddr.coarseX = 0;
-      vRamAddr.nameTableX = !vRamAddr.nameTableX;
+    if (mVRamAddr.coarseX == 31) {
+      mVRamAddr.coarseX = 0;
+      mVRamAddr.nameTableX = !mVRamAddr.nameTableX;
     } else {
-      vRamAddr.coarseX++;
+      mVRamAddr.coarseX++;
     }
   }
 };
 
 void Ppu::TransferAddressY() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    vRamAddr.fineY = tRamAddr.fineY;
-    vRamAddr.nameTableY = tRamAddr.nameTableY;
-    vRamAddr.coarseY = tRamAddr.coarseY;
+    mVRamAddr.fineY = mTRamAddr.fineY;
+    mVRamAddr.nameTableY = mTRamAddr.nameTableY;
+    mVRamAddr.coarseY = mTRamAddr.coarseY;
   }
 };
 
 void Ppu::TransferAddressX() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    vRamAddr.nameTableX = tRamAddr.nameTableX;
-    vRamAddr.coarseX = tRamAddr.coarseX;
+    mVRamAddr.nameTableX = mTRamAddr.nameTableX;
+    mVRamAddr.coarseX = mTRamAddr.coarseX;
   }
 };
 
