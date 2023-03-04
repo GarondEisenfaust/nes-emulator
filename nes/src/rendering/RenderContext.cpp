@@ -10,8 +10,6 @@
 #include <iostream>
 #include <thread>
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-
 RenderContext::RenderContext() : mShaderProgram() {
   glfwInit();
 
@@ -20,7 +18,7 @@ RenderContext::RenderContext() : mShaderProgram() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-  mWindow = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
+  mWindow = glfwCreateWindow(WIDTH, HEIGHT, APPLICATION_NAME, nullptr, nullptr);
   glfwMakeContextCurrent(mWindow);
 
   IMGUI_CHECKVERSION();
@@ -36,8 +34,6 @@ RenderContext::RenderContext() : mShaderProgram() {
       (*callback)(window, key, scancode, action, mods);
     }
   });
-
-  glewExperimental = GL_TRUE;
   glewInit();
 
   glfwGetFramebufferSize(mWindow, &mWidth, &mHeight);
@@ -81,8 +77,8 @@ void RenderContext::GameLoop(std::function<void()> loop) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     mShaderProgram.Use();
-    mShaderProgram.SetUniform("height", 960);
-    mShaderProgram.SetUniform("width", 1024);
+    mShaderProgram.SetUniform("height", HEIGHT);
+    mShaderProgram.SetUniform("width", WIDTH);
 
     for (auto vertexArray : mVertexArrays) {
       vertexArray->Draw();

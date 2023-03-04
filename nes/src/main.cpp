@@ -95,9 +95,8 @@ int main() {
     using namespace std::chrono_literals;
     auto diff = (1000ms / 60);
     renderContext.GameLoop([&]() {
+      static auto next = std::chrono::system_clock::now();
       controller.SetControllerBitBasedOnInput();
-      auto next = std::chrono::system_clock::now() + diff;
-
       auto colorData = grid.MakeColorData();
       colors->SetData(colorData);
       registerWindow.Render();
@@ -111,6 +110,7 @@ int main() {
       } else {
         RenderCompleteFrame(bus, grid);
         std::this_thread::sleep_until(next);
+        next += diff;
       }
     });
   }
