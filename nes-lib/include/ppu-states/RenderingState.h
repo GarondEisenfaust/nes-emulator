@@ -5,9 +5,4 @@ class RenderingState : public IPpuState {
  public:
   RenderingState(Ppu& ppu);
   void Execute() override;
-
- private:
-  void IncrementScrollY();
-  void TransferAddressX();
-  void TransferAddressY();
 };

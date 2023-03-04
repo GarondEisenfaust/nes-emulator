@@ -10,8 +10,5 @@ void VerticalBlankState::Execute() {
     if (mPpu.mControlRegister.enableNmi) {
       mPpu.nmi = true;
     }
-
-  } else if ((mPpu.mScanline >= -1 && mPpu.mScanline < 240)) {
-    mPpu.Transition<RenderingState>();
   }
 }

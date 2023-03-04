@@ -6,6 +6,7 @@
 #include "PixelColor.h"
 #include "PpuRegisterDefinitions.h"
 #include "Sprite.h"
+#include "ppu-states/HorizontalBlankState.h"
 #include "ppu-states/IPpuState.h"
 #include "ppu-states/RenderingState.h"
 #include "ppu-states/VerticalBlankState.h"
@@ -53,14 +54,14 @@ class Ppu {
   PixelColor& CalculatePixelColor();
 
   void VRamFetch();
+  void IncrementScrollY();
   void IncrementScrollX();
-  void LoadBackgroundShifters();
+  void TransferAddressY();
+  void TransferAddressX();
   void UpdateShifters();
+  void LoadBackgroundShifters();
 
-  template <class STATE>
-  void Transition() {
-    mState = std::make_unique<STATE>(*this);
-  }
+  void Transition();
 
   Cartridge* mCartridge;
   int16_t mCycle;
@@ -103,8 +104,13 @@ class Ppu {
   bool bSpriteZeroHitPossible = false;
   bool bSpriteZeroBeingRendered = false;
 
-  std::unique_ptr<IPpuState> mState;
+  IPpuState* mState;
+
+  RenderingState mRenderingState;
+  VerticalBlankState mVerticalBlankState;
+  HorizontalBlankState mHorizontalBlankState;
 
   friend RenderingState;
   friend VerticalBlankState;
+  friend HorizontalBlankState;
 };

@@ -9,7 +9,15 @@
 #include <vector>
 
 Ppu::Ppu(IRenderer& renderer)
-    : mCycle(0), mScanline(0), mColorPalette(std::move(MakePixelColors())), mRenderer(renderer), nmi(false) {}
+    : mCycle(0),
+      mScanline(0),
+      mColorPalette(std::move(MakePixelColors())),
+      mRenderer(renderer),
+      nmi(false),
+      mRenderingState(*this),
+      mVerticalBlankState(*this),
+      mHorizontalBlankState(*this),
+      mState(&mRenderingState) {}
 
 void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
   switch (addr) {
@@ -265,6 +273,7 @@ void Ppu::Clock() {
       mRenderer.CommitFrame();
     }
   }
+  Transition();
 }
 
 void Ppu::ConnectBus(Bus* bus) {
@@ -297,7 +306,7 @@ void Ppu::Reset() {
   mControlRegister.reg = 0x00;
   vRamAddr.reg = 0x0000;
   tRamAddr.reg = 0x0000;
-  Transition<RenderingState>();
+  mState = &mRenderingState;
 }
 
 void Ppu::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette) {
@@ -473,6 +482,24 @@ void Ppu::VRamFetch() {
   }
 }
 
+void Ppu::IncrementScrollY() {
+  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
+    if (vRamAddr.fineY < 7) {
+      vRamAddr.fineY++;
+    } else {
+      vRamAddr.fineY = 0;
+      if (vRamAddr.coarseY == 29) {
+        vRamAddr.coarseY = 0;
+        vRamAddr.nameTableY = !vRamAddr.nameTableY;
+      } else if (vRamAddr.coarseY == 31) {
+        vRamAddr.coarseY = 0;
+      } else {
+        vRamAddr.coarseY++;
+      }
+    }
+  }
+};
+
 void Ppu::IncrementScrollX() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
     if (vRamAddr.coarseX == 31) {
@@ -481,6 +508,21 @@ void Ppu::IncrementScrollX() {
     } else {
       vRamAddr.coarseX++;
     }
+  }
+};
+
+void Ppu::TransferAddressY() {
+  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
+    vRamAddr.fineY = tRamAddr.fineY;
+    vRamAddr.nameTableY = tRamAddr.nameTableY;
+    vRamAddr.coarseY = tRamAddr.coarseY;
+  }
+};
+
+void Ppu::TransferAddressX() {
+  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
+    vRamAddr.nameTableX = tRamAddr.nameTableX;
+    vRamAddr.coarseX = tRamAddr.coarseX;
   }
 };
 
@@ -511,3 +553,13 @@ void Ppu::LoadBackgroundShifters() {
   mBg.shifterAttributeLow = (mBg.shifterAttributeLow & 0xFF00) | ((mBg.nextTileAttribute & 0b01) ? 0xFF : 0x00);
   mBg.shifterAttributeHigh = (mBg.shifterAttributeHigh & 0xFF00) | ((mBg.nextTileAttribute & 0b10) ? 0xFF : 0x00);
 };
+
+void Ppu::Transition() {
+  if (mScanline >= 240) {
+    mState = &mVerticalBlankState;
+  } else if (mCycle >= 256) {
+    mState = &mHorizontalBlankState;
+  } else {
+    mState = &mRenderingState;
+  }
+}
