@@ -38,7 +38,12 @@ void MakeOneStep(Bus& bus) {
   } while (bus.mCpu->cycles <= 0);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cout << "You have to specify a ROM to load!" << std::endl;
+    return 1;
+  }
+
   RenderContext renderContext;
   Grid grid(WIDTH, HEIGHT, 256, 240);
   grid.Init();
@@ -66,8 +71,8 @@ int main() {
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
 
-  auto workDir = std::filesystem::current_path().string();
-  Cartridge cartridge(fmt::format("{}/roms/smb.nes", workDir));
+  std::string romPath = argv[1];
+  Cartridge cartridge(romPath);
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
