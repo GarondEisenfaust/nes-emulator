@@ -6,7 +6,7 @@
 
 class Shader {
  public:
-  Shader(std::string_view path, GLuint shaderType);
+  Shader(const char* code, GLuint shaderType);
   ~Shader();
   GLuint GetHandle() const;
   bool WasSuccessful() const;

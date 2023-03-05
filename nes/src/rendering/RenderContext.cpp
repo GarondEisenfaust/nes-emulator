@@ -1,5 +1,7 @@
 #include "rendering/RenderContext.h"
 #include "Definitions.h"
+#include "FragmentShader.h"
+#include "VertexShader.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -40,8 +42,8 @@ RenderContext::RenderContext() : mShaderProgram() {
   glViewport(0, 0, mWidth, mHeight);
 
   auto workDir = std::filesystem::current_path().string();
-  Shader fragmentShader(workDir + "/shaders/FragmentShader.frag", GL_FRAGMENT_SHADER);
-  Shader vertexShader(workDir + "/shaders/VertexShader.vert", GL_VERTEX_SHADER);
+  Shader fragmentShader(FragmentShaderCode, GL_FRAGMENT_SHADER);
+  Shader vertexShader(VertexShaderCode, GL_VERTEX_SHADER);
 
   mShaderProgram.AttachShader(fragmentShader);
   mShaderProgram.AttachShader(vertexShader);

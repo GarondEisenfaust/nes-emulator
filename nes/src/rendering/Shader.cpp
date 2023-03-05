@@ -12,11 +12,9 @@ std::string ReadFile(std::string_view path) {
   return buffer.str();
 }
 
-Shader::Shader(std::string_view path, GLuint shaderType) {
-  mShaderCode = ReadFile(path);
-  auto* codePointer = mShaderCode.c_str();
+Shader::Shader(const char* code, GLuint shaderType) {
   mShaderType = shaderType;
-  auto [success, handle] = Compile(codePointer, mShaderType);
+  auto [success, handle] = Compile(code, mShaderType);
   mSuccessful = success;
   mHandle = handle;
 }

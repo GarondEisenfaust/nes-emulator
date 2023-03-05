@@ -1,4 +1,5 @@
 set(PIP_CMD ${VENV_PATH}/bin/pip)
+set(PYTHON_CMD ${VENV_PATH}/bin/python)
 set(REQUIREMENTS_TXT ${CMAKE_CURRENT_SOURCE_DIR}/requirements.txt)
 
 if(NOT EXISTS ${PIP_CMD})
