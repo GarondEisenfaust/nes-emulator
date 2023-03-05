@@ -34,7 +34,7 @@ void HorizontalBlankState::Execute() {
   }
 
   if (mPpu.mCycle == 257 && 0 <= mPpu.mScanline) {
-    std::memset(mPpu.mSpriteOnScanline.data(), 0xFF, 8 * sizeof(ObjectAttributeEntry));
+    mPpu.mSpriteOnScanline = {0xFF};
     mPpu.mSpriteCount = 0;
 
     mPpu.mSpriteShifterPattern.low = {0};
@@ -52,8 +52,7 @@ void HorizontalBlankState::Execute() {
           if (nOAMEntry == 0) {
             mPpu.mSpriteZeroHitPossible = true;
           }
-
-          std::memcpy(&mPpu.mSpriteOnScanline[mPpu.mSpriteCount], &mPpu.mOam[nOAMEntry], sizeof(ObjectAttributeEntry));
+          mPpu.mSpriteOnScanline[mPpu.mSpriteCount] = mPpu.mOam[nOAMEntry];
           mPpu.mSpriteCount++;
         }
       }
@@ -84,23 +83,23 @@ void HorizontalBlankState::Execute() {
       } else {
         if (!(mPpu.mSpriteOnScanline[i].attribute & (1 << 7))) {
           if (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y < 8) {
-            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
-                                   ((mPpu.mSpriteOnScanline[i].id & 0xFE) << 4) |
-                                   ((mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
+            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0b01) << 12) |
+                                   ((mPpu.mSpriteOnScanline[i].id & ~0b01) << 4) |
+                                   ((mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) % 8);
           } else {
-            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
-                                   (((mPpu.mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
-                                   ((mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
+            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0b01) << 12) |
+                                   (((mPpu.mSpriteOnScanline[i].id & ~0b01) + 1) << 4) |
+                                   ((mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) % 8);
           }
         } else {
           if (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y < 8) {
-            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
-                                   (((mPpu.mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
-                                   (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
+            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0b01) << 12) |
+                                   (((mPpu.mSpriteOnScanline[i].id & ~0b01) + 1) << 4) |
+                                   (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) % 8);
           } else {
-            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0x01) << 12) |
-                                   ((mPpu.mSpriteOnScanline[i].id & 0xFE) << 4) |
-                                   (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) & 0x07);
+            spritePattern.addrLo = ((mPpu.mSpriteOnScanline[i].id & 0b01) << 12) |
+                                   ((mPpu.mSpriteOnScanline[i].id & ~0b01) << 4) |
+                                   (7 - (mPpu.mScanline - mPpu.mSpriteOnScanline[i].y) % 8);
           }
         }
       }

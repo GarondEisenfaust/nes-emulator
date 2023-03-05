@@ -316,20 +316,21 @@ void Ppu::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette)
   constexpr auto size = width * height * channels;
   std::array<unsigned char, size> image;
 
-  for (uint16_t nTileY = 0; nTileY < 16; nTileY++) {
-    for (uint16_t nTileX = 0; nTileX < 16; nTileX++) {
-      const uint16_t nOffset = nTileY * 256 + nTileX * 16;
+  for (uint16_t tileY = 0; tileY < 16; tileY++) {
+    for (uint16_t tileX = 0; tileX < 16; tileX++) {
+      const uint16_t offset = tileY * 256 + tileX * 16;
       for (uint16_t row = 0; row < 8; row++) {
-        uint8_t tile_lsb = PpuRead(i * 0x1000 + nOffset + row + 0x0000);
-        uint8_t tile_msb = PpuRead(i * 0x1000 + nOffset + row + 0x0008);
+        auto address = i * 0x1000 + offset + row;
+        uint8_t tileLsb = PpuRead(address + 0);
+        uint8_t tileMsb = PpuRead(address + 8);
 
         for (uint16_t col = 0; col < 8; col++) {
-          const uint8_t pixel = (tile_lsb & 0x01) + (tile_msb & 0x01);
-          tile_lsb >>= 1;
-          tile_msb >>= 1;
+          const uint8_t pixel = (tileLsb & 0b01) + (tileMsb & 0b01);
+          tileLsb >>= 1;
+          tileMsb >>= 1;
 
-          const auto x = nTileX * 8 + (7 - col);
-          const auto y = nTileY * 8 + row;
+          const auto x = tileX * 8 + (7 - col);
+          const auto y = tileY * 8 + row;
 
           const auto index = (y * width + x) * 3;
           const auto& color = GetColorFromPalette(palette, pixel);
@@ -360,40 +361,40 @@ void Ppu::WriteColorPaletteToImage(const char* path) {
   lodepng::encode(path, image.data(), paletteSize, numPalettes, LCT_RGB);
 }
 
+uint8_t ReadValueFromBackgroundShifter(uint16_t highShifter, uint16_t lowShifter, uint16_t bitMux) {
+  bool lowBit = (lowShifter & bitMux) > 0;
+  bool highBit = (highShifter & bitMux) > 0;
+  return (highBit << 1) | lowBit;
+}
+
 PixelColor& Ppu::CalculatePixelColor() {
-  uint8_t bgPixel = 0x00;
-  uint8_t bgPalette = 0x00;
+  uint8_t backgroundPixel = 0x00;
+  uint8_t backgroundPalette = 0x00;
 
   if (mMaskRegister.renderBackground) {
-    uint16_t bitMux = 0x8000 >> mFineX;
-
-    uint8_t p0Pixel = (mBg.shifterPatternLow & bitMux) > 0;
-    uint8_t p1Pixel = (mBg.shifterPatternHigh & bitMux) > 0;
-
-    bgPixel = (p1Pixel << 1) | p0Pixel;
-
-    uint8_t bgPal0 = (mBg.shifterAttributeLow & bitMux) > 0;
-    uint8_t bgPal1 = (mBg.shifterAttributeHigh & bitMux) > 0;
-    bgPalette = (bgPal1 << 1) | bgPal0;
+    constexpr uint16_t mostSignificantBit = 1 << 15;
+    uint16_t bitMux = mostSignificantBit >> mFineX;
+    backgroundPixel = ReadValueFromBackgroundShifter(mBg.shifterPatternHigh, mBg.shifterPatternLow, bitMux);
+    backgroundPalette = ReadValueFromBackgroundShifter(mBg.shifterAttributeHigh, mBg.shifterAttributeLow, bitMux);
   }
 
-  uint8_t fgPixel = 0x00;
-  uint8_t fgPalette = 0x00;
-  uint8_t fgPriority = 0x00;
+  uint8_t foregroudPixel = 0x00;
+  uint8_t foregroudPalette = 0x00;
+  bool foregroudPriority = 0x00;
 
   if (mMaskRegister.renderSprites) {
     mSpriteZeroBeingRendered = false;
 
     for (uint8_t i = 0; i < mSpriteCount; i++) {
       if (mSpriteOnScanline[i].x == 0) {
-        uint8_t fgPixelLo = (mSpriteShifterPattern.low[i] & (1 << 7)) > 0;
-        uint8_t fgPixelHi = (mSpriteShifterPattern.high[i] & (1 << 7)) > 0;
-        fgPixel = (fgPixelHi << 1) | fgPixelLo;
+        bool foregroudPixelPixelLow = (mSpriteShifterPattern.low[i] & (1 << 7)) > 0;
+        bool foregroudPixelPixelHigh = (mSpriteShifterPattern.high[i] & (1 << 7)) > 0;
+        foregroudPixel = (foregroudPixelPixelHigh << 1) | foregroudPixelPixelLow;
 
-        fgPalette = (mSpriteOnScanline[i].attribute & 0b11) + 0x04;
-        fgPriority = (mSpriteOnScanline[i].attribute & (1 << 5)) == 0;
+        foregroudPalette = (mSpriteOnScanline[i].attribute & 0b11) + 0x04;
+        foregroudPriority = (mSpriteOnScanline[i].attribute & (1 << 5)) == 0;
 
-        if (fgPixel != 0) {
+        if (foregroudPixel != 0) {
           if (i == 0) {
             mSpriteZeroBeingRendered = true;
           }
@@ -407,35 +408,27 @@ PixelColor& Ppu::CalculatePixelColor() {
   uint8_t pixel = 0x00;
   uint8_t palette = 0x00;
 
-  if (bgPixel == 0 && fgPixel == 0) {
-    pixel = 0x00;
-    palette = 0x00;
-  } else if (bgPixel == 0 && fgPixel > 0) {
-    pixel = fgPixel;
-    palette = fgPalette;
-  } else if (bgPixel > 0 && fgPixel == 0) {
-    pixel = bgPixel;
-    palette = bgPalette;
-  } else if (bgPixel > 0 && fgPixel > 0) {
-    if (fgPriority) {
-      pixel = fgPixel;
-      palette = fgPalette;
+  if (backgroundPixel == 0 && foregroudPixel > 0) {
+    pixel = foregroudPixel;
+    palette = foregroudPalette;
+  } else if (backgroundPixel > 0 && foregroudPixel == 0) {
+    pixel = backgroundPixel;
+    palette = backgroundPalette;
+  } else if (backgroundPixel > 0 && foregroudPixel > 0) {
+    if (foregroudPriority) {
+      pixel = foregroudPixel;
+      palette = foregroudPalette;
     } else {
-      pixel = bgPixel;
-      palette = bgPalette;
+      pixel = backgroundPixel;
+      palette = backgroundPalette;
     }
 
-    if (mSpriteZeroHitPossible && mSpriteZeroBeingRendered) {
-      if (mMaskRegister.renderBackground & mMaskRegister.renderSprites) {
-        if (~(mMaskRegister.renderBackgroundLeft | mMaskRegister.renderSpritesLeft)) {
-          if (mCycle >= 9 && mCycle < 258) {
-            mStatusRegister.spriteZeroHit = true;
-          }
-        } else {
-          if (mCycle >= 1 && mCycle < 258) {
-            mStatusRegister.spriteZeroHit = true;
-          }
-        }
+    if (mSpriteZeroHitPossible && mSpriteZeroBeingRendered && mMaskRegister.renderBackground &&
+        mMaskRegister.renderSprites) {
+      if (!mMaskRegister.renderBackgroundLeft && !mMaskRegister.renderSpritesLeft && 9 <= mCycle && mCycle < 258) {
+        mStatusRegister.spriteZeroHit = true;
+      } else if (1 <= mCycle && mCycle < 258) {
+        mStatusRegister.spriteZeroHit = true;
       }
     }
   }
@@ -502,7 +495,7 @@ void Ppu::IncrementScrollY() {
 
 void Ppu::IncrementScrollX() {
   if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    if (mVRamAddr.coarseX == 31) {
+    if (mVRamAddr.coarseX >= 31) {
       mVRamAddr.coarseX = 0;
       mVRamAddr.nameTableX = !mVRamAddr.nameTableX;
     } else {
