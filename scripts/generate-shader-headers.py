@@ -1,6 +1,6 @@
 #! /bin/python
 from pathlib import Path
-from sys import argv
+from sys import argv, exit
 
 shader_path = Path(argv[1])
 output_path = Path(argv[2])
@@ -11,6 +11,16 @@ const char* {name}Code = R"======(
 {code}
 )======";
 """
+
+if shader_path.is_dir():
+  print("The shader path {shader_path} leads to a directory".format(
+      shader_path=shader_path))
+  exit(1)
+
+if output_path.is_dir():
+  print("The output path {output_path} leads to a directory".format(
+      output_path=output_path))
+  exit(1)
 
 Path(output_path.parent).mkdir(parents=True, exist_ok=True)
 
