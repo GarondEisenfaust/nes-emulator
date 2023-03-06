@@ -15,6 +15,7 @@ include(cmake/python.cmake)
 include(cmake/macros.cmake)
 include(cmake/conan.cmake)
 include(cmake/download_roms.cmake)
+include(cmake/generate_shader_headers.cmake)
 
 option(RUN_TESTS "Build the tests" ON)
 if(RUN_TESTS)

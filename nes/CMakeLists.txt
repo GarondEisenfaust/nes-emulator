@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.14)
+
 set_defaults()
 
+set(SHADER_DIR ${CMAKE_CURRENT_LIST_DIR}/shaders)
 set(SHADER_HEADER_DIR ${CMAKE_BINARY_DIR}/shaders/)
+generate_shader_headers(${SHADER_DIR} ${SHADER_HEADER_DIR} SHADER_HEADERS)
 
 set(SOURCE_FILES
     ${SOURCE_FILES}
+    ${SHADER_HEADERS}
     ${CMAKE_BINARY_DIR}/bindings/imgui_impl_glfw.h
     ${CMAKE_BINARY_DIR}/bindings/imgui_impl_opengl3.h
     ${CMAKE_BINARY_DIR}/bindings/imgui_impl_glfw.cpp
@@ -23,19 +27,3 @@ target_link_libraries(
   PRIVATE CONAN_PKG::glm
   PRIVATE CONAN_PKG::fmt
   PRIVATE CONAN_PKG::imgui)
-
-message(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)
-message(${PROJECT_BINARY_DIR}/shaders)
-
-set(GENERATE_SHADER_HEADERS_SCRIPT
-    ${CMAKE_SOURCE_DIR}/scripts/generate-shader-headers.py)
-set(SHADER_DIR ${CMAKE_CURRENT_LIST_DIR}/shaders)
-
-add_custom_target(
-  generate-shader-headers ALL
-  DEPENDS ${SHADER_DIR}
-  COMMAND ${PYTHON_CMD} ${GENERATE_SHADER_HEADERS_SCRIPT} ${SHADER_DIR}
-          ${SHADER_HEADER_DIR}
-  COMMENT "Generating shaders in ${SHADER_HEADER_DIR}")
-
-add_dependencies(${PROJECT_NAME} generate-shader-headers)
