@@ -12,6 +12,8 @@ const char* {name}Code = R"======(
 )======";
 """
 
+Path(output_path.parent).mkdir(parents=True, exist_ok=True)
+
 with open(shader_path, "r") as shader_file:
   file_name = shader_path.stem
   code = shader_file.read()
