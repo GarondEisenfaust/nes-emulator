@@ -1,18 +1,19 @@
 #pragma once
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+#include "IController.h"
 #include <array>
 #include <cstdint>
 
-class GLFWwindow;
-class Controller {
+class Controller : public IController {
  public:
   Controller(GLFWwindow* window);
+  virtual ~Controller() = default;
+
   void Write(uint16_t address);
   uint8_t Read(uint16_t address);
 
-  void Reset();
-  void SetControllerBitBasedOnInput();
+  void SetControllerBitBasedOnInput(int gamepadIndex);
 
  private:
   union ControllerRegister {
@@ -33,9 +34,10 @@ class Controller {
   std::array<uint8_t, 2> controllerBuffer;
   std::array<ControllerRegister, 2> mControllerRegister;
 
-  GLFWgamepadstate mGamepadState;
+  std::array<GLFWgamepadstate, 2> mGamepadState;
 
+  void Reset(int gamepadIndex);
   bool PressedKeyboard(int keyToCheck);
-  bool PressedGamepad(int buttonToCheck);
-  bool JoystickPositionBetween(int buttonToCheck, float lower, float upper);
+  bool PressedGamepad(int gamepadIndex, int buttonToCheck);
+  bool JoystickPositionBetween(int gamepadIndex, int buttonToCheck, float lower, float upper);
 };

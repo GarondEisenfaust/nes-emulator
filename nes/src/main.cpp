@@ -101,7 +101,9 @@ int main(int argc, char* argv[]) {
     auto diff = (1000ms / 60);
     renderContext.GameLoop([&]() {
       static auto next = std::chrono::system_clock::now();
-      controller.SetControllerBitBasedOnInput();
+      controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_1);
+      controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_2);
+
       auto colorData = grid.MakeColorData();
       colors->SetData(colorData);
       registerWindow.Render();

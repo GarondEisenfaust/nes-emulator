@@ -1,7 +1,7 @@
 #pragma once
 #include "Cartridge.h"
-#include "Controller.h"
 #include "Cpu.h"
+#include "IController.h"
 #include "Ppu.h"
 #include "RAM.h"
 #include <cstdint>
@@ -19,7 +19,7 @@ class Bus {
   void CpuWrite(uint16_t addr, uint8_t data);
   uint8_t CpuRead(uint16_t addr, bool bReadOnly = false);
 
-  void ConnectController(Controller* controller);
+  void ConnectController(IController* controller);
 
   Cpu* mCpu;
   Ppu* mPpu;
@@ -28,7 +28,7 @@ class Bus {
   Cartridge* mCartridge;
   uint32_t mSystemClockCounter;
   RAM& mRam;
-  Controller* mController;
+  IController* mController;
 
   struct {
     uint8_t page = 0x00;

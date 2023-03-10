@@ -35,7 +35,7 @@ uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
   return data;
 }
 
-void Bus::ConnectController(Controller* controller) { mController = controller; }
+void Bus::ConnectController(IController* controller) { mController = controller; }
 
 void Bus::InsertCartridge(Cartridge* cartridge) {
   mCartridge = cartridge;
