@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
 
-  std::string romPath = argv[1];
+  std::string romPath = "./roms/smb.nes";
   Cartridge cartridge(romPath);
   bus.InsertCartridge(&cartridge);
   bus.Reset();
