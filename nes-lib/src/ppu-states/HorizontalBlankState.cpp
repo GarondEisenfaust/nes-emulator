@@ -39,24 +39,25 @@ void HorizontalBlankState::Execute() {
 
     mPpu.mSpriteShifterPattern.low = {0};
     mPpu.mSpriteShifterPattern.high = {0};
-
-    uint8_t nOAMEntry = 0;
-
     mPpu.mSpriteZeroHitPossible = false;
 
-    while (nOAMEntry < 64 && mPpu.mSpriteCount < 9) {
-      int16_t diff = (mPpu.mScanline - static_cast<int16_t>(mPpu.mOam[nOAMEntry].y));
-
-      if (0 <= diff && diff < (mPpu.mControlRegister.spriteSize ? 16 : 8)) {
-        if (mPpu.mSpriteCount < 8) {
-          if (nOAMEntry == 0) {
-            mPpu.mSpriteZeroHitPossible = true;
-          }
-          mPpu.mSpriteOnScanline[mPpu.mSpriteCount] = mPpu.mOam[nOAMEntry];
-          mPpu.mSpriteCount++;
-        }
+    for (uint8_t i = 0; i < mPpu.mOam.size(); i++) {
+      if (mPpu.mSpriteCount >= mPpu.mSpriteOnScanline.size() + 1) {
+        break;
       }
-      nOAMEntry++;
+      int16_t diff = mPpu.mScanline - mPpu.mOam[i].y;
+
+      if (!(0 <= diff && diff < (mPpu.mControlRegister.spriteSize ? 16 : 8))) {
+        continue;
+      }
+      if (mPpu.mSpriteCount >= mPpu.mSpriteOnScanline.size()) {
+        continue;
+      }
+      if (i == 0) {
+        mPpu.mSpriteZeroHitPossible = true;
+      }
+      mPpu.mSpriteOnScanline[mPpu.mSpriteCount] = mPpu.mOam[i];
+      mPpu.mSpriteCount++;
     }
     mPpu.mStatusRegister.spriteOverflow = (mPpu.mSpriteCount > 8);
   }
