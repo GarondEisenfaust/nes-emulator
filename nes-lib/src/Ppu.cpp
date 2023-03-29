@@ -20,6 +20,7 @@ Ppu::Ppu(IRenderer& renderer)
       mState(&mRenderingState) {}
 
 void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
+  addr &= PPU_RAM_SIZE;
   switch (addr) {
     case 0x0000:  // Control
     {
@@ -68,6 +69,7 @@ void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
 }
 
 uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
+  addr &= PPU_RAM_SIZE;
   uint8_t data = 0x00;
   if (bReadOnly) {
     switch (addr) {

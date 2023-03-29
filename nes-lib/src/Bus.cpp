@@ -11,7 +11,7 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (RAM_START <= addr && addr <= RAM_END) {
     mRam[addr & RAM_SIZE] = data;
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
-    mPpu->CpuWrite(addr & PPU_RAM_SIZE, data);
+    mPpu->CpuWrite(addr, data);
   } else if (addr == 0x4014) {
     Dma(data);
   } else if (0x4016 <= addr && addr <= 0x4017) {
@@ -26,7 +26,7 @@ uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
   } else if (RAM_START <= addr && addr <= RAM_END) {
     data = mRam[addr & RAM_SIZE];
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
-    data = mPpu->CpuRead(addr & PPU_RAM_SIZE, bReadOnly);
+    data = mPpu->CpuRead(addr, bReadOnly);
   } else if (0x4016 <= addr && addr <= 0x4017) {
     data = mController->Read(addr);
   }
