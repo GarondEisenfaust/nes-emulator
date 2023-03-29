@@ -4,6 +4,7 @@
 #include "Cpu.h"
 #include "Definitions.h"
 #include "Ppu.h"
+#include "Ram.h"
 #include "fmt/format.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -61,7 +62,7 @@ int main(int argc, char* argv[]) {
 
   renderContext.AddVertexArray(vertexArray);
 
-  auto ram = std::make_unique<RAM>();
+  auto ram = std::make_unique<Ram>();
   Bus bus(*ram);
   Cpu cpu;
   Ppu ppu(grid);

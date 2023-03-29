@@ -3,13 +3,13 @@
 #include "Cpu.h"
 #include "IController.h"
 #include "Ppu.h"
-#include "RAM.h"
 #include <cstdint>
 #include <memory>
+#include "Ram.h"
 
 class Bus {
  public:
-  Bus(RAM& ram);
+  Bus(Ram& ram);
   ~Bus();
 
   void InsertCartridge(Cartridge* cartridge);
@@ -27,7 +27,7 @@ class Bus {
  private:
   Cartridge* mCartridge;
   uint32_t mClockCounter;
-  RAM& mRam;
+  Ram& mRam;
   IController* mController;
   void Dma(uint8_t page);
 };
