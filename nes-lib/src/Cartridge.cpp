@@ -17,8 +17,8 @@ struct Header {
 
 uint8_t DetermineMapperId(const Header& header) { return ((header.mapper2 >> 4) << 4) | (header.mapper1 >> 4); }
 
-Cartridge::MIRROR DetermineMirror(const Header& header) {
-  return (header.mapper1 & 0x01) ? Cartridge::VERTICAL : Cartridge::HORIZONTAL;
+MirrorMode DetermineMirror(const Header& header) {
+  return (header.mapper1 & 0x01) ? MirrorMode::Vertical : MirrorMode::Horizontal;
 }
 
 Cartridge::Cartridge(const std::string& path) {

@@ -1,4 +1,5 @@
 #pragma once
+#include "MirrorMode.h"
 #include "mapper/IMapper.h"
 #include <cstdint>
 #include <memory>
@@ -11,8 +12,6 @@ class Cartridge {
     bool hasRead;
   };
 
-  enum MIRROR { HORIZONTAL, VERTICAL, ONESCREEN_LO, ONESCREEN_HI };
-
   Cartridge(const std::string& path);
   virtual ~Cartridge() = default;
 
@@ -22,7 +21,7 @@ class Cartridge {
   bool PpuRead(uint16_t address, uint8_t& data);
   bool PpuWrite(uint16_t address, uint8_t data);
   void Reset();
-  MIRROR mMirror;
+  MirrorMode mMirror;
 
  private:
   std::vector<uint8_t> mProgramMemory;

@@ -2,6 +2,7 @@
 #include "Bus.h"
 #include "Definitions.h"
 #include "IRenderer.h"
+#include "Mirror.h"
 #include "lodepng.h"
 #include <cstdlib>
 #include <cstring>
@@ -149,36 +150,7 @@ void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
     mPatternTable[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
-    addr &= 0x0FFF;
-    if (mCartridge->mMirror == Cartridge::MIRROR::VERTICAL) {
-      // Vertical
-      if (addr >= 0x0000 && addr <= 0x03FF) {
-        mNameTable[0][addr & 0x03FF] = data;
-      }
-      if (addr >= 0x0400 && addr <= 0x07FF) {
-        mNameTable[1][addr & 0x03FF] = data;
-      }
-      if (addr >= 0x0800 && addr <= 0x0BFF) {
-        mNameTable[0][addr & 0x03FF] = data;
-      }
-      if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        mNameTable[1][addr & 0x03FF] = data;
-      }
-    } else if (mCartridge->mMirror == Cartridge::MIRROR::HORIZONTAL) {
-      // Horizontal
-      if (addr >= 0x0000 && addr <= 0x03FF) {
-        mNameTable[0][addr & 0x03FF] = data;
-      }
-      if (addr >= 0x0400 && addr <= 0x07FF) {
-        mNameTable[0][addr & 0x03FF] = data;
-      }
-      if (addr >= 0x0800 && addr <= 0x0BFF) {
-        mNameTable[1][addr & 0x03FF] = data;
-      }
-      if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        mNameTable[1][addr & 0x03FF] = data;
-      }
-    }
+    Mirror(mNameTable, mCartridge->mMirror, addr) = data;
   } else if (0x3F00 <= addr && addr <= 0x3FFF) {
     addr &= 0x001F;
     if (addr == 0x0010) {
@@ -206,36 +178,7 @@ uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
   } else if (0x0000 <= addr && addr <= 0x1FFF) {
     data = mPatternTable[(addr & 0x1000) >> 12][addr & 0x0FFF];
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
-    addr &= 0x0FFF;
-    if (mCartridge->mMirror == Cartridge::MIRROR::VERTICAL) {
-      // Vertical
-      if (addr >= 0x0000 && addr <= 0x03FF) {
-        data = mNameTable[0][addr & 0x03FF];
-      }
-      if (addr >= 0x0400 && addr <= 0x07FF) {
-        data = mNameTable[1][addr & 0x03FF];
-      }
-      if (addr >= 0x0800 && addr <= 0x0BFF) {
-        data = mNameTable[0][addr & 0x03FF];
-      }
-      if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        data = mNameTable[1][addr & 0x03FF];
-      }
-    } else if (mCartridge->mMirror == Cartridge::MIRROR::HORIZONTAL) {
-      // Horizontal
-      if (addr >= 0x0000 && addr <= 0x03FF) {
-        data = mNameTable[0][addr & 0x03FF];
-      }
-      if (addr >= 0x0400 && addr <= 0x07FF) {
-        data = mNameTable[0][addr & 0x03FF];
-      }
-      if (addr >= 0x0800 && addr <= 0x0BFF) {
-        data = mNameTable[1][addr & 0x03FF];
-      }
-      if (addr >= 0x0C00 && addr <= 0x0FFF) {
-        data = mNameTable[1][addr & 0x03FF];
-      }
-    }
+    data = Mirror(mNameTable, mCartridge->mMirror, addr);
   } else if (0x3F00 <= addr && addr <= 0x3FFF) {
     addr &= 0x001F;
     if (addr == 0x0010) {
