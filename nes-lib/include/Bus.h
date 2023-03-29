@@ -26,15 +26,8 @@ class Bus {
 
  private:
   Cartridge* mCartridge;
-  uint32_t mSystemClockCounter;
+  uint32_t mClockCounter;
   RAM& mRam;
   IController* mController;
-
-  struct {
-    uint8_t page = 0x00;
-    uint8_t addr = 0x00;
-    uint8_t data = 0x00;
-    bool transfer = false;
-    bool dummy = false;
-  } mDma;
+  void Dma(uint8_t page);
 };

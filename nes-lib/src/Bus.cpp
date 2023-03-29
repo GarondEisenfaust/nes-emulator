@@ -2,7 +2,7 @@
 #include "Definitions.h"
 #include "IRenderer.h"
 
-Bus::Bus(RAM& ram) : mRam(ram), mSystemClockCounter(0) {}
+Bus::Bus(RAM& ram) : mRam(ram), mClockCounter(0) {}
 
 Bus::~Bus() {}
 
@@ -12,10 +12,8 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
     mRam[addr & RAM_SIZE] = data;
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     mPpu->CpuWrite(addr & PPU_RAM_SIZE, data);
-  } else if (0x4014 == addr) {
-    mDma.page = data;
-    mDma.addr = 0x00;
-    mDma.transfer = true;
+  } else if (addr == 0x4014) {
+    Dma(data);
   } else if (0x4016 <= addr && addr <= 0x4017) {
     mController->Write(addr);
   }
@@ -46,38 +44,13 @@ void Bus::Reset() {
   mCartridge->Reset();
   mCpu->Reset();
   mPpu->Reset();
-  mSystemClockCounter = 0;
-  mDma.page = 0x00;
-  mDma.addr = 0x00;
-  mDma.data = 0x00;
-  mDma.dummy = true;
-  mDma.transfer = false;
+  mClockCounter = 0;
 }
 
 void Bus::Clock() {
   mPpu->Clock();
-  if (mSystemClockCounter % 3 == 0) {
-    if (mDma.transfer) {
-      if (mDma.dummy) {
-        if (mSystemClockCounter % 2 == 1) {
-          mDma.dummy = false;
-        }
-      } else {
-        if (mSystemClockCounter % 2 == 0) {
-          mDma.data = CpuRead(mDma.page << 8 | mDma.addr);
-        }
-        if (mSystemClockCounter % 2 == 1) {
-          mPpu->mOamPtr[mDma.addr] = mDma.data;
-          mDma.addr++;
-          if (mDma.addr == 0x00) {
-            mDma.transfer = false;
-            mDma.dummy = true;
-          }
-        }
-      }
-    } else {
-      mCpu->Clock();
-    }
+  if (mClockCounter % 3 == 0) {
+    mCpu->Clock();
   }
 
   if (mPpu->nmi) {
@@ -85,5 +58,16 @@ void Bus::Clock() {
     mCpu->NonMaskableInterrupt();
   }
 
-  mSystemClockCounter++;
+  mClockCounter++;
+}
+
+void Bus::Dma(uint8_t page) {
+  uint16_t address = page << 8;
+
+  for (auto i = 0; i < 256; i++) {
+    mPpu->mOamPtr[i] = CpuRead(address);
+    address++;
+  }
+
+  mCpu->cycles += 513 + (mClockCounter % 2);
 }
