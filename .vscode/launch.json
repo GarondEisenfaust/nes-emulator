@@ -4,20 +4,18 @@
     {
       "name": "nes debug",
       "type": "cppdbg",
+      "cwd": "${command:cmake.buildDirectory}/bin",
       "request": "launch",
-      "program": "${workspaceFolder}/build/bin/nes",
-      "args": ["roms/smb.nes"],
-      "cwd": "${workspaceFolder}/build/bin",
+      "program": "${command:cmake.buildDirectory}/bin/nes",
       "preLaunchTask": "${defaultBuildTask}"
     },
     {
       "name": "nes",
       "type": "cppdbg",
+      "cwd": "${command:cmake.buildDirectory}/bin",
       "request": "launch",
       "noDebug": true,
-      "program": "${workspaceFolder}/build/bin/nes",
-      "args": ["roms/smb.nes"],
-      "cwd": "${workspaceFolder}/build/bin",
+      "program": "${command:cmake.buildDirectory}/bin/nes",
       "preLaunchTask": "${defaultBuildTask}"
     }
   ]

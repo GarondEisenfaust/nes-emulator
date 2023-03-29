@@ -80,6 +80,7 @@
     "regex": "cpp"
   },
   "cmake.configureOnOpen": false,
+  "cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",
   "[cpp]": {
     "editor.defaultFormatter": "xaver.clang-format"
   },
