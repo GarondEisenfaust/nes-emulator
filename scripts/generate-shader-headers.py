@@ -5,7 +5,6 @@ from sys import argv, exit
 shader_path = Path(argv[1])
 output_path = Path(argv[2])
 
-suffix = ".h"
 template = """#pragma once
 const char* {name}Code = R"======(
 {code}
