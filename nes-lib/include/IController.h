@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 
+#define CONTROLLER_START 0x4016
+#define CONTROLLER_END 0x4017
+
 class IController {
  public:
   virtual ~IController() = default;

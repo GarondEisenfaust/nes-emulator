@@ -60,44 +60,24 @@ Cartridge::Cartridge(const std::string& path) {
   romStream.close();
 }
 
-bool Cartridge::CpuRead(uint16_t address, uint8_t& data) {
-  uint32_t mappedAddr = 0;
-  if (mMapper->CpuMapRead(address, mappedAddr)) {
-    data = mProgramMemory[mappedAddr];
-    return true;
-  } else {
-    return false;
-  }
+uint8_t Cartridge::CpuRead(uint16_t address) {
+  auto mappedAddr = mMapper->CpuMapRead(address);
+  return mProgramMemory[mappedAddr];
 }
 
-bool Cartridge::CpuWrite(uint16_t address, uint8_t data) {
-  uint32_t mappedAddr = 0;
-  if (mMapper->CpuMapWrite(address, mappedAddr, data)) {
-    mProgramMemory[mappedAddr] = data;
-    return true;
-  } else {
-    return false;
-  }
+void Cartridge::CpuWrite(uint16_t address, uint8_t data) {
+  auto mappedAddr = mMapper->CpuMapWrite(address);
+  mProgramMemory[mappedAddr] = data;
 }
 
-bool Cartridge::PpuRead(uint16_t address, uint8_t& data) {
-  uint32_t mappedAddr = 0;
-  if (mMapper->PpuMapRead(address, mappedAddr)) {
-    data = mCharacterMemory[mappedAddr];
-    return true;
-  } else {
-    return false;
-  }
+uint8_t Cartridge::PpuRead(uint16_t address) {
+  auto mappedAddr = mMapper->PpuMapRead(address);
+  return mCharacterMemory[mappedAddr];
 }
 
-bool Cartridge::PpuWrite(uint16_t address, uint8_t data) {
-  uint32_t mappedAddr = 0;
-  if (mMapper->PpuMapWrite(address, mappedAddr)) {
-    mCharacterMemory[mappedAddr] = data;
-    return true;
-  } else {
-    return false;
-  }
+void Cartridge::PpuWrite(uint16_t address, uint8_t data) {
+  uint32_t mappedAddr = mMapper->PpuMapWrite(address);
+  mCharacterMemory[mappedAddr] = data;
 }
 
 void Cartridge::Reset() {

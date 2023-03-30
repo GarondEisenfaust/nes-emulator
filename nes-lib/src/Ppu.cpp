@@ -145,10 +145,8 @@ uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
 
 void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   addr &= 0x3FFF;
-  if (mCartridge->PpuWrite(addr, data)) {
-    //
-  } else if (0x0000 <= addr && addr <= 0x1FFF) {
-    mPatternTable[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
+  if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
+    mCartridge->PpuWrite(addr, data);
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
     Mirror(mNameTable, mCartridge->mMirror, addr) = data;
   } else if (0x3F00 <= addr && addr <= 0x3FFF) {
@@ -173,10 +171,8 @@ uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
   uint8_t data = 0x00;
   addr &= 0x3FFF;
 
-  if (mCartridge->PpuRead(addr, data)) {
-    //
-  } else if (0x0000 <= addr && addr <= 0x1FFF) {
-    data = mPatternTable[(addr & 0x1000) >> 12][addr & 0x0FFF];
+  if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
+    data = mCartridge->PpuRead(addr);
   } else if (0x2000 <= addr && addr <= 0x3EFF) {
     data = Mirror(mNameTable, mCartridge->mMirror, addr);
   } else if (0x3F00 <= addr && addr <= 0x3FFF) {

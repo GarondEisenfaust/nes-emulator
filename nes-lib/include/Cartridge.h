@@ -5,6 +5,12 @@
 #include <memory>
 #include <vector>
 
+#define CPU_CARTRIDGE_START 0x8000
+#define CPU_CARTRIDGE_END 0xFFFF
+
+#define PPU_CARTRIDGE_START 0x0000
+#define PPU_CARTRIDGE_END 0x1FFF
+
 class Cartridge {
  public:
   struct ReadResult {
@@ -15,11 +21,11 @@ class Cartridge {
   Cartridge(const std::string& path);
   virtual ~Cartridge() = default;
 
-  bool CpuRead(uint16_t address, uint8_t& data);
-  bool CpuWrite(uint16_t address, uint8_t data);
+  uint8_t CpuRead(uint16_t address);
+  void CpuWrite(uint16_t address, uint8_t data);
+  uint8_t PpuRead(uint16_t address);
+  void PpuWrite(uint16_t address, uint8_t data);
 
-  bool PpuRead(uint16_t address, uint8_t& data);
-  bool PpuWrite(uint16_t address, uint8_t data);
   void Reset();
   MirrorMode mMirror;
 

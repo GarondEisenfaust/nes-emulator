@@ -21,8 +21,6 @@
 class Bus;
 class Grid;
 
-using PatternMemory = std::array<std::array<uint8_t, 128 * 128>, 2>;
-
 class Ppu {
  public:
   Ppu(IRenderer& renderer);
@@ -74,7 +72,6 @@ class Ppu {
   std::unique_ptr<ColorPalette> mColorPalette;
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
-  std::array<std::array<uint8_t, 4096>, 2> mPatternTable;
   std::array<uint8_t, 32> mPaletteTable;
 
   StatusRegister mStatusRegister;

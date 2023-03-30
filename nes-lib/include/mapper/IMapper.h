@@ -13,11 +13,11 @@ class IMapper {
  public:
   virtual ~IMapper() = default;
 
-  virtual bool CpuMapRead(uint16_t address, uint32_t& mappedAddr) = 0;
-  virtual bool CpuMapWrite(uint16_t address, uint32_t& mappedAddr, uint8_t data) = 0;
+  virtual uint32_t CpuMapRead(uint16_t address) = 0;
+  virtual uint32_t CpuMapWrite(uint16_t address) = 0;
 
-  virtual bool PpuMapRead(uint16_t address, uint32_t& mappedAddr) = 0;
-  virtual bool PpuMapWrite(uint16_t address, uint32_t& mappedAddr) = 0;
+  virtual uint32_t PpuMapRead(uint16_t address) = 0;
+  virtual uint32_t PpuMapWrite(uint16_t address) = 0;
 
   virtual void Reset() = 0;
 };
