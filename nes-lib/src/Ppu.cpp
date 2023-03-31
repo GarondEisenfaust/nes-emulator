@@ -143,6 +143,23 @@ uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
   return data;
 }
 
+uint16_t DetermineFramePaletteAddress(uint16_t addr) {
+  addr &= 0x001F;
+  if (addr == 0x0010) {
+    addr = 0x0000;
+  }
+  if (addr == 0x0014) {
+    addr = 0x0004;
+  }
+  if (addr == 0x0018) {
+    addr = 0x0008;
+  }
+  if (addr == 0x001C) {
+    addr = 0x000C;
+  }
+  return addr;
+}
+
 void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   addr &= 0x3FFF;
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
@@ -150,20 +167,8 @@ void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
     Mirror(mNameTable, mCartridge->mMirror, addr) = data;
   } else if (FRAME_PALETTE_START <= addr && addr <= FRAME_PALETTE_END) {
-    addr &= 0x001F;
-    if (addr == 0x0010) {
-      addr = 0x0000;
-    }
-    if (addr == 0x0014) {
-      addr = 0x0004;
-    }
-    if (addr == 0x0018) {
-      addr = 0x0008;
-    }
-    if (addr == 0x001C) {
-      addr = 0x000C;
-    }
-    mPaletteTable[addr] = data;
+    addr = DetermineFramePaletteAddress(addr);
+    mFramePalette[addr] = data;
   }
 }
 
@@ -176,20 +181,8 @@ uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
   } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
     data = Mirror(mNameTable, mCartridge->mMirror, addr);
   } else if (FRAME_PALETTE_START <= addr && addr <= FRAME_PALETTE_END) {
-    addr &= 0x001F;
-    if (addr == 0x0010) {
-      addr = 0x0000;
-    }
-    if (addr == 0x0014) {
-      addr = 0x0004;
-    }
-    if (addr == 0x0018) {
-      addr = 0x0008;
-    }
-    if (addr == 0x001C) {
-      addr = 0x000C;
-    }
-    data = mPaletteTable[addr] & (mMaskRegister.grayscale ? 0x30 : 0x3F);
+    addr = DetermineFramePaletteAddress(addr);
+    data = mFramePalette[addr] & (mMaskRegister.grayscale ? 0x30 : 0x3F);
   }
   return data;
 }
@@ -369,7 +362,7 @@ PixelInfo Ppu::DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPix
       result.palette = backgroundPixelInfo.palette;
     }
 
-    if (mSpriteZeroHitPossible && mSpriteZeroBeingRendered && mMaskRegister.renderBackground &&
+    if (mSpriteOneBeingRendered && mSpriteZeroBeingRendered && mMaskRegister.renderBackground &&
         mMaskRegister.renderSprites) {
       if (!mMaskRegister.renderBackgroundLeft && !mMaskRegister.renderSpritesLeft && 9 <= mCycle && mCycle < 258) {
         mStatusRegister.spriteZeroHit = true;

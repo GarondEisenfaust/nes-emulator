@@ -26,7 +26,6 @@
 #define FRAME_PALETTE_END 0x3FFF
 
 class Bus;
-class Grid;
 
 class Ppu {
  public:
@@ -68,12 +67,12 @@ class Ppu {
   void TransferAddressX();
   void UpdateShifters();
   void LoadBackgroundShifters();
+  void Transition();
+
   BackgroundPixelInfo CalculateBackgroundPixelInfo();
   ForegroundPixelInfo CalculateForegroundPixelInfo();
   PixelInfo DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPixelInfo,
                                      const ForegroundPixelInfo& foregroundPixelInfo);
-
-  void Transition();
 
   Cartridge* mCartridge;
   int16_t mCycle;
@@ -83,7 +82,7 @@ class Ppu {
   std::unique_ptr<ColorPalette> mColorPalette;
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
-  std::array<uint8_t, 32> mPaletteTable;
+  std::array<uint8_t, 32> mFramePalette;
 
   StatusRegister mStatusRegister;
   MaskRegister mMaskRegister;
@@ -112,7 +111,7 @@ class Ppu {
   std::array<ObjectAttributeEntry, 8> mSpriteOnScanline;
   uint8_t mSpriteCount;
 
-  bool mSpriteZeroHitPossible;
+  bool mSpriteOneBeingRendered;
   bool mSpriteZeroBeingRendered;
 
   IPpuState* mState;

@@ -4,36 +4,36 @@
 
 uint8_t& MirrorHorizontal(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr) {
   auto truncated = addr & 0x0FFF;
+  bool nameTableIndex;
   if (0x0000 <= truncated && truncated <= 0x03FF) {
-    return nameTable[0][truncated & 0x03FF];
+    nameTableIndex = 0;
+  } else if (0x0400 <= truncated && truncated <= 0x07FF) {
+    nameTableIndex = 0;
+  } else if (0x0800 <= truncated && truncated <= 0x0BFF) {
+    nameTableIndex = 1;
+  } else if (0x0C00 <= truncated && truncated <= 0x0FFF) {
+    nameTableIndex = 1;
+  } else {
+    throw std::runtime_error(fmt::format("The address {:#06x} is not in the nametable address range!", addr));
   }
-  if (0x0400 <= truncated && truncated <= 0x07FF) {
-    return nameTable[0][truncated & 0x03FF];
-  }
-  if (0x0800 <= truncated && truncated <= 0x0BFF) {
-    return nameTable[1][truncated & 0x03FF];
-  }
-  if (0x0C00 <= truncated && truncated <= 0x0FFF) {
-    return nameTable[1][truncated & 0x03FF];
-  }
-  throw std::runtime_error(fmt::format("The address {:#06x} is not in the nametable address range!", addr));
+  return nameTable[nameTableIndex][truncated & 0x03FF];
 }
 
 uint8_t& MirrorVertical(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr) {
   auto truncated = addr & 0x0FFF;
+  bool nameTableIndex;
   if (0x0000 <= truncated && truncated <= 0x03FF) {
-    return nameTable[0][truncated & 0x03FF];
+    nameTableIndex = 0;
+  } else if (0x0400 <= truncated && truncated <= 0x07FF) {
+    nameTableIndex = 1;
+  } else if (0x0800 <= truncated && truncated <= 0x0BFF) {
+    nameTableIndex = 0;
+  } else if (0x0C00 <= truncated && truncated <= 0x0FFF) {
+    nameTableIndex = 1;
+  } else {
+    throw std::runtime_error(fmt::format("The address {:#06x} is not in the nametable address range!", addr));
   }
-  if (0x0400 <= truncated && truncated <= 0x07FF) {
-    return nameTable[1][truncated & 0x03FF];
-  }
-  if (0x0800 <= truncated && truncated <= 0x0BFF) {
-    return nameTable[0][truncated & 0x03FF];
-  }
-  if (0x0C00 <= truncated && truncated <= 0x0FFF) {
-    return nameTable[1][truncated & 0x03FF];
-  }
-  throw std::runtime_error(fmt::format("The address {:#06x} is not in the nametable address range!", addr));
+  return nameTable[nameTableIndex][truncated & 0x03FF];
 }
 
 uint8_t& Mirror(std::array<std::array<uint8_t, 1024>, 2>& nameTable, MirrorMode mirror, uint16_t addr) {
