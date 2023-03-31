@@ -16,7 +16,6 @@ Ppu::Ppu(IRenderer& renderer)
       mScanline(0),
       mColorPalette(std::move(MakePixelColors())),
       mRenderer(renderer),
-      nmi(false),
       mRenderingState(*this),
       mVerticalBlankState(*this),
       mHorizontalBlankState(*this),
@@ -118,8 +117,8 @@ uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
   return data;
 }
 
-uint16_t DetermineFramePaletteAddress(uint16_t addr) {
-  addr &= 0x001F;
+uint16_t Ppu::DetermineFramePaletteAddress(uint16_t addr) {
+  addr %= mFramePalette.size();
   if (addr == 0x0010) {
     addr = 0x0000;
   }
@@ -136,7 +135,6 @@ uint16_t DetermineFramePaletteAddress(uint16_t addr) {
 }
 
 void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
-  addr &= 0x3FFF;
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
     mCartridge->PpuWrite(addr, data);
   } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
@@ -149,8 +147,6 @@ void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
 
 uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
   uint8_t data = 0x00;
-  addr &= 0x3FFF;
-
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
     data = mCartridge->PpuRead(addr);
   } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
@@ -192,9 +188,11 @@ void Ppu::ConnectBus(Bus* bus) {
 
 PixelColor& Ppu::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
   auto address = FRAME_PALETTE_START + (palette << 2) + pixel;
-  auto index = PpuRead(address) & 0x3F;
+  auto index = PpuRead(address);
   return mColorPalette->at(index);
 }
+
+void Ppu::NonMaskableInterrupt() { mBus->NonMaskableInterrupt(); }
 
 void Ppu::Reset() {
   mFineX = 0x00;
@@ -295,7 +293,7 @@ ForegroundPixelInfo Ppu::CalculateForegroundPixelInfo() {
   if (!mMaskRegister.renderSprites) {
     return result;
   }
-  mSpriteZeroBeingRendered = false;
+  mSpriteZero.beingRendered = false;
 
   for (uint8_t i = 0; i < mSpriteCount; i++) {
     if (mSpriteOnScanline[i].x != 0) {
@@ -312,7 +310,7 @@ ForegroundPixelInfo Ppu::CalculateForegroundPixelInfo() {
       continue;
     }
     if (i == 0) {
-      mSpriteZeroBeingRendered = true;
+      mSpriteZero.beingRendered = true;
     }
     break;
   }
@@ -337,7 +335,7 @@ PixelInfo Ppu::DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPix
       result.palette = backgroundPixelInfo.palette;
     }
 
-    if (mSpriteOneBeingRendered && mSpriteZeroBeingRendered && mMaskRegister.renderBackground &&
+    if (mSpriteZero.onScanline && mSpriteZero.beingRendered && mMaskRegister.renderBackground &&
         mMaskRegister.renderSprites) {
       if (!mMaskRegister.renderBackgroundLeft && !mMaskRegister.renderSpritesLeft && 9 <= mCycle && mCycle < 258) {
         mStatusRegister.spriteZeroHit = true;
@@ -459,10 +457,10 @@ void Ppu::UpdateShifters() {
   for (int i = 0; i < mSpriteCount; i++) {
     if (mSpriteOnScanline[i].x > 0) {
       mSpriteOnScanline[i].x--;
-    } else {
-      mSpriteShifterPattern.low[i] <<= 1;
-      mSpriteShifterPattern.high[i] <<= 1;
+      continue;
     }
+    mSpriteShifterPattern.low[i] <<= 1;
+    mSpriteShifterPattern.high[i] <<= 1;
   }
 }
 

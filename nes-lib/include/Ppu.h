@@ -43,18 +43,13 @@ class Ppu {
   void Reset();
 
   PixelColor& GetColorFromPalette(uint8_t palette, uint8_t pixel);
+  void NonMaskableInterrupt();
+
   void WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette);
   void WriteColorPaletteToImage(const char* path);
 
-  bool nmi;
-
   uint8_t* mOamPtr = (uint8_t*)mOam.data();
   uint8_t mOamAddr;
-
-  struct {
-    std::array<uint8_t, 8> low;
-    std::array<uint8_t, 8> high;
-  } mSpriteShifterPattern;
 
  private:
   PixelColor& CalculatePixelColor();
@@ -72,6 +67,7 @@ class Ppu {
   ForegroundPixelInfo CalculateForegroundPixelInfo();
   PixelInfo DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPixelInfo,
                                      const ForegroundPixelInfo& foregroundPixelInfo);
+  uint16_t DetermineFramePaletteAddress(uint16_t addr);
 
   Cartridge* mCartridge;
   int16_t mCycle;
@@ -96,6 +92,11 @@ class Ppu {
   uint8_t mFineX;
 
   struct {
+    std::array<uint8_t, 8> low;
+    std::array<uint8_t, 8> high;
+  } mSpriteShifterPattern;
+
+  struct {
     uint8_t nextTileId;
     uint8_t nextTileAttribute;
     uint8_t nextTileLsb;
@@ -110,8 +111,10 @@ class Ppu {
   std::array<ObjectAttributeEntry, 8> mSpriteOnScanline;
   uint8_t mSpriteCount;
 
-  bool mSpriteOneBeingRendered;
-  bool mSpriteZeroBeingRendered;
+  struct {
+    bool onScanline;
+    bool beingRendered;
+  } mSpriteZero;
 
   IPpuState* mState;
 

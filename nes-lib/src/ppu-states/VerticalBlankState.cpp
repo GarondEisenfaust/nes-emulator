@@ -1,4 +1,5 @@
 #include "ppu-states/VerticalBlankState.h"
+#include "Bus.h"
 #include "Ppu.h"
 #include <cstring>
 
@@ -10,6 +11,6 @@ void VerticalBlankState::Execute() {
   }
   mPpu.mStatusRegister.verticalBlank = true;
   if (mPpu.mControlRegister.enableNmi) {
-    mPpu.nmi = true;
+    mPpu.NonMaskableInterrupt();
   }
 }

@@ -39,7 +39,7 @@ void HorizontalBlankState::Execute() {
 
     mPpu.mSpriteShifterPattern.low = {0};
     mPpu.mSpriteShifterPattern.high = {0};
-    mPpu.mSpriteOneBeingRendered = false;
+    mPpu.mSpriteZero.onScanline = false;
 
     for (uint8_t i = 0; i < mPpu.mOam.size(); i++) {
       if (mPpu.mSpriteCount >= mPpu.mSpriteOnScanline.size() + 1) {
@@ -54,7 +54,7 @@ void HorizontalBlankState::Execute() {
         continue;
       }
       if (i == 0) {
-        mPpu.mSpriteOneBeingRendered = true;
+        mPpu.mSpriteZero.onScanline = true;
       }
       mPpu.mSpriteOnScanline[mPpu.mSpriteCount] = mPpu.mOam[i];
       mPpu.mSpriteCount++;

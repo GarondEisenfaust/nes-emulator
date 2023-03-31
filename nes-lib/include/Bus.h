@@ -3,9 +3,9 @@
 #include "Cpu.h"
 #include "IController.h"
 #include "Ppu.h"
+#include "Ram.h"
 #include <cstdint>
 #include <memory>
-#include "Ram.h"
 
 class Bus {
  public:
@@ -20,6 +20,7 @@ class Bus {
   uint8_t CpuRead(uint16_t addr, bool bReadOnly = false);
 
   void ConnectController(IController* controller);
+  void NonMaskableInterrupt();
 
   Cpu* mCpu;
   Ppu* mPpu;

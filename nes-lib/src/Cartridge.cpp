@@ -33,7 +33,7 @@ Cartridge::Cartridge(const std::string& path) {
     return;
   }
 
-  romStream.read((char*)&header, sizeof(Header));
+  romStream.read(reinterpret_cast<char*>(&header), sizeof(Header));
   if (header.mapper1 & 0x04) {
     romStream.seekg(512, std::ios_base::cur);
   }
@@ -43,12 +43,12 @@ Cartridge::Cartridge(const std::string& path) {
 
   mProgramBanks = header.programRomChunks;
   mProgramMemory.resize(mProgramBanks * 16384);
-  romStream.read((char*)mProgramMemory.data(), mProgramMemory.size());
+  romStream.read(reinterpret_cast<char*>(mProgramMemory.data()), mProgramMemory.size());
 
   mCharacterBanks = header.characterRomChunks;
   auto banksToAllocate = mCharacterBanks > 0 ? mCharacterBanks : 1;
   mCharacterMemory.resize(banksToAllocate * 8192);
-  romStream.read((char*)mCharacterMemory.data(), mCharacterMemory.size());
+  romStream.read(reinterpret_cast<char*>(mCharacterMemory.data()), mCharacterMemory.size());
 
   mMapper = std::make_unique<Mapper000>(mProgramBanks, mCharacterBanks);
   mImageValid = true;
