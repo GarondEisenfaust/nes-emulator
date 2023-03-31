@@ -13,12 +13,13 @@ void Cpu::ConnectBus(Bus* bus) {
 }
 
 uint8_t Cpu::Read(uint16_t addr) { return mBus->CpuRead(addr); }
+void Cpu::Write(uint16_t addr, uint8_t data) { mBus->CpuWrite(addr, data); }
+
 uint8_t Cpu::PopFromStack() {
   stackPointer++;
   return Read(STACK_BEGIN + stackPointer);
 }
 
-void Cpu::Write(uint16_t addr, uint8_t data) { mBus->CpuWrite(addr, data); }
 void Cpu::PushToStack(uint8_t data) {
   Write(STACK_BEGIN + stackPointer, data);
   stackPointer--;

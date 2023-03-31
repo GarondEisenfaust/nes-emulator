@@ -9,5 +9,6 @@ uint16_t IAddressingMode::Read16BitAddress(uint32_t& address) {
   address++;
   auto hi = mCpu->mBus->CpuRead(address, true);
   address++;
+
   return static_cast<uint16_t>(hi << 8) | lo;
 }

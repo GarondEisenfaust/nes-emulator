@@ -18,8 +18,8 @@ class Cpu {
   virtual ~Cpu() = default;
 
   uint8_t Read(uint16_t addr);
-  uint8_t PopFromStack();
   virtual void Write(uint16_t addr, uint8_t data);
+  uint8_t PopFromStack();
   virtual void PushToStack(uint8_t data);
 
   void Interrupt();
