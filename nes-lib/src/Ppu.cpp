@@ -147,9 +147,9 @@ void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   addr &= 0x3FFF;
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
     mCartridge->PpuWrite(addr, data);
-  } else if (0x2000 <= addr && addr <= 0x3EFF) {
+  } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
     Mirror(mNameTable, mCartridge->mMirror, addr) = data;
-  } else if (0x3F00 <= addr && addr <= 0x3FFF) {
+  } else if (FRAME_PALETTE_START <= addr && addr <= FRAME_PALETTE_END) {
     addr &= 0x001F;
     if (addr == 0x0010) {
       addr = 0x0000;
@@ -173,9 +173,9 @@ uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
 
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
     data = mCartridge->PpuRead(addr);
-  } else if (0x2000 <= addr && addr <= 0x3EFF) {
+  } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
     data = Mirror(mNameTable, mCartridge->mMirror, addr);
-  } else if (0x3F00 <= addr && addr <= 0x3FFF) {
+  } else if (FRAME_PALETTE_START <= addr && addr <= FRAME_PALETTE_END) {
     addr &= 0x001F;
     if (addr == 0x0010) {
       addr = 0x0000;
@@ -308,60 +308,65 @@ uint8_t ReadValueFromBackgroundShifter(uint16_t highShifter, uint16_t lowShifter
   return (highBit << 1) | lowBit;
 }
 
-PixelColor& Ppu::CalculatePixelColor() {
-  uint8_t backgroundPixel = 0x00;
-  uint8_t backgroundPalette = 0x00;
+BackgroundPixelInfo Ppu::CalculateBackgroundPixelInfo() {
+  BackgroundPixelInfo result;
 
-  if (mMaskRegister.renderBackground) {
-    constexpr uint16_t mostSignificantBit = 1 << 15;
-    uint16_t bitMux = mostSignificantBit >> mFineX;
-    backgroundPixel = ReadValueFromBackgroundShifter(mBg.shifterPatternHigh, mBg.shifterPatternLow, bitMux);
-    backgroundPalette = ReadValueFromBackgroundShifter(mBg.shifterAttributeHigh, mBg.shifterAttributeLow, bitMux);
+  if (!mMaskRegister.renderBackground) {
+    return result;
   }
+  constexpr uint16_t mostSignificantBit = 1 << 15;
+  uint16_t bitMux = mostSignificantBit >> mFineX;
+  result.pixel = ReadValueFromBackgroundShifter(mBg.shifterPatternHigh, mBg.shifterPatternLow, bitMux);
+  result.palette = ReadValueFromBackgroundShifter(mBg.shifterAttributeHigh, mBg.shifterAttributeLow, bitMux);
+  return result;
+}
 
-  uint8_t foregroudPixel = 0x00;
-  uint8_t foregroudPalette = 0x00;
-  bool foregroudPriority = 0x00;
+ForegroundPixelInfo Ppu::CalculateForegroundPixelInfo() {
+  ForegroundPixelInfo result;
 
-  if (mMaskRegister.renderSprites) {
-    mSpriteZeroBeingRendered = false;
+  if (!mMaskRegister.renderSprites) {
+    return result;
+  }
+  mSpriteZeroBeingRendered = false;
 
-    for (uint8_t i = 0; i < mSpriteCount; i++) {
-      if (mSpriteOnScanline[i].x == 0) {
-        bool foregroudPixelPixelLow = (mSpriteShifterPattern.low[i] & (1 << 7)) > 0;
-        bool foregroudPixelPixelHigh = (mSpriteShifterPattern.high[i] & (1 << 7)) > 0;
-        foregroudPixel = (foregroudPixelPixelHigh << 1) | foregroudPixelPixelLow;
-
-        foregroudPalette = (mSpriteOnScanline[i].attribute & 0b11) + 0x04;
-        foregroudPriority = (mSpriteOnScanline[i].attribute & (1 << 5)) == 0;
-
-        if (foregroudPixel != 0) {
-          if (i == 0) {
-            mSpriteZeroBeingRendered = true;
-          }
-
-          break;
-        }
-      }
+  for (uint8_t i = 0; i < mSpriteCount; i++) {
+    if (mSpriteOnScanline[i].x != 0) {
+      continue;
     }
+    bool foregroudPixelPixelLow = (mSpriteShifterPattern.low[i] & (1 << 7)) > 0;
+    bool foregroudPixelPixelHigh = (mSpriteShifterPattern.high[i] & (1 << 7)) > 0;
+    result.pixel = (foregroudPixelPixelHigh << 1) | foregroudPixelPixelLow;
+
+    result.palette = (mSpriteOnScanline[i].attribute & 0b11) + 0x04;
+    result.priority = (mSpriteOnScanline[i].attribute & (1 << 5)) == 0;
+
+    if (result.pixel == 0) {
+      continue;
+    }
+    if (i == 0) {
+      mSpriteZeroBeingRendered = true;
+    }
+    break;
   }
+  return result;
+}
 
-  uint8_t pixel = 0x00;
-  uint8_t palette = 0x00;
-
-  if (backgroundPixel == 0 && foregroudPixel > 0) {
-    pixel = foregroudPixel;
-    palette = foregroudPalette;
-  } else if (backgroundPixel > 0 && foregroudPixel == 0) {
-    pixel = backgroundPixel;
-    palette = backgroundPalette;
-  } else if (backgroundPixel > 0 && foregroudPixel > 0) {
-    if (foregroudPriority) {
-      pixel = foregroudPixel;
-      palette = foregroudPalette;
+PixelInfo Ppu::DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPixelInfo,
+                                        const ForegroundPixelInfo& foregroundPixelInfo) {
+  PixelInfo result;
+  if (backgroundPixelInfo.pixel == 0 && foregroundPixelInfo.pixel > 0) {
+    result.pixel = foregroundPixelInfo.pixel;
+    result.palette = foregroundPixelInfo.palette;
+  } else if (backgroundPixelInfo.pixel > 0 && foregroundPixelInfo.pixel == 0) {
+    result.pixel = backgroundPixelInfo.pixel;
+    result.palette = backgroundPixelInfo.palette;
+  } else if (backgroundPixelInfo.pixel > 0 && foregroundPixelInfo.pixel > 0) {
+    if (foregroundPixelInfo.priority) {
+      result.pixel = foregroundPixelInfo.pixel;
+      result.palette = foregroundPixelInfo.palette;
     } else {
-      pixel = backgroundPixel;
-      palette = backgroundPalette;
+      result.pixel = backgroundPixelInfo.pixel;
+      result.palette = backgroundPixelInfo.palette;
     }
 
     if (mSpriteZeroHitPossible && mSpriteZeroBeingRendered && mMaskRegister.renderBackground &&
@@ -373,7 +378,15 @@ PixelColor& Ppu::CalculatePixelColor() {
       }
     }
   }
-  return GetColorFromPalette(palette, pixel);
+  return result;
+}
+
+PixelColor& Ppu::CalculatePixelColor() {
+  auto backgroundInfo = CalculateBackgroundPixelInfo();
+  auto foregroundInfo = CalculateForegroundPixelInfo();
+  auto pixelInfo = DetermineActualPixelInfo(backgroundInfo, foregroundInfo);
+
+  return GetColorFromPalette(pixelInfo.palette, pixelInfo.pixel);
 };
 
 void Ppu::VRamFetch() {

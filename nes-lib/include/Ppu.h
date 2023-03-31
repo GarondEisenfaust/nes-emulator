@@ -4,6 +4,7 @@
 #include "IRenderer.h"
 #include "ObjectAttributeEntry.h"
 #include "PixelColor.h"
+#include "PixelInfo.h"
 #include "PpuRegisterDefinitions.h"
 #include "Sprite.h"
 #include "ppu-states/HorizontalBlankState.h"
@@ -17,6 +18,12 @@
 #define PPU_RAM_START 0x2000
 #define PPU_RAM_END 0x3FFF
 #define PPU_RAM_SIZE 0x0007
+
+#define PPU_NAMETABLE_START 0x2000
+#define PPU_NAMETABLE_END 0x3EFF
+
+#define FRAME_PALETTE_START 0x3F00
+#define FRAME_PALETTE_END 0x3FFF
 
 class Bus;
 class Grid;
@@ -61,6 +68,10 @@ class Ppu {
   void TransferAddressX();
   void UpdateShifters();
   void LoadBackgroundShifters();
+  BackgroundPixelInfo CalculateBackgroundPixelInfo();
+  ForegroundPixelInfo CalculateForegroundPixelInfo();
+  PixelInfo DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPixelInfo,
+                                     const ForegroundPixelInfo& foregroundPixelInfo);
 
   void Transition();
 
