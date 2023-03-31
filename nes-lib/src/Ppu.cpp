@@ -3,7 +3,9 @@
 #include "Definitions.h"
 #include "IRenderer.h"
 #include "Mirror.h"
+#include "PpuPort.h"
 #include "lodepng.h"
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -21,27 +23,27 @@ Ppu::Ppu(IRenderer& renderer)
       mState(&mRenderingState) {}
 
 void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
-  addr &= PPU_RAM_SIZE;
+  addr %= PPU_NUM_PORTS;
   switch (addr) {
-    case 0x0000:  // Control
-    {
+    case PpuPort::Control: {
       mControlRegister.reg = data;
       mTRamAddr.nameTableX = mControlRegister.nametableX;
       mTRamAddr.nameTableY = mControlRegister.nametableY;
       break;
     }
-    case 0x0001:  // Mask
+    case PpuPort::Mask: {
       mMaskRegister.reg = data;
       break;
-    case 0x0002:  // Status
-      break;
-    case 0x0003:  // OAM Address
+    }
+    case PpuPort::OamAddress: {
       mOamAddr = data;
       break;
-    case 0x0004:  // OAM Data
+    }
+    case PpuPort::OamData: {
       mOamPtr[mOamAddr] = data;
       break;
-    case 0x0005:  // Scroll
+    }
+    case PpuPort::Scroll: {
       if (!mAddressLatch) {
         mFineX = data & 0b111;
         mTRamAddr.coarseX = data >> 3;
@@ -52,7 +54,8 @@ void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
         mAddressLatch = false;
       }
       break;
-    case 0x0006:  // PPU Address
+    }
+    case PpuPort::PpuAddress: {
       if (!mAddressLatch) {
         mTRamAddr.reg = static_cast<uint16_t>(mTRamAddr.reg & 0x00FF) | (static_cast<uint16_t>(data & 0b111111) << 8);
         mAddressLatch = true;
@@ -62,77 +65,49 @@ void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
         mAddressLatch = false;
       }
       break;
-    case 0x0007:  // PPU Data
+    }
+    case PpuPort::PpuData: {
       PpuWrite(mVRamAddr.reg, data);
       mVRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
       break;
+    }
   }
 }
 
 uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
-  addr &= PPU_RAM_SIZE;
+  addr %= PPU_NUM_PORTS;
   uint8_t data = 0x00;
   if (bReadOnly) {
     switch (addr) {
-      case 0x0000: {  // Control
+      case PpuPort::Control: {
         data = mControlRegister.reg;
         break;
       }
-      case 0x0001: {  // Mask
+      case PpuPort::Mask: {
         data = mMaskRegister.reg;
         break;
       }
-      case 0x0002: {  // Status
+      case PpuPort::Status: {
         data = mStatusRegister.reg;
-        break;
-      }
-      case 0x0003: {  // OAM Address
-        break;
-      }
-      case 0x0004: {  // OAM Data
-        break;
-      }
-      case 0x0005: {  // Scroll
-        break;
-      }
-      case 0x0006: {  // PPU Address
-        break;
-      }
-      case 0x0007: {  // PPU Data
         break;
       }
     }
   } else {
     switch (addr) {
-      case 0x0000: {  // Control
-        break;
-      }
-      case 0x0001: {  // Mask
-        break;
-      }
-      case 0x0002: {  // Status
+      case PpuPort::Status: {
         data = (mStatusRegister.reg & 0xE0) | (mPpuDataBuffer & 0x1F);
         mStatusRegister.verticalBlank = false;
         mAddressLatch = false;
         break;
       }
-      case 0x0003: {  // OAM Address
-        break;
-      }
-      case 0x0004: {  // OAM Data
+      case PpuPort::OamData: {
         data = mOamPtr[mOamAddr];
         break;
       }
-      case 0x0005: {  // Scroll
-        break;
-      }
-      case 0x0006: {  // PPU Address
-        break;
-      }
-      case 0x0007: {  // PPU Data
+      case PpuPort::PpuData: {
         data = mPpuDataBuffer;
         mPpuDataBuffer = PpuRead(mVRamAddr.reg);
-        if (mVRamAddr.reg >= 0x3F00) {
+        if (mVRamAddr.reg >= FRAME_PALETTE_START) {
           data = mPpuDataBuffer;
         }
         mVRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
@@ -216,7 +191,7 @@ void Ppu::ConnectBus(Bus* bus) {
 }
 
 PixelColor& Ppu::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
-  auto address = 0x3F00 + (palette << 2) + pixel;
+  auto address = FRAME_PALETTE_START + (palette << 2) + pixel;
   auto index = PpuRead(address) & 0x3F;
   return mColorPalette->at(index);
 }
@@ -423,48 +398,52 @@ void Ppu::VRamFetch() {
 }
 
 void Ppu::IncrementScrollY() {
-  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    if (mVRamAddr.fineY < 7) {
-      mVRamAddr.fineY++;
-    } else {
-      mVRamAddr.fineY = 0;
-      if (mVRamAddr.coarseY == 29) {
-        mVRamAddr.coarseY = 0;
-        mVRamAddr.nameTableY = !mVRamAddr.nameTableY;
-      } else if (mVRamAddr.coarseY == 31) {
-        mVRamAddr.coarseY = 0;
-      } else {
-        mVRamAddr.coarseY++;
-      }
-    }
+  if (!(mMaskRegister.renderBackground || mMaskRegister.renderSprites)) {
+    return;
   }
-};
+  if (mVRamAddr.fineY < 7) {
+    mVRamAddr.fineY++;
+    return;
+  }
+  mVRamAddr.fineY = 0;
+  if (mVRamAddr.coarseY == 29) {
+    mVRamAddr.coarseY = 0;
+    mVRamAddr.nameTableY = !mVRamAddr.nameTableY;
+  } else if (mVRamAddr.coarseY == 31) {
+    mVRamAddr.coarseY = 0;
+  } else {
+    mVRamAddr.coarseY++;
+  }
+}
 
 void Ppu::IncrementScrollX() {
-  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    if (mVRamAddr.coarseX >= 31) {
-      mVRamAddr.coarseX = 0;
-      mVRamAddr.nameTableX = !mVRamAddr.nameTableX;
-    } else {
-      mVRamAddr.coarseX++;
-    }
+  if (!(mMaskRegister.renderBackground || mMaskRegister.renderSprites)) {
+    return;
   }
-};
+  if (mVRamAddr.coarseX >= 31) {
+    mVRamAddr.coarseX = 0;
+    mVRamAddr.nameTableX = !mVRamAddr.nameTableX;
+  } else {
+    mVRamAddr.coarseX++;
+  }
+}
 
 void Ppu::TransferAddressY() {
-  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    mVRamAddr.fineY = mTRamAddr.fineY;
-    mVRamAddr.nameTableY = mTRamAddr.nameTableY;
-    mVRamAddr.coarseY = mTRamAddr.coarseY;
+  if (!(mMaskRegister.renderBackground || mMaskRegister.renderSprites)) {
+    return;
   }
-};
+  mVRamAddr.fineY = mTRamAddr.fineY;
+  mVRamAddr.nameTableY = mTRamAddr.nameTableY;
+  mVRamAddr.coarseY = mTRamAddr.coarseY;
+}
 
 void Ppu::TransferAddressX() {
-  if (mMaskRegister.renderBackground || mMaskRegister.renderSprites) {
-    mVRamAddr.nameTableX = mTRamAddr.nameTableX;
-    mVRamAddr.coarseX = mTRamAddr.coarseX;
+  if (!(mMaskRegister.renderBackground || mMaskRegister.renderSprites)) {
+    return;
   }
-};
+  mVRamAddr.nameTableX = mTRamAddr.nameTableX;
+  mVRamAddr.coarseX = mTRamAddr.coarseX;
+}
 
 void Ppu::UpdateShifters() {
   if (mMaskRegister.renderBackground) {
@@ -474,14 +453,15 @@ void Ppu::UpdateShifters() {
     mBg.shifterAttributeLow <<= 1;
     mBg.shifterAttributeHigh <<= 1;
   }
-  if (mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258) {
-    for (int i = 0; i < mSpriteCount; i++) {
-      if (mSpriteOnScanline[i].x > 0) {
-        mSpriteOnScanline[i].x--;
-      } else {
-        mSpriteShifterPattern.low[i] <<= 1;
-        mSpriteShifterPattern.high[i] <<= 1;
-      }
+  if (!(mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258)) {
+    return;
+  }
+  for (int i = 0; i < mSpriteCount; i++) {
+    if (mSpriteOnScanline[i].x > 0) {
+      mSpriteOnScanline[i].x--;
+    } else {
+      mSpriteShifterPattern.low[i] <<= 1;
+      mSpriteShifterPattern.high[i] <<= 1;
     }
   }
 }

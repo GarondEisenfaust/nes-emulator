@@ -41,11 +41,6 @@ Cartridge::Cartridge(const std::string& path) {
   mMapperId = DetermineMapperId(header);
   mMirror = DetermineMirror(header);
 
-  uint8_t nFileType = 1;
-  if ((header.mapper2 & 0x0C) == 0x08) {
-    nFileType = 2;
-  }
-
   mProgramBanks = header.programRomChunks;
   mProgramMemory.resize(mProgramBanks * 16384);
   romStream.read((char*)mProgramMemory.data(), mProgramMemory.size());
