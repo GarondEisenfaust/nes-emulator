@@ -7,7 +7,7 @@ IMP::IMP(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool IMP::operator()() {
   mCpu->fetched = mCpu->a;
-  return 0;
+  return false;
 }
 
 std::string IMP::Disassemble(uint32_t& current) { return "{IMP}"; }

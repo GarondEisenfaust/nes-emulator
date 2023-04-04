@@ -9,7 +9,7 @@ bool ZP0::operator()() {
   mCpu->addrAbs = mCpu->Read(mCpu->pc);
   mCpu->pc++;
   mCpu->addrAbs &= 0x00FF;
-  return 0;
+  return false;
 }
 
 std::string ZP0::Disassemble(uint32_t& current) {

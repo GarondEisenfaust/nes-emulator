@@ -11,7 +11,7 @@ bool REL::operator()() {
   if (mCpu->addrRel & (1 << 7)) {
     mCpu->addrRel |= 0xFF00;
   }
-  return 0;
+  return false;
 }
 
 std::string REL::Disassemble(uint32_t& current) {

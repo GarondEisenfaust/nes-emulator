@@ -6,21 +6,14 @@
 ABY::ABY(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool ABY::operator()() {
-  uint16_t low = mCpu->Read(mCpu->pc);
-  mCpu->pc++;
-  uint16_t high = mCpu->Read(mCpu->pc);
-  mCpu->pc++;
-
-  mCpu->addrAbs = ((high << 8) | low) + mCpu->y;
-
-  if ((mCpu->addrAbs & 0xFF00) != (high << 8)) {
-    return 1;
-  } else {
-    return 0;
-  }
+  uint16_t addr = mCpu->ReadTwoBytes(mCpu->pc);
+  mCpu->pc += 2;
+  mCpu->addrAbs = addr + mCpu->y;
+  return (mCpu->addrAbs & 0xFF00) != (addr & 0xFF00);
 }
 
 std::string ABY::Disassemble(uint32_t& current) {
-  auto address = Read16BitAddress(current);
+  auto address = mCpu->ReadTwoBytes(current);
+  current += 2;
   return fmt::format("{:#06x}, Y {{ABY}}", address);
 }

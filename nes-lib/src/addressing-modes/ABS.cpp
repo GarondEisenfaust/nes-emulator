@@ -6,17 +6,13 @@
 ABS::ABS(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool ABS::operator()() {
-  uint16_t low = mCpu->Read(mCpu->pc);
-  mCpu->pc++;
-  uint16_t high = mCpu->Read(mCpu->pc);
-  mCpu->pc++;
-
-  mCpu->addrAbs = (high << 8) | low;
-
-  return 0;
+  mCpu->addrAbs = mCpu->ReadTwoBytes(mCpu->pc);
+  mCpu->pc += 2;
+  return false;
 }
 
 std::string ABS::Disassemble(uint32_t& current) {
-  auto address = Read16BitAddress(current);
+  auto address = mCpu->ReadTwoBytes(current);
+  current += 2;
   return fmt::format("{:#06x} {{ABS}}", address);
 }

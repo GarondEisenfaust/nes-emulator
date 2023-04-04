@@ -13,6 +13,12 @@ void Cpu::ConnectBus(Bus* bus) {
 }
 
 uint8_t Cpu::Read(uint16_t addr) { return mBus->CpuRead(addr); }
+uint16_t Cpu::ReadTwoBytes(uint16_t addr) {
+  uint16_t low = Read(addr);
+  uint16_t high = Read(addr + 1);
+  return static_cast<uint16_t>(high << 8) | low;
+}
+
 void Cpu::Write(uint16_t addr, uint8_t data) { mBus->CpuWrite(addr, data); }
 
 uint8_t Cpu::PopFromStack() {
@@ -51,13 +57,9 @@ void Cpu::Clock() {
 }
 
 void Cpu::Reset() {
-  addrAbs = 0xFFFC;
-  uint16_t lo = Read(addrAbs + 0);
-  uint16_t hi = Read(addrAbs + 1);
-
-  pc = (hi << 8) | lo;
+  pc = ReadTwoBytes(0xFFFC);
   // nestest
-  // pc = 0xC000;
+  // pc = ReadTwoBytes(0xC000);
 
   a = 0;
   x = 0;
@@ -84,7 +86,7 @@ bool Cpu::BranchIf(bool condition) {
 
     pc = addrAbs;
   }
-  return 0;
+  return false;
 }
 
 void Cpu::Interrupt(uint16_t address, uint8_t numCycles) {
@@ -97,9 +99,7 @@ void Cpu::Interrupt(uint16_t address, uint8_t numCycles) {
   PushToStack(status.reg);
 
   addrAbs = address;
-  uint16_t lo = Read(addrAbs + 0);
-  uint16_t hi = Read(addrAbs + 1);
-  pc = (hi << 8) | lo;
+  pc = ReadTwoBytes(addrAbs);
 
   cycles = numCycles;
 }

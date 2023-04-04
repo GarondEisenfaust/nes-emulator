@@ -12,5 +12,4 @@ class IAddressingMode {
 
  protected:
   Cpu* mCpu;
-  uint16_t Read16BitAddress(uint32_t& address);
 };

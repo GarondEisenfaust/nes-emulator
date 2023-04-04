@@ -6,21 +6,14 @@
 ABX::ABX(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool ABX::operator()() {
-  uint16_t low = mCpu->Read(mCpu->pc);
-  mCpu->pc++;
-  uint16_t high = mCpu->Read(mCpu->pc);
-  mCpu->pc++;
-
-  mCpu->addrAbs = ((high << 8) | low) + mCpu->x;
-
-  if ((mCpu->addrAbs & 0xFF00) != (high << 8)) {
-    return 1;
-  } else {
-    return 0;
-  }
+  uint16_t addr = mCpu->ReadTwoBytes(mCpu->pc);
+  mCpu->pc += 2;
+  mCpu->addrAbs = addr + mCpu->x;
+  return (mCpu->addrAbs & 0xFF00) != (addr & 0xFF00);
 }
 
 std::string ABX::Disassemble(uint32_t& current) {
-  auto address = Read16BitAddress(current);
+  auto address = mCpu->ReadTwoBytes(current);
+  current += 2;
   return fmt::format("{:#06x}, X {{ABX}}", address);
 }

@@ -7,7 +7,7 @@ IMM::IMM(Cpu* cpu) : IAddressingMode(cpu) {}
 
 bool IMM::operator()() {
   mCpu->addrAbs = mCpu->pc++;
-  return 0;
+  return false;
 }
 
 std::string IMM::Disassemble(uint32_t& current) {

@@ -9,7 +9,7 @@ bool ZPY::operator()() {
   mCpu->addrAbs = mCpu->Read(mCpu->pc) + mCpu->y;
   mCpu->pc++;
   mCpu->addrAbs &= 0x00FF;
-  return 0;
+  return false;
 }
 
 std::string ZPY::Disassemble(uint32_t& current) {
