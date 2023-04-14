@@ -47,10 +47,10 @@ void Cpu::Clock() {
     auto instruction = lookup->at(opcode);
     cycles = lookup->at(opcode).cycles;
 
-    auto additionalCycle1 = (*lookup->at(opcode).addrMode)();
-    auto additionalCycle2 = (*lookup->at(opcode).opcode)();
+    auto additionalAddressModeCycle = (*lookup->at(opcode).addrMode)();
+    auto additionalOpcodeCycle = (*lookup->at(opcode).opcode)();
 
-    cycles += additionalCycle1 && additionalCycle2;
+    cycles += additionalAddressModeCycle && additionalOpcodeCycle;
     status.u = true;
   }
   cycles--;
