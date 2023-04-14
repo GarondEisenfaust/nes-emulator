@@ -4,6 +4,7 @@
 #include <array>
 #include <memory>
 
-using ColorPalette = std::array<PixelColor, 0x40>;
+#define NUMBER_OF_COLORS 64
 
+using ColorPalette = std::array<PixelColor, NUMBER_OF_COLORS>;
 std::unique_ptr<ColorPalette> MakePixelColors();

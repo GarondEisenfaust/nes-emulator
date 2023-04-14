@@ -1,6 +1,7 @@
 #pragma once
 #include "Cartridge.h"
 #include "ColorPalette.h"
+#include "FramePalette.h"
 #include "IRenderer.h"
 #include "ObjectAttributeEntry.h"
 #include "PixelColor.h"
@@ -67,7 +68,6 @@ class Ppu {
   ForegroundPixelInfo CalculateForegroundPixelInfo();
   PixelInfo DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPixelInfo,
                                      const ForegroundPixelInfo& foregroundPixelInfo);
-  uint16_t DetermineFramePaletteAddress(uint16_t addr);
 
   Cartridge* mCartridge;
   int16_t mCycle;
@@ -77,7 +77,7 @@ class Ppu {
   std::unique_ptr<ColorPalette> mColorPalette;
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
-  std::array<uint8_t, 32> mFramePalette;
+  FramePalette mFramePalette;
 
   StatusRegister mStatusRegister;
   MaskRegister mMaskRegister;

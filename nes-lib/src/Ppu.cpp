@@ -117,31 +117,13 @@ uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
   return data;
 }
 
-uint16_t Ppu::DetermineFramePaletteAddress(uint16_t addr) {
-  addr %= mFramePalette.size();
-  if (addr == 0x0010) {
-    addr = 0x0000;
-  }
-  if (addr == 0x0014) {
-    addr = 0x0004;
-  }
-  if (addr == 0x0018) {
-    addr = 0x0008;
-  }
-  if (addr == 0x001C) {
-    addr = 0x000C;
-  }
-  return addr;
-}
-
 void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
     mCartridge->PpuWrite(addr, data);
   } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
     Mirror(mNameTable, mCartridge->mMirror, addr) = data;
   } else if (FRAME_PALETTE_START <= addr && addr <= FRAME_PALETTE_END) {
-    addr = DetermineFramePaletteAddress(addr);
-    mFramePalette[addr] = data;
+    mFramePalette.Write(addr, data);
   }
 }
 
@@ -152,8 +134,7 @@ uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
   } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
     data = Mirror(mNameTable, mCartridge->mMirror, addr);
   } else if (FRAME_PALETTE_START <= addr && addr <= FRAME_PALETTE_END) {
-    addr = DetermineFramePaletteAddress(addr);
-    data = mFramePalette[addr] & (mMaskRegister.grayscale ? 0x30 : 0x3F);
+    data = mMaskRegister.grayscale ? mFramePalette.ReadGrayscale(addr) : mFramePalette.Read(addr);
   }
   return data;
 }
@@ -163,10 +144,10 @@ void Ppu::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
 void Ppu::Clock() {
   mState->Execute();
 
-  auto xPos = mCycle - 1;
-  auto yPos = mScanline;
+  auto xPosOnScreen = mCycle - 1;
+  auto yPosOnScreen = mScanline;
   auto& color = CalculatePixelColor();
-  mRenderer.SetPixelColor(xPos, yPos, color);
+  mRenderer.SetPixelColor(xPosOnScreen, yPosOnScreen, color);
 
   mCycle++;
 
