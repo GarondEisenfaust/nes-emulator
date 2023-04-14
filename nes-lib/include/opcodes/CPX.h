@@ -5,5 +5,4 @@ class CPX : public IOpcode {
  public:
   CPX(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

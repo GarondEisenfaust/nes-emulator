@@ -11,5 +11,3 @@ bool CPY::operator()() {
   mCpu->status.n = temp & 0x0080;
   return true;
 }
-
-const char* CPY::Name() { return "CPY"; }

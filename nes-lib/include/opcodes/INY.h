@@ -5,5 +5,4 @@ class INY : public IOpcode {
  public:
   INY(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

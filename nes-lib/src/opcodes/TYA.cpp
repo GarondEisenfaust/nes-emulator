@@ -9,5 +9,3 @@ bool TYA::operator()() {
   mCpu->status.n = mCpu->a & (1 << 7);
   return false;
 }
-
-const char* TYA::Name() { return "TYA"; }

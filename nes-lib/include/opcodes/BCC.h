@@ -5,5 +5,4 @@ class BCC : public IOpcode {
  public:
   BCC(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

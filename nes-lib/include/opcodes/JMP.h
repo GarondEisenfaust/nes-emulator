@@ -5,5 +5,4 @@ class JMP : public IOpcode {
  public:
   JMP(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

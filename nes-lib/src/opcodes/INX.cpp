@@ -9,5 +9,3 @@ bool INX::operator()() {
   mCpu->status.n = mCpu->x & (1 << 7);
   return false;
 }
-
-const char* INX::Name() { return "INX"; }

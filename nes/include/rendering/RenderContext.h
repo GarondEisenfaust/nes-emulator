@@ -22,7 +22,6 @@ class RenderContext {
   int GetWidth();
   GLFWwindow* GetWindow();
   void AddVertexArray(std::shared_ptr<VertexArray> vertexArray);
-  void SetKeyCallback(KeyCallback* keyCallback);
 
  private:
   int mWidth;

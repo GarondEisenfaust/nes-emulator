@@ -10,5 +10,3 @@ bool LDX::operator()() {
   mCpu->status.n = mCpu->x & (1 << 7);
   return true;
 }
-
-const char* LDX::Name() { return "LDX"; }

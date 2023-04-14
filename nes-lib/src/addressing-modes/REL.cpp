@@ -13,9 +13,3 @@ bool REL::operator()() {
   }
   return false;
 }
-
-std::string REL::Disassemble(uint32_t& current) {
-  auto value = mCpu->mBus->CpuRead(current, true);
-  current++;
-  return fmt::format("{:#04x} [{:#06x}] {{REL}}", value, current + static_cast<int8_t>(value));
-}

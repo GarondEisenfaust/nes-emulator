@@ -11,8 +11,6 @@
 #include "imgui_impl_opengl3.h"
 #include "rendering/Grid.h"
 #include "rendering/RenderContext.h"
-#include "windows/DisassamblerWindow.h"
-#include "windows/RegisterWindow.h"
 #include <array>
 #include <chrono>
 #include <filesystem>
@@ -77,50 +75,19 @@ int main(int argc, char* argv[]) {
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
-  auto stepMode = false;
-  auto shouldStep = false;
-  RenderContext::KeyCallback keyCallback = [&](GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-      stepMode = !stepMode;
-    }
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS && stepMode) {
-      shouldStep = true;
-    }
-    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-      const auto palette = 1;
-      ppu.WritePatternTableToImage("table-1.png", 1, palette);
-      ppu.WritePatternTableToImage("table-2.png", 2, palette);
-      ppu.WriteColorPaletteToImage("color-palette.png");
-    }
-  };
+  using namespace std::chrono_literals;
+  auto diff = (1000ms / 60);
+  renderContext.GameLoop([&]() {
+    static auto next = std::chrono::system_clock::now();
+    controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_1);
+    controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_2);
 
-  renderContext.SetKeyCallback(&keyCallback);
-  DisassamblerWindow disassamblerWindow(cpu);
-  RegisterWindow registerWindow(cpu);
-  {
-    using namespace std::chrono_literals;
-    auto diff = (1000ms / 60);
-    renderContext.GameLoop([&]() {
-      static auto next = std::chrono::system_clock::now();
-      controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_1);
-      controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_2);
+    auto colorData = grid.MakeColorData();
+    colors->SetData(colorData);
 
-      auto colorData = grid.MakeColorData();
-      colors->SetData(colorData);
-      registerWindow.Render();
-      disassamblerWindow.Render();
-
-      if (stepMode) {
-        if (shouldStep) {
-          MakeOneStep(bus);
-          shouldStep = false;
-        }
-      } else {
-        RenderCompleteFrame(bus, grid);
-        std::this_thread::sleep_until(next);
-        next += diff;
-      }
-    });
-  }
+    RenderCompleteFrame(bus, grid);
+    std::this_thread::sleep_until(next);
+    next += diff;
+  });
   return 0;
 }

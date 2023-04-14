@@ -5,5 +5,4 @@ class STY : public IOpcode {
  public:
   STY(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

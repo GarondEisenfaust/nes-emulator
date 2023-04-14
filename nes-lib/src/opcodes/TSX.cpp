@@ -9,5 +9,3 @@ bool TSX::operator()() {
   mCpu->status.n = mCpu->x & (1 << 7);
   return false;
 }
-
-const char* TSX::Name() { return "TSX"; }

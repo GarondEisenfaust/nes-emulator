@@ -11,5 +11,3 @@ bool JSR::operator()() {
   mCpu->pc = mCpu->addrAbs;
   return false;
 }
-
-const char* JSR::Name() { return "JSR"; }

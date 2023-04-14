@@ -7,5 +7,3 @@ bool TXS::operator()() {
   mCpu->stackPointer = mCpu->x;
   return 0;
 }
-
-const char* TXS::Name() { return "TXS"; }

@@ -9,5 +9,3 @@ bool DEX::operator()() {
   mCpu->status.n = mCpu->x & (1 << 7);
   return 0;
 }
-
-const char* DEX::Name() { return "DEX"; }

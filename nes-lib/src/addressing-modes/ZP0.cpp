@@ -11,9 +11,3 @@ bool ZP0::operator()() {
   mCpu->addrAbs &= 0x00FF;
   return false;
 }
-
-std::string ZP0::Disassemble(uint32_t& current) {
-  auto value = mCpu->mBus->CpuRead(current, true);
-  current++;
-  return fmt::format("{:#04x} {{ZP0}}", value);
-}

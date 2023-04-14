@@ -15,9 +15,3 @@ bool IZY::operator()() {
   mCpu->addrAbs = ((hi << 8) | lo) + mCpu->y;
   return (mCpu->addrAbs & 0xFF00) != (hi << 8);
 }
-
-std::string IZY::Disassemble(uint32_t& current) {
-  auto value = mCpu->mBus->CpuRead(current, true);
-  current++;
-  return fmt::format("({:#04x}), Y {{IZY}}", value);
-}

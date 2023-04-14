@@ -20,7 +20,6 @@ create_executable()
 
 target_link_libraries(
   ${PROJECT_NAME}
-  PRIVATE util
   PRIVATE nes-lib
   PRIVATE CONAN_PKG::glfw
   PRIVATE CONAN_PKG::glew

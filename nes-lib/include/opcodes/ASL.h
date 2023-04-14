@@ -5,5 +5,4 @@ class ASL : public IOpcode {
  public:
   ASL(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

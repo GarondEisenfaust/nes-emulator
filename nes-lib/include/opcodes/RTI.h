@@ -5,5 +5,4 @@ class RTI : public IOpcode {
  public:
   RTI(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

@@ -5,5 +5,4 @@ class BVS : public IOpcode {
  public:
   BVS(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

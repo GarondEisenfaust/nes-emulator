@@ -4,5 +4,3 @@
 BNE::BNE(Cpu* cpu) : IOpcode(cpu) {}
 
 bool BNE::operator()() { return mCpu->BranchIf(mCpu->status.z == 0); }
-
-const char* BNE::Name() { return "BNE"; }

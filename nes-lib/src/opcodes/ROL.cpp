@@ -17,5 +17,3 @@ bool ROL::operator()() {
   }
   return 0;
 }
-
-const char* ROL::Name() { return "ROL"; }

@@ -9,9 +9,3 @@ bool IMM::operator()() {
   mCpu->addrAbs = mCpu->pc++;
   return false;
 }
-
-std::string IMM::Disassemble(uint32_t& current) {
-  auto value = mCpu->mBus->CpuRead(current, true);
-  current++;
-  return fmt::format("{:#04x} {{IMM}}", value);
-}

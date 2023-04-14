@@ -15,9 +15,3 @@ bool IZX::operator()() {
   mCpu->addrAbs = (hi << 8) | lo;
   return false;
 }
-
-std::string IZX::Disassemble(uint32_t& current) {
-  auto value = mCpu->mBus->CpuRead(current, true);
-  current++;
-  return fmt::format("({:#04x}, X) {{IZX}}", value);
-}

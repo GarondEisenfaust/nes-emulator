@@ -10,5 +10,3 @@ bool AND::operator()() {
   mCpu->status.n = mCpu->a & (1 << 7);
   return 1;
 }
-
-const char* AND::Name() { return "AND"; }

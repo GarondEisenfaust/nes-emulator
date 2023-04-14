@@ -97,8 +97,6 @@ void RenderContext::GameLoop(std::function<void()> loop) {
 int RenderContext::GetHeight() { return mHeight; }
 int RenderContext::GetWidth() { return mWidth; }
 
-void RenderContext::SetKeyCallback(KeyCallback* keyCallback) { glfwSetWindowUserPointer(mWindow, keyCallback); }
-
 void RenderContext::AddVertexArray(std::shared_ptr<VertexArray> vertexArray) { mVertexArrays.push_back(vertexArray); }
 
 GLFWwindow* RenderContext::GetWindow() { return mWindow; }

@@ -7,5 +7,3 @@ bool SED::operator()() {
   mCpu->status.d = true;
   return 0;
 }
-
-const char* SED::Name() { return "SED"; }

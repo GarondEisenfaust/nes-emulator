@@ -11,9 +11,3 @@ bool ABY::operator()() {
   mCpu->addrAbs = addr + mCpu->y;
   return (mCpu->addrAbs & 0xFF00) != (addr & 0xFF00);
 }
-
-std::string ABY::Disassemble(uint32_t& current) {
-  auto address = mCpu->ReadTwoBytes(current);
-  current += 2;
-  return fmt::format("{:#06x}, Y {{ABY}}", address);
-}

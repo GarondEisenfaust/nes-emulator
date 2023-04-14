@@ -10,5 +10,3 @@ bool LDY::operator()() {
   mCpu->status.n = mCpu->y & (1 << 7);
   return true;
 }
-
-const char* LDY::Name() { return "LDY"; }

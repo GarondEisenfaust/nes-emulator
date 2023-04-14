@@ -9,5 +9,3 @@ bool INY::operator()() {
   mCpu->status.n = mCpu->y & (1 << 7);
   return false;
 }
-
-const char* INY::Name() { return "INY"; }

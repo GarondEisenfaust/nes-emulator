@@ -5,5 +5,4 @@ class SEC : public IOpcode {
  public:
   SEC(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

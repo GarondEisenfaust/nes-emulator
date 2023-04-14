@@ -9,5 +9,3 @@ bool IMP::operator()() {
   mCpu->fetched = mCpu->a;
   return false;
 }
-
-std::string IMP::Disassemble(uint32_t& current) { return "{IMP}"; }

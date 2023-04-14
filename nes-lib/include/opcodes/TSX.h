@@ -5,5 +5,4 @@ class TSX : public IOpcode {
  public:
   TSX(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

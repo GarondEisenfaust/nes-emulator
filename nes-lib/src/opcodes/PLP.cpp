@@ -8,5 +8,3 @@ bool PLP::operator()() {
   mCpu->status.u = true;
   return 0;
 }
-
-const char* PLP::Name() { return "PLP"; }

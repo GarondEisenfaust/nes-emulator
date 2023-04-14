@@ -7,5 +7,3 @@ bool PHA::operator()() {
   mCpu->PushToStack(mCpu->a);
   return 0;
 }
-
-const char* PHA::Name() { return "PHA"; }

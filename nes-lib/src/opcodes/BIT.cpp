@@ -11,5 +11,3 @@ bool BIT::operator()() {
   mCpu->status.v = mCpu->fetched & (1 << 6);
   return 0;
 }
-
-const char* BIT::Name() { return "BIT"; }

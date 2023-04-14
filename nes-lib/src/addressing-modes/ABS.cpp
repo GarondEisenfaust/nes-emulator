@@ -10,9 +10,3 @@ bool ABS::operator()() {
   mCpu->pc += 2;
   return false;
 }
-
-std::string ABS::Disassemble(uint32_t& current) {
-  auto address = mCpu->ReadTwoBytes(current);
-  current += 2;
-  return fmt::format("{:#06x} {{ABS}}", address);
-}

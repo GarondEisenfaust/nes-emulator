@@ -4,7 +4,6 @@
 #include "IRenderer.h"
 #include "Mirror.h"
 #include "PpuPort.h"
-#include "lodepng.h"
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -195,58 +194,6 @@ void Ppu::Reset() {
   mVRamAddr.reg = 0x0000;
   mTRamAddr.reg = 0x0000;
   mState = &mRenderingState;
-}
-
-void Ppu::WritePatternTableToImage(const char* path, uint8_t i, uint8_t palette) {
-  const int width = 128;
-  const int height = 128;
-  const int channels = 3;
-  constexpr auto size = width * height * channels;
-  std::array<unsigned char, size> image;
-
-  for (uint16_t tileY = 0; tileY < 16; tileY++) {
-    for (uint16_t tileX = 0; tileX < 16; tileX++) {
-      const uint16_t offset = tileY * 256 + tileX * 16;
-      for (uint16_t row = 0; row < 8; row++) {
-        auto address = i * 0x1000 + offset + row;
-        uint8_t tileLsb = PpuRead(address + 0);
-        uint8_t tileMsb = PpuRead(address + 8);
-
-        for (uint16_t col = 0; col < 8; col++) {
-          const uint8_t pixel = (tileLsb & 0b01) + (tileMsb & 0b01);
-          tileLsb >>= 1;
-          tileMsb >>= 1;
-
-          const auto x = tileX * 8 + (7 - col);
-          const auto y = tileY * 8 + row;
-
-          const auto index = (y * width + x) * 3;
-          const auto& color = GetColorFromPalette(palette, pixel);
-          image[index + 0] = static_cast<unsigned char>(color.r);
-          image[index + 1] = static_cast<unsigned char>(color.g);
-          image[index + 2] = static_cast<unsigned char>(color.b);
-        }
-      }
-    }
-  }
-
-  lodepng::encode(path, image.data(), width, height, LCT_RGB);
-}
-
-void Ppu::WriteColorPaletteToImage(const char* path) {
-  const int numPalettes = 8;
-  const int paletteSize = 4;
-
-  std::vector<unsigned char> image;
-  for (auto p = 0; p < numPalettes; p++) {
-    for (auto s = 0; s < paletteSize; s++) {
-      const auto& color = GetColorFromPalette(p, s);
-      const auto values = {color.r, color.g, color.b};
-      std::copy(values.begin(), values.end(), std::back_inserter(image));
-    }
-  }
-
-  lodepng::encode(path, image.data(), paletteSize, numPalettes, LCT_RGB);
 }
 
 uint8_t ReadValueFromBackgroundShifter(uint16_t highShifter, uint16_t lowShifter, uint16_t bitMux) {

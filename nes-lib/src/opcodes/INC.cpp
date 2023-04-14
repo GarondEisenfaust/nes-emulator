@@ -11,5 +11,3 @@ bool INC::operator()() {
   mCpu->status.n = temp & 0x0080;
   return 0;
 }
-
-const char* INC::Name() { return "INC"; }

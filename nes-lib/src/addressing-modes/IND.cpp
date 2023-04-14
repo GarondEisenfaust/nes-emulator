@@ -16,9 +16,3 @@ bool IND::operator()() {
   }
   return false;
 }
-
-std::string IND::Disassemble(uint32_t& current) {
-  auto address = mCpu->ReadTwoBytes(current);
-  current += 2;
-  return fmt::format("({:#06x}) {{IND}}", address);
-}

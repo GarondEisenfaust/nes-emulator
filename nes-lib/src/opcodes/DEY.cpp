@@ -9,5 +9,3 @@ bool DEY::operator()() {
   mCpu->status.n = mCpu->y & (1 << 7);
   return 0;
 }
-
-const char* DEY::Name() { return "DEY"; }

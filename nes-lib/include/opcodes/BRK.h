@@ -5,5 +5,4 @@ class BRK : public IOpcode {
  public:
   BRK(Cpu* cpu);
   virtual bool operator()();
-  virtual const char* Name();
 };

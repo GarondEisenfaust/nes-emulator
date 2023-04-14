@@ -113,20 +113,3 @@ void Cpu::Interrupt() {
 }
 
 void Cpu::NonMaskableInterrupt() { Interrupt(0xFFFA, 8); }
-
-std::map<uint16_t, std::string> Cpu::Disassemble(uint16_t begin, uint16_t end) {
-  uint32_t current = begin;
-  std::map<uint16_t, std::string> disassembledCode;
-
-  while (current <= end) {
-    auto line = current;
-    auto opcode = mBus->CpuRead(current, true);
-    auto& instruction = lookup->at(opcode);
-    current++;
-
-    auto name = instruction.opcode->Name();
-    auto addressingMode = instruction.addrMode->Disassemble(current);
-    disassembledCode[line] = fmt::format("{:#06x}: {} {}", line, name, addressingMode);
-  }
-  return disassembledCode;
-}
