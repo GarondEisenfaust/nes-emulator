@@ -3,7 +3,6 @@
 #include "Definitions.h"
 #include "IRenderer.h"
 #include "Mirror.h"
-#include "PpuPort.h"
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -18,102 +17,28 @@ Ppu::Ppu(IRenderer& renderer)
       mRenderingState(*this),
       mVerticalBlankState(*this),
       mHorizontalBlankState(*this),
-      mState(&mRenderingState) {}
+      mState(&mRenderingState) {
+  mCpuWriteCases.emplace(PpuPort::Control, [&](uint16_t addr, uint8_t data) { WriteControl(addr, data); });
+  mCpuWriteCases.emplace(PpuPort::Mask, [&](uint16_t addr, uint8_t data) { WriteMask(addr, data); });
+  mCpuWriteCases.emplace(PpuPort::OamAddress, [&](uint16_t addr, uint8_t data) { WriteOamAddress(addr, data); });
+  mCpuWriteCases.emplace(PpuPort::OamData, [&](uint16_t addr, uint8_t data) { WriteOamData(addr, data); });
+  mCpuWriteCases.emplace(PpuPort::Scroll, [&](uint16_t addr, uint8_t data) { WriteScroll(addr, data); });
+  mCpuWriteCases.emplace(PpuPort::PpuAddress, [&](uint16_t addr, uint8_t data) { WritePpuAddress(addr, data); });
+  mCpuWriteCases.emplace(PpuPort::PpuData, [&](uint16_t addr, uint8_t data) { WritePpuData(addr, data); });
+
+  mCpuReadCases.emplace(PpuPort::Status, [&](uint16_t addr) { return ReadStatus(addr); });
+  mCpuReadCases.emplace(PpuPort::OamData, [&](uint16_t addr) { return ReadOamData(addr); });
+  mCpuReadCases.emplace(PpuPort::PpuData, [&](uint16_t addr) { return ReadPpuData(addr); });
+}
 
 void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
-  addr %= PPU_NUM_PORTS;
-  switch (addr) {
-    case PpuPort::Control: {
-      mControlRegister.reg = data;
-      mTRamAddr.nameTableX = mControlRegister.nametableX;
-      mTRamAddr.nameTableY = mControlRegister.nametableY;
-      break;
-    }
-    case PpuPort::Mask: {
-      mMaskRegister.reg = data;
-      break;
-    }
-    case PpuPort::OamAddress: {
-      mOamAddr = data;
-      break;
-    }
-    case PpuPort::OamData: {
-      mOamPtr[mOamAddr] = data;
-      break;
-    }
-    case PpuPort::Scroll: {
-      if (!mAddressLatch) {
-        mFineX = data & 0b111;
-        mTRamAddr.coarseX = data >> 3;
-        mAddressLatch = true;
-      } else {
-        mTRamAddr.fineY = data & 0b111;
-        mTRamAddr.coarseY = data >> 3;
-        mAddressLatch = false;
-      }
-      break;
-    }
-    case PpuPort::PpuAddress: {
-      if (!mAddressLatch) {
-        mTRamAddr.reg = static_cast<uint16_t>(mTRamAddr.reg & 0x00FF) | (static_cast<uint16_t>(data & 0b111111) << 8);
-        mAddressLatch = true;
-      } else {
-        mTRamAddr.reg = static_cast<uint16_t>(mTRamAddr.reg & 0xFF00) | static_cast<uint16_t>(data);
-        mVRamAddr = mTRamAddr;
-        mAddressLatch = false;
-      }
-      break;
-    }
-    case PpuPort::PpuData: {
-      PpuWrite(mVRamAddr.reg, data);
-      mVRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
-      break;
-    }
-  }
+  auto addressedPort = static_cast<PpuPort>(addr % PPU_NUM_PORTS);
+  mCpuWriteCases.at(addressedPort)(addr, data);
 }
 
 uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
-  addr %= PPU_NUM_PORTS;
-  uint8_t data = 0x00;
-  if (bReadOnly) {
-    switch (addr) {
-      case PpuPort::Control: {
-        data = mControlRegister.reg;
-        break;
-      }
-      case PpuPort::Mask: {
-        data = mMaskRegister.reg;
-        break;
-      }
-      case PpuPort::Status: {
-        data = mStatusRegister.reg;
-        break;
-      }
-    }
-  } else {
-    switch (addr) {
-      case PpuPort::Status: {
-        data = (mStatusRegister.reg & 0xE0) | (mPpuDataBuffer & 0x1F);
-        mStatusRegister.verticalBlank = false;
-        mAddressLatch = false;
-        break;
-      }
-      case PpuPort::OamData: {
-        data = mOamPtr[mOamAddr];
-        break;
-      }
-      case PpuPort::PpuData: {
-        data = mPpuDataBuffer;
-        mPpuDataBuffer = PpuRead(mVRamAddr.reg);
-        if (mVRamAddr.reg >= FRAME_PALETTE_START) {
-          data = mPpuDataBuffer;
-        }
-        mVRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
-        break;
-      }
-    }
-  }
-  return data;
+  auto addressedPort = static_cast<PpuPort>(addr % PPU_NUM_PORTS);
+  return mCpuReadCases.at(addressedPort)(addr);
 }
 
 void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
@@ -158,7 +83,7 @@ void Ppu::Clock() {
       mRenderer.CommitFrame();
     }
   }
-  Transition();
+  TransitionState();
 }
 
 void Ppu::ConnectBus(Bus* bus) {
@@ -180,14 +105,14 @@ void Ppu::Reset() {
   mPpuDataBuffer = 0x00;
   mScanline = 0;
   mCycle = 0;
-  mBg.nextTileId = 0x00;
-  mBg.nextTileAttribute = 0x00;
-  mBg.nextTileLsb = 0x00;
-  mBg.nextTileMsb = 0x00;
-  mBg.shifterPatternLow = 0x0000;
-  mBg.shifterPatternHigh = 0x0000;
-  mBg.shifterAttributeLow = 0x0000;
-  mBg.shifterAttributeHigh = 0x0000;
+  mBackground.nextTileId = 0x00;
+  mBackground.nextTileAttribute = 0x00;
+  mBackground.nextTileLsb = 0x00;
+  mBackground.nextTileMsb = 0x00;
+  mBackground.shifterPatternLow = 0x0000;
+  mBackground.shifterPatternHigh = 0x0000;
+  mBackground.shifterAttributeLow = 0x0000;
+  mBackground.shifterAttributeHigh = 0x0000;
   mStatusRegister.reg = 0x00;
   mMaskRegister.reg = 0x00;
   mControlRegister.reg = 0x00;
@@ -210,8 +135,9 @@ BackgroundPixelInfo Ppu::CalculateBackgroundPixelInfo() {
   }
   constexpr uint16_t mostSignificantBit = 1 << 15;
   uint16_t bitMux = mostSignificantBit >> mFineX;
-  result.pixel = ReadValueFromBackgroundShifter(mBg.shifterPatternHigh, mBg.shifterPatternLow, bitMux);
-  result.palette = ReadValueFromBackgroundShifter(mBg.shifterAttributeHigh, mBg.shifterAttributeLow, bitMux);
+  result.pixel = ReadValueFromBackgroundShifter(mBackground.shifterPatternHigh, mBackground.shifterPatternLow, bitMux);
+  result.palette =
+      ReadValueFromBackgroundShifter(mBackground.shifterAttributeHigh, mBackground.shifterAttributeLow, bitMux);
   return result;
 }
 
@@ -288,32 +214,32 @@ void Ppu::VRamFetch() {
   switch ((mCycle - 1) % 8) {
     case 0: {
       LoadBackgroundShifters();
-      mBg.nextTileId = PpuRead(0x2000 | (mVRamAddr.reg & 0x0FFF));
+      mBackground.nextTileId = PpuRead(0x2000 | (mVRamAddr.reg & 0x0FFF));
       break;
     }
     case 2: {
-      mBg.nextTileAttribute = PpuRead(0x23C0 | (mVRamAddr.nameTableY << 11) | (mVRamAddr.nameTableX << 10) |
-                                      ((mVRamAddr.coarseY >> 2) << 3) | (mVRamAddr.coarseX >> 2));
+      mBackground.nextTileAttribute = PpuRead(0x23C0 | (mVRamAddr.nameTableY << 11) | (mVRamAddr.nameTableX << 10) |
+                                              ((mVRamAddr.coarseY >> 2) << 3) | (mVRamAddr.coarseX >> 2));
 
       if (mVRamAddr.coarseY & 0b10) {
-        mBg.nextTileAttribute >>= 4;
+        mBackground.nextTileAttribute >>= 4;
       }
       if (mVRamAddr.coarseX & 0b10) {
-        mBg.nextTileAttribute >>= 2;
+        mBackground.nextTileAttribute >>= 2;
       }
-      mBg.nextTileAttribute &= 0b11;
+      mBackground.nextTileAttribute &= 0b11;
       break;
     }
     case 4: {
-      auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBg.nextTileId) << 4) +
-                        (mVRamAddr.fineY + 0);
-      mBg.nextTileLsb = PpuRead(toReadFrom);
+      auto toReadFrom = (mControlRegister.patternBackground << 12) +
+                        (static_cast<uint16_t>(mBackground.nextTileId) << 4) + (mVRamAddr.fineY + 0);
+      mBackground.nextTileLsb = PpuRead(toReadFrom);
       break;
     }
     case 6: {
-      auto toReadFrom = (mControlRegister.patternBackground << 12) + (static_cast<uint16_t>(mBg.nextTileId) << 4) +
-                        (mVRamAddr.fineY + 8);
-      mBg.nextTileMsb = PpuRead(toReadFrom);
+      auto toReadFrom = (mControlRegister.patternBackground << 12) +
+                        (static_cast<uint16_t>(mBackground.nextTileId) << 4) + (mVRamAddr.fineY + 8);
+      mBackground.nextTileMsb = PpuRead(toReadFrom);
       break;
     }
     case 7: {
@@ -373,11 +299,11 @@ void Ppu::TransferAddressX() {
 
 void Ppu::UpdateShifters() {
   if (mMaskRegister.renderBackground) {
-    mBg.shifterPatternLow <<= 1;
-    mBg.shifterPatternHigh <<= 1;
+    mBackground.shifterPatternLow <<= 1;
+    mBackground.shifterPatternHigh <<= 1;
 
-    mBg.shifterAttributeLow <<= 1;
-    mBg.shifterAttributeHigh <<= 1;
+    mBackground.shifterAttributeLow <<= 1;
+    mBackground.shifterAttributeHigh <<= 1;
   }
   if (!(mMaskRegister.renderBackground && mCycle >= 1 && mCycle < 258)) {
     return;
@@ -393,14 +319,16 @@ void Ppu::UpdateShifters() {
 }
 
 void Ppu::LoadBackgroundShifters() {
-  mBg.shifterPatternLow = (mBg.shifterPatternLow & 0xFF00) | mBg.nextTileLsb;
-  mBg.shifterPatternHigh = (mBg.shifterPatternHigh & 0xFF00) | mBg.nextTileMsb;
+  mBackground.shifterPatternLow = (mBackground.shifterPatternLow & 0xFF00) | mBackground.nextTileLsb;
+  mBackground.shifterPatternHigh = (mBackground.shifterPatternHigh & 0xFF00) | mBackground.nextTileMsb;
 
-  mBg.shifterAttributeLow = (mBg.shifterAttributeLow & 0xFF00) | ((mBg.nextTileAttribute & 0b01) ? 0xFF : 0x00);
-  mBg.shifterAttributeHigh = (mBg.shifterAttributeHigh & 0xFF00) | ((mBg.nextTileAttribute & 0b10) ? 0xFF : 0x00);
+  mBackground.shifterAttributeLow =
+      (mBackground.shifterAttributeLow & 0xFF00) | ((mBackground.nextTileAttribute & 0b01) ? 0xFF : 0x00);
+  mBackground.shifterAttributeHigh =
+      (mBackground.shifterAttributeHigh & 0xFF00) | ((mBackground.nextTileAttribute & 0b10) ? 0xFF : 0x00);
 };
 
-void Ppu::Transition() {
+void Ppu::TransitionState() {
   if (mScanline >= 240) {
     mState = &mVerticalBlankState;
   } else if (mCycle >= 256) {
@@ -408,4 +336,63 @@ void Ppu::Transition() {
   } else {
     mState = &mRenderingState;
   }
+}
+
+void Ppu::WriteControl(uint16_t addr, uint8_t data) {
+  mControlRegister.reg = data;
+  mTRamAddr.nameTableX = mControlRegister.nametableX;
+  mTRamAddr.nameTableY = mControlRegister.nametableY;
+}
+
+void Ppu::WriteMask(uint16_t addr, uint8_t data) { mMaskRegister.reg = data; }
+
+void Ppu::WriteOamAddress(uint16_t addr, uint8_t data) { mOamAddr = data; }
+
+void Ppu::WriteOamData(uint16_t addr, uint8_t data) { mOamPtr[mOamAddr] = data; }
+
+void Ppu::WriteScroll(uint16_t addr, uint8_t data) {
+  if (!mAddressLatch) {
+    mFineX = data & 0b111;
+    mTRamAddr.coarseX = data >> 3;
+    mAddressLatch = true;
+  } else {
+    mTRamAddr.fineY = data & 0b111;
+    mTRamAddr.coarseY = data >> 3;
+    mAddressLatch = false;
+  }
+}
+
+void Ppu::WritePpuAddress(uint16_t addr, uint8_t data) {
+  if (!mAddressLatch) {
+    mTRamAddr.reg = static_cast<uint16_t>(mTRamAddr.reg & 0x00FF) | (static_cast<uint16_t>(data & 0b111111) << 8);
+    mAddressLatch = true;
+  } else {
+    mTRamAddr.reg = static_cast<uint16_t>(mTRamAddr.reg & 0xFF00) | static_cast<uint16_t>(data);
+    mVRamAddr = mTRamAddr;
+    mAddressLatch = false;
+  }
+}
+
+void Ppu::WritePpuData(uint16_t addr, uint8_t data) {
+  PpuWrite(mVRamAddr.reg, data);
+  mVRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
+}
+
+uint8_t Ppu::ReadStatus(uint16_t addr) {
+  auto data = (mStatusRegister.reg & 0xE0) | (mPpuDataBuffer & 0x1F);
+  mStatusRegister.verticalBlank = false;
+  mAddressLatch = false;
+  return data;
+}
+
+uint8_t Ppu::ReadOamData(uint16_t addr) { return mOamPtr[mOamAddr]; }
+
+uint8_t Ppu::ReadPpuData(uint16_t addr) {
+  auto data = mPpuDataBuffer;
+  mPpuDataBuffer = PpuRead(mVRamAddr.reg);
+  if (mVRamAddr.reg >= FRAME_PALETTE_START) {
+    data = mPpuDataBuffer;
+  }
+  mVRamAddr.reg += (mControlRegister.incrementMode ? 32 : 1);
+  return data;
 }

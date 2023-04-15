@@ -26,7 +26,7 @@ void HorizontalBlankState::Execute() {
   }
 
   if (mPpu.mCycle == 338 || mPpu.mCycle == 340) {
-    mPpu.mBg.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.mVRamAddr.reg & 0x0FFF));
+    mPpu.mBackground.nextTileId = mPpu.PpuRead(0x2000 | (mPpu.mVRamAddr.reg & 0x0FFF));
   }
 
   if (mPpu.mScanline == -1 && 280 <= mPpu.mCycle && mPpu.mCycle < 305) {

@@ -6,6 +6,7 @@
 #include "ObjectAttributeEntry.h"
 #include "PixelColor.h"
 #include "PixelInfo.h"
+#include "PpuPort.h"
 #include "PpuRegisterDefinitions.h"
 #include "Sprite.h"
 #include "ppu-states/HorizontalBlankState.h"
@@ -13,6 +14,8 @@
 #include "ppu-states/RenderingState.h"
 #include "ppu-states/VerticalBlankState.h"
 #include <cstdint>
+#include <functional>
+#include <map>
 #include <memory>
 #include <utility>
 
@@ -47,7 +50,6 @@ class Ppu {
   void NonMaskableInterrupt();
 
   uint8_t* mOamPtr = (uint8_t*)mOam.data();
-  uint8_t mOamAddr;
 
  private:
   PixelColor& CalculatePixelColor();
@@ -59,7 +61,19 @@ class Ppu {
   void TransferAddressX();
   void UpdateShifters();
   void LoadBackgroundShifters();
-  void Transition();
+  void TransitionState();
+
+  void WriteControl(uint16_t addr, uint8_t data);
+  void WriteMask(uint16_t addr, uint8_t data);
+  void WriteOamAddress(uint16_t addr, uint8_t data);
+  void WriteOamData(uint16_t addr, uint8_t data);
+  void WriteScroll(uint16_t addr, uint8_t data);
+  void WritePpuAddress(uint16_t addr, uint8_t data);
+  void WritePpuData(uint16_t addr, uint8_t data);
+
+  uint8_t ReadStatus(uint16_t addr);
+  uint8_t ReadOamData(uint16_t addr);
+  uint8_t ReadPpuData(uint16_t addr);
 
   BackgroundPixelInfo CalculateBackgroundPixelInfo();
   ForegroundPixelInfo CalculateForegroundPixelInfo();
@@ -72,6 +86,9 @@ class Ppu {
   Bus* mBus;
   IRenderer& mRenderer;
   std::unique_ptr<ColorPalette> mColorPalette;
+
+  std::map<PpuPort, std::function<void(uint16_t, uint8_t)>> mCpuWriteCases;
+  std::map<PpuPort, std::function<uint8_t(uint16_t)>> mCpuReadCases;
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
   FramePalette mFramePalette;
@@ -102,9 +119,11 @@ class Ppu {
     uint16_t shifterPatternHigh;
     uint16_t shifterAttributeLow;
     uint16_t shifterAttributeHigh;
-  } mBg;
+  } mBackground;
 
   std::array<ObjectAttributeEntry, 64> mOam;
+  uint8_t mOamAddr;
+
   std::array<ObjectAttributeEntry, 8> mSpriteOnScanline;
   uint8_t mSpriteCount;
 
