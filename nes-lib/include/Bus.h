@@ -17,7 +17,7 @@ class Bus {
   void Clock();
 
   void CpuWrite(uint16_t addr, uint8_t data);
-  uint8_t CpuRead(uint16_t addr, bool bReadOnly = false);
+  uint8_t CpuRead(uint16_t addr);
 
   void ConnectController(IController* controller);
   void NonMaskableInterrupt();

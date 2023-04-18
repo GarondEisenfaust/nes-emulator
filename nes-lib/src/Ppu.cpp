@@ -36,7 +36,7 @@ void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
   mCpuWriteCases.at(addressedPort)(addr, data);
 }
 
-uint8_t Ppu::CpuRead(uint16_t addr, bool bReadOnly) {
+uint8_t Ppu::CpuRead(uint16_t addr) {
   auto addressedPort = static_cast<PpuPort>(addr % PPU_NUM_PORTS);
   return mCpuReadCases.at(addressedPort)(addr);
 }
@@ -51,7 +51,7 @@ void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   }
 }
 
-uint8_t Ppu::PpuRead(uint16_t addr, bool bReadOnly) {
+uint8_t Ppu::PpuRead(uint16_t addr) {
   uint8_t data = 0x00;
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
     data = mCartridge->PpuRead(addr);

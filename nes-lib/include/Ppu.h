@@ -35,10 +35,10 @@ class Ppu {
   Ppu(IRenderer& renderer);
   ~Ppu() = default;
 
-  uint8_t CpuRead(uint16_t addr, bool bReadOnly = false);
+  uint8_t CpuRead(uint16_t addr);
   void CpuWrite(uint16_t addr, uint8_t data);
 
-  uint8_t PpuRead(uint16_t addr, bool bReadOnly = false);
+  uint8_t PpuRead(uint16_t addr);
   void PpuWrite(uint16_t addr, uint8_t data);
 
   void ConnectBus(Bus* bus);

@@ -22,13 +22,13 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
   }
 }
 
-uint8_t Bus::CpuRead(uint16_t addr, bool bReadOnly) {
+uint8_t Bus::CpuRead(uint16_t addr) {
   uint8_t data = 0x00;
 
   if (RAM_START <= addr && addr <= RAM_END) {
     data = mRam.Read(addr);
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
-    data = mPpu->CpuRead(addr, bReadOnly);
+    data = mPpu->CpuRead(addr);
   } else if (CONTROLLER_START <= addr && addr <= CONTROLLER_END) {
     data = mController->Read(addr);
   } else if (CPU_CARTRIDGE_START <= addr && addr <= CPU_CARTRIDGE_END) {
