@@ -17,6 +17,18 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#define MA_NO_DECODING
+#define MA_NO_ENCODING
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
+
+#define DEVICE_FORMAT ma_format_f32
+#define DEVICE_CHANNELS 1
+#define DEVICE_SAMPLE_RATE 44100
+
+void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
+  *reinterpret_cast<double*>(pOutput) = 0;
+}
 
 void RenderCompleteFrame(Bus& bus, Grid& grid) {
   while (!grid.FrameComplete()) {
@@ -74,6 +86,28 @@ int main(int argc, char* argv[]) {
   Cartridge cartridge(romPath);
   bus.InsertCartridge(&cartridge);
   bus.Reset();
+
+  ma_device_config deviceConfig;
+  ma_device device;
+
+  deviceConfig = ma_device_config_init(ma_device_type_playback);
+  deviceConfig.playback.format = DEVICE_FORMAT;
+  deviceConfig.playback.channels = DEVICE_CHANNELS;
+  deviceConfig.sampleRate = DEVICE_SAMPLE_RATE;
+  deviceConfig.dataCallback = data_callback;
+
+  if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
+    printf("Failed to open playback device.\n");
+    return -4;
+  }
+
+  printf("Device Name: %s\n", device.playback.name);
+
+  if (ma_device_start(&device) != MA_SUCCESS) {
+    printf("Failed to start playback device.\n");
+    ma_device_uninit(&device);
+    return -5;
+  }
 
   using namespace std::chrono_literals;
   auto diff = (1000ms / 60);
