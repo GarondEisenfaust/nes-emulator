@@ -27,7 +27,7 @@ class Cpu {
   void Interrupt();
   void NonMaskableInterrupt();
 
-  virtual uint8_t Fetch();
+  uint8_t Fetch();
 
   void Clock();
   void Reset();

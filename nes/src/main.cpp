@@ -1,3 +1,4 @@
+#include "Apu.h"
 #include "Bus.h"
 #include "Cartridge.h"
 #include "Controller.h"
@@ -26,9 +27,11 @@
 #define DEVICE_CHANNELS 1
 #define DEVICE_SAMPLE_RATE 44100
 
+Apu apu;
+
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
-  *reinterpret_cast<double*>(pOutput) = 0;
-}
+  *reinterpret_cast<double*>(pOutput) = apu.GetNextSample();
+};
 
 void RenderCompleteFrame(Bus& bus, Grid& grid) {
   while (!grid.FrameComplete()) {
@@ -76,11 +79,13 @@ int main(int argc, char* argv[]) {
   Bus bus(*ram);
   Cpu cpu;
   Ppu ppu(grid);
+
   Controller controller(renderContext.GetWindow());
 
   bus.ConnectController(&controller);
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
+  apu.ConnectBus(&bus);
 
   std::string romPath = argv[1];
   Cartridge cartridge(romPath);
@@ -94,6 +99,7 @@ int main(int argc, char* argv[]) {
   deviceConfig.playback.format = DEVICE_FORMAT;
   deviceConfig.playback.channels = DEVICE_CHANNELS;
   deviceConfig.sampleRate = DEVICE_SAMPLE_RATE;
+
   deviceConfig.dataCallback = data_callback;
 
   if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {

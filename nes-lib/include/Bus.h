@@ -1,4 +1,5 @@
 #pragma once
+#include "Apu.h"
 #include "Cartridge.h"
 #include "Cpu.h"
 #include "IController.h"
@@ -24,6 +25,7 @@ class Bus {
 
   Cpu* mCpu;
   Ppu* mPpu;
+  Apu* mApu;
 
  private:
   Cartridge* mCartridge;
