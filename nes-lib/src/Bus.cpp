@@ -18,7 +18,7 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == DMA_ADDRESS) {
     Dma(data);
   } else if (CONTROLLER_START == addr) {
-    mController->Write(addr);
+    mController->Write(addr, data);
   } else if (CPU_CARTRIDGE_START <= addr && addr <= CPU_CARTRIDGE_END) {
     mCartridge->CpuWrite(addr, data);
   }

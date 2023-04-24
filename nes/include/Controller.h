@@ -10,7 +10,7 @@ class Controller : public IController {
   Controller(GLFWwindow* window);
   virtual ~Controller() = default;
 
-  void Write(uint16_t address);
+  void Write(uint16_t address, uint8_t data);
   uint8_t Read(uint16_t address);
 
   void SetControllerBitBasedOnInput(int gamepadIndex);

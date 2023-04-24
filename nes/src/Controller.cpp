@@ -2,8 +2,8 @@
 
 Controller::Controller(GLFWwindow* window) : mWindow(window) {}
 
-void Controller::Write(uint16_t address) {
-  const auto controllerIndex = address & 0x0001;
+void Controller::Write(uint16_t address, uint8_t data) {
+  const auto controllerIndex = data & 0x0001;
   controllerBuffer[controllerIndex] = mControllerRegister[controllerIndex].reg;
 }
 
