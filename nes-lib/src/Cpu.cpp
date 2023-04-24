@@ -75,7 +75,7 @@ void Cpu::Reset() {
   cycles = 8;
 }
 
-bool Cpu::BranchIf(bool condition) {
+void Cpu::BranchIf(bool condition) {
   if (condition) {
     cycles++;
     addrAbs = pc + addrRel;
@@ -86,7 +86,6 @@ bool Cpu::BranchIf(bool condition) {
 
     pc = addrAbs;
   }
-  return false;
 }
 
 void Cpu::Interrupt(uint16_t address, uint8_t numCycles) {

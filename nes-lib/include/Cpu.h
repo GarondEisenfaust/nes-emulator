@@ -61,7 +61,7 @@ class Cpu {
     uint8_t reg;
   } status;
 
-  bool BranchIf(bool condition);
+  void BranchIf(bool condition);
 
   std::unique_ptr<LookupTable> lookup;
   AddressingModeContainer addressingModes;
