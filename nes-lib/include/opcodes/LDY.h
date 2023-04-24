@@ -4,5 +4,5 @@
 class LDY : public IOpcode {
  public:
   LDY(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

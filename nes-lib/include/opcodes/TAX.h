@@ -4,5 +4,5 @@
 class TAX : public IOpcode {
  public:
   TAX(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

@@ -4,5 +4,5 @@
 class LSR : public IOpcode {
  public:
   LSR(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

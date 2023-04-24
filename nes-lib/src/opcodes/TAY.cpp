@@ -3,9 +3,8 @@
 
 TAY::TAY(Cpu* cpu) : IOpcode(cpu) {}
 
-bool TAY::operator()() {
+void TAY::operator()() {
   mCpu->y = mCpu->a;
   mCpu->status.z = mCpu->y == 0;
   mCpu->status.n = mCpu->y & (1 << 7);
-  return false;
 }

@@ -3,8 +3,7 @@
 
 PLP::PLP(Cpu* cpu) : IOpcode(cpu) {}
 
-bool PLP::operator()() {
+void PLP::operator()() {
   mCpu->status.reg = mCpu->PopFromStack();
   mCpu->status.u = true;
-  return 0;
 }

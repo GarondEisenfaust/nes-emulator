@@ -4,5 +4,5 @@
 class SEI : public IOpcode {
  public:
   SEI(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

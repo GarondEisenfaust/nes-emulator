@@ -3,7 +3,4 @@
 
 JMP::JMP(Cpu* cpu) : IOpcode(cpu) {}
 
-bool JMP::operator()() {
-  mCpu->pc = mCpu->addrAbs;
-  return 0;
-}
+void JMP::operator()() { mCpu->pc = mCpu->addrAbs; }

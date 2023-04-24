@@ -4,5 +4,5 @@
 class BEQ : public IOpcode {
  public:
   BEQ(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

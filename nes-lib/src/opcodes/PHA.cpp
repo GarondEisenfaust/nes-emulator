@@ -3,7 +3,4 @@
 
 PHA::PHA(Cpu* cpu) : IOpcode(cpu) {}
 
-bool PHA::operator()() {
-  mCpu->PushToStack(mCpu->a);
-  return 0;
-}
+void PHA::operator()() { mCpu->PushToStack(mCpu->a); }

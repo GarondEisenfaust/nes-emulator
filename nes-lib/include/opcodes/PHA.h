@@ -4,5 +4,5 @@
 class PHA : public IOpcode {
  public:
   PHA(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

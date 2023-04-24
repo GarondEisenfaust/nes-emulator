@@ -3,7 +3,7 @@
 
 SBC::SBC(Cpu* cpu) : IOpcode(cpu) {}
 
-bool SBC::operator()() {
+void SBC::operator()() {
   mCpu->Fetch();
 
   uint16_t value = mCpu->fetched ^ 0x00FF;
@@ -14,5 +14,4 @@ bool SBC::operator()() {
   mCpu->status.v = (temp ^ mCpu->a) & (temp ^ value) & 0x0080;
   mCpu->status.n = temp & 0x0080;
   mCpu->a = temp & 0x00FF;
-  return true;
 }

@@ -4,5 +4,5 @@
 class BIT : public IOpcode {
  public:
   BIT(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

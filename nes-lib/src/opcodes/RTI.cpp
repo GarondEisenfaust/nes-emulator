@@ -3,7 +3,7 @@
 
 RTI::RTI(Cpu* cpu) : IOpcode(cpu) {}
 
-bool RTI::operator()() {
+void RTI::operator()() {
   mCpu->status.reg = mCpu->PopFromStack();
 
   constexpr uint8_t allButB = ~(1 << 4);
@@ -14,5 +14,4 @@ bool RTI::operator()() {
 
   mCpu->pc = mCpu->PopFromStack();
   mCpu->pc |= mCpu->PopFromStack() << 8;
-  return 0;
 }

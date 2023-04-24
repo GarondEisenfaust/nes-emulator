@@ -3,4 +3,4 @@
 
 XXX::XXX(Cpu* cpu) : IOpcode(cpu) {}
 
-bool XXX::operator()() { return false; }
+void XXX::operator()() {}

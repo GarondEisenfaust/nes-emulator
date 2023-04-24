@@ -3,7 +3,4 @@
 
 TXS::TXS(Cpu* cpu) : IOpcode(cpu) {}
 
-bool TXS::operator()() {
-  mCpu->stackPointer = mCpu->x;
-  return 0;
-}
+void TXS::operator()() { mCpu->stackPointer = mCpu->x; }

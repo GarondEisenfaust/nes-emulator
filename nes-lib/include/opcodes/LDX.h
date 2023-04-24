@@ -4,5 +4,5 @@
 class LDX : public IOpcode {
  public:
   LDX(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

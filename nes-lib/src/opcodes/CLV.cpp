@@ -3,7 +3,4 @@
 
 CLV::CLV(Cpu* cpu) : IOpcode(cpu) {}
 
-bool CLV::operator()() {
-  mCpu->status.v = false;
-  return false;
-}
+void CLV::operator()() { mCpu->status.v = false; }

@@ -4,5 +4,5 @@
 class PLP : public IOpcode {
  public:
   PLP(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

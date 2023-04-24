@@ -4,5 +4,5 @@
 class CMP : public IOpcode {
  public:
   CMP(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

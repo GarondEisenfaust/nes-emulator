@@ -3,4 +3,4 @@
 
 BVC::BVC(Cpu* cpu) : IOpcode(cpu) {}
 
-bool BVC::operator()() { return mCpu->BranchIf(mCpu->status.v == 0); }
+void BVC::operator()() { mCpu->BranchIf(mCpu->status.v == 0); }

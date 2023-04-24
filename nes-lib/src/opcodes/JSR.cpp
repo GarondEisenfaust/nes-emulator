@@ -3,11 +3,9 @@
 
 JSR::JSR(Cpu* cpu) : IOpcode(cpu) {}
 
-bool JSR::operator()() {
+void JSR::operator()() {
   mCpu->pc--;
   mCpu->PushToStack((mCpu->pc >> 8) & 0x00FF);
   mCpu->PushToStack(mCpu->pc & 0x00FF);
-
   mCpu->pc = mCpu->addrAbs;
-  return false;
 }

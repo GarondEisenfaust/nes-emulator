@@ -3,7 +3,7 @@
 
 LSR::LSR(Cpu* cpu) : IOpcode(cpu) {}
 
-bool LSR::operator()() {
+void LSR::operator()() {
   mCpu->Fetch();
   mCpu->status.c = mCpu->fetched & 0x0001;
   auto temp = mCpu->fetched >> 1;
@@ -15,5 +15,4 @@ bool LSR::operator()() {
   } else {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
   }
-  return 0;
 }

@@ -4,5 +4,5 @@
 class TYA : public IOpcode {
  public:
   TYA(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

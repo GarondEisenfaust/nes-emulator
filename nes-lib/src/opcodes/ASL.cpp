@@ -3,7 +3,7 @@
 
 ASL::ASL(Cpu* cpu) : IOpcode(cpu) {}
 
-bool ASL::operator()() {
+void ASL::operator()() {
   mCpu->Fetch();
   auto temp = mCpu->fetched << 1;
   mCpu->status.c = (temp & 0xFF00) > 0;
@@ -15,5 +15,4 @@ bool ASL::operator()() {
   } else {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
   }
-  return 0;
 }

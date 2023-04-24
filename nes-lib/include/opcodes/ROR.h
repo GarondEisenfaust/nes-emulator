@@ -4,5 +4,5 @@
 class ROR : public IOpcode {
  public:
   ROR(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

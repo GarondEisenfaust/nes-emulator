@@ -3,7 +3,4 @@
 
 CLC::CLC(Cpu* cpu) : IOpcode(cpu) {}
 
-bool CLC::operator()() {
-  mCpu->status.c = false;
-  return false;
-}
+void CLC::operator()() { mCpu->status.c = false; }

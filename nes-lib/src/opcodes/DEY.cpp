@@ -3,9 +3,8 @@
 
 DEY::DEY(Cpu* cpu) : IOpcode(cpu) {}
 
-bool DEY::operator()() {
+void DEY::operator()() {
   mCpu->y--;
   mCpu->status.z = mCpu->y == 0;
   mCpu->status.n = mCpu->y & (1 << 7);
-  return 0;
 }

@@ -3,7 +3,4 @@
 
 SEC::SEC(Cpu* cpu) : IOpcode(cpu) {}
 
-bool SEC::operator()() {
-  mCpu->status.c = true;
-  return 0;
-}
+void SEC::operator()() { mCpu->status.c = true; }

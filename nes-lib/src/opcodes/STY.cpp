@@ -3,7 +3,4 @@
 
 STY::STY(Cpu* cpu) : IOpcode(cpu) {}
 
-bool STY::operator()() {
-  mCpu->Write(mCpu->addrAbs, mCpu->y);
-  return false;
-}
+void STY::operator()() { mCpu->Write(mCpu->addrAbs, mCpu->y); }

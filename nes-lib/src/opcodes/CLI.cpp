@@ -3,7 +3,4 @@
 
 CLI::CLI(Cpu* cpu) : IOpcode(cpu) {}
 
-bool CLI::operator()() {
-  mCpu->status.i = false;
-  return false;
-}
+void CLI::operator()() { mCpu->status.i = false; }

@@ -4,5 +4,5 @@
 class ADC : public IOpcode {
  public:
   ADC(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

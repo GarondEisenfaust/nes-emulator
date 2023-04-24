@@ -3,9 +3,8 @@
 
 TSX::TSX(Cpu* cpu) : IOpcode(cpu) {}
 
-bool TSX::operator()() {
+void TSX::operator()() {
   mCpu->x = mCpu->stackPointer;
   mCpu->status.z = mCpu->x == 0;
   mCpu->status.n = mCpu->x & (1 << 7);
-  return false;
 }

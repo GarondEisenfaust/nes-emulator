@@ -3,4 +3,4 @@
 
 BNE::BNE(Cpu* cpu) : IOpcode(cpu) {}
 
-bool BNE::operator()() { return mCpu->BranchIf(mCpu->status.z == 0); }
+void BNE::operator()() { mCpu->BranchIf(mCpu->status.z == 0); }

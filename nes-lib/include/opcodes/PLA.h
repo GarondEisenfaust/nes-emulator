@@ -4,5 +4,5 @@
 class PLA : public IOpcode {
  public:
   PLA(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

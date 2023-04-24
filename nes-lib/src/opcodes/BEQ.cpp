@@ -3,4 +3,4 @@
 
 BEQ::BEQ(Cpu* cpu) : IOpcode(cpu) {}
 
-bool BEQ::operator()() { return mCpu->BranchIf(mCpu->status.z == 1); }
+void BEQ::operator()() { mCpu->BranchIf(mCpu->status.z == 1); }

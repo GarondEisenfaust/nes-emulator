@@ -4,5 +4,5 @@
 class ORA : public IOpcode {
  public:
   ORA(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

@@ -3,7 +3,7 @@
 
 ROR::ROR(Cpu* cpu) : IOpcode(cpu) {}
 
-bool ROR::operator()() {
+void ROR::operator()() {
   mCpu->Fetch();
 
   auto temp = mCpu->status.c << 7 | (mCpu->fetched >> 1);
@@ -16,5 +16,4 @@ bool ROR::operator()() {
   } else {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
   }
-  return 0;
 }

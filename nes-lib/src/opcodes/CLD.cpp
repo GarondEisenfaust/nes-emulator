@@ -3,7 +3,4 @@
 
 CLD::CLD(Cpu* cpu) : IOpcode(cpu) {}
 
-bool CLD::operator()() {
-  mCpu->status.d = false;
-  return false;
-}
+void CLD::operator()() { mCpu->status.d = false; }

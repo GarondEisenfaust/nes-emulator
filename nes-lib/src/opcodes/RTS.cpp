@@ -3,10 +3,8 @@
 
 RTS::RTS(Cpu* cpu) : IOpcode(cpu) {}
 
-bool RTS::operator()() {
+void RTS::operator()() {
   mCpu->pc = mCpu->PopFromStack();
   mCpu->pc |= mCpu->PopFromStack() << 8;
-
   mCpu->pc++;
-  return 0;
 }

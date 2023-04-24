@@ -4,5 +4,5 @@
 class SBC : public IOpcode {
  public:
   SBC(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

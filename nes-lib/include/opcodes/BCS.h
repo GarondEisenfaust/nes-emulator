@@ -4,5 +4,5 @@
 class BCS : public IOpcode {
  public:
   BCS(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

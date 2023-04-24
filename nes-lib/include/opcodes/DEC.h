@@ -4,5 +4,5 @@
 class DEC : public IOpcode {
  public:
   DEC(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

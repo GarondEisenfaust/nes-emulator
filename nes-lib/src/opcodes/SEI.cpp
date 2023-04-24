@@ -3,7 +3,4 @@
 
 SEI::SEI(Cpu* cpu) : IOpcode(cpu) {}
 
-bool SEI::operator()() {
-  mCpu->status.i = true;
-  return 0;
-}
+void SEI::operator()() { mCpu->status.i = true; }

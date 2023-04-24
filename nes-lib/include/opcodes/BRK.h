@@ -4,5 +4,5 @@
 class BRK : public IOpcode {
  public:
   BRK(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

@@ -3,7 +3,7 @@
 
 BRK::BRK(Cpu* cpu) : IOpcode(cpu) {}
 
-bool BRK::operator()() {
+void BRK::operator()() {
   mCpu->pc++;
 
   mCpu->status.i = true;
@@ -15,5 +15,4 @@ bool BRK::operator()() {
   mCpu->status.b = false;
 
   mCpu->pc = mCpu->Read(0xFFFE) | (mCpu->Read(0xFFFF) << 8);
-  return 0;
 }

@@ -4,5 +4,5 @@
 class CLD : public IOpcode {
  public:
   CLD(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

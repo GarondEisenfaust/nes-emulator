@@ -4,5 +4,5 @@
 class TXA : public IOpcode {
  public:
   TXA(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

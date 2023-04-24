@@ -3,7 +3,7 @@
 
 PHP::PHP(Cpu* cpu) : IOpcode(cpu) {}
 
-bool PHP::operator()() {
+void PHP::operator()() {
   auto tempStatus = mCpu->status;
   tempStatus.b = true;
   tempStatus.u = true;
@@ -11,5 +11,4 @@ bool PHP::operator()() {
   mCpu->PushToStack(tempStatus.reg);
   mCpu->status.b = false;
   mCpu->status.u = false;
-  return 0;
 }

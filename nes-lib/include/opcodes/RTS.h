@@ -4,5 +4,5 @@
 class RTS : public IOpcode {
  public:
   RTS(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

@@ -3,9 +3,8 @@
 
 DEX::DEX(Cpu* cpu) : IOpcode(cpu) {}
 
-bool DEX::operator()() {
+void DEX::operator()() {
   mCpu->x--;
   mCpu->status.z = mCpu->x == 0;
   mCpu->status.n = mCpu->x & (1 << 7);
-  return 0;
 }

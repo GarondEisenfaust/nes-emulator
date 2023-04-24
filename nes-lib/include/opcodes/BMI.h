@@ -4,5 +4,5 @@
 class BMI : public IOpcode {
  public:
   BMI(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 };

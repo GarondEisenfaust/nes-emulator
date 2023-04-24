@@ -3,7 +3,7 @@
 
 ROL::ROL(Cpu* cpu) : IOpcode(cpu) {}
 
-bool ROL::operator()() {
+void ROL::operator()() {
   mCpu->Fetch();
   auto temp = mCpu->fetched << 1 | mCpu->status.c;
   mCpu->status.c = temp & 0xFF00;
@@ -15,5 +15,4 @@ bool ROL::operator()() {
   } else {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
   }
-  return 0;
 }
