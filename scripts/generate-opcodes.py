@@ -9,7 +9,7 @@ h_template = """#pragma once
 class {name} : public IOpcode {{
  public:
   {name}(Cpu* cpu);
-  virtual bool operator()();
+  virtual void operator()();
 }};
 """
 
@@ -18,7 +18,7 @@ cpp_template = """#include "opcodes/{name}.h"
 
 {name}::{name}(Cpu* cpu) : IOpcode(cpu) {{}}
 
-bool {name}::operator()() {{
+void {name}::operator()() {{
   return false;
 }}
 """
@@ -31,5 +31,5 @@ for line in Lines:
   with open("include/opcodes/" + name + ".h", 'w') as h_file:
     h_file.writelines(h)
 
-  with open("src/opcodes/" + name + ".cpp", 'w') as cpp_file:
-    cpp_file.writelines(cpp)
+with open("src/opcodes/" + name + ".cpp", 'w') as cpp_file:
+  cpp_file.writelines(cpp)
