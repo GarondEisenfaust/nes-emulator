@@ -45,12 +45,12 @@ void Cpu::Clock() {
     pc++;
 
     auto instruction = lookup->at(opcode);
-    cycles = lookup->at(opcode).cycles;
+    cycles = instruction.cycles;
 
-    auto additionalAddressModeCycle = (*lookup->at(opcode).addrMode)();
-    auto additionalOpcodeCycle = (*lookup->at(opcode).opcode)();
+    auto pageCrossed = (*instruction.addrMode)();
+    (*instruction.opcode)();
 
-    cycles += additionalAddressModeCycle && additionalOpcodeCycle;
+    cycles += pageCrossed && instruction.additionalCycleOnPageCrossed;
     status.u = true;
   }
   cycles--;
