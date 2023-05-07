@@ -31,7 +31,7 @@ uint8_t Bus::CpuRead(uint16_t addr) {
     data = mRam.Read(addr);
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     data = mPpu->CpuRead(addr);
-  } else if (0x4000 <= addr && addr <= 0x400F) {
+  } else if ((0x4000 <= addr && addr <= 0x400F) || (addr == 0x4015)) {
     data = mApu->CpuRead(addr);
   } else if (CONTROLLER_START <= addr && addr <= CONTROLLER_END) {
     data = mController->Read(addr);

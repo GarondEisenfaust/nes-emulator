@@ -5,16 +5,20 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   if (addr == 0x4000) {
     switch ((data & 0xC0) >> 6) {
       case 0x00:
-        mPulseSequencerOne.sequence = 0b01000000;
+        // mPulseSequencerOne.sequence = 0b01000000;
+        mPulseOscilatorOne.dutycycle = 0.125;
         break;
       case 0x01:
-        mPulseSequencerOne.sequence = 0b01100000;
+        // mPulseSequencerOne.sequence = 0b01100000;
+        mPulseOscilatorOne.dutycycle = 0.250;
         break;
       case 0x02:
-        mPulseSequencerOne.sequence = 0b01111000;
+        // mPulseSequencerOne.sequence = 0b01111000;
+        mPulseOscilatorOne.dutycycle = 0.500;
         break;
       case 0x03:
-        mPulseSequencerOne.sequence = 0b10011111;
+        // mPulseSequencerOne.sequence = 0b10011111;
+        mPulseOscilatorOne.dutycycle = 0.750;
         break;
     }
     mPulseSequencerOne.enabled = (data & 0x20);
@@ -26,16 +30,20 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4004) {
     switch ((data & 0xC0) >> 6) {
       case 0x00:
-        mPulseSequencerTwo.sequence = 0b01000000;
+        // mPulseSequencerTwo.sequence = 0b01000000;
+        mPulseOscilatorTwo.dutycycle = 0.125;
         break;
       case 0x01:
-        mPulseSequencerTwo.sequence = 0b01100000;
+        // mPulseSequencerTwo.sequence = 0b01100000;
+        mPulseOscilatorTwo.dutycycle = 0.250;
         break;
       case 0x02:
-        mPulseSequencerTwo.sequence = 0b01111000;
+        // mPulseSequencerTwo.sequence = 0b01111000;
+        mPulseOscilatorTwo.dutycycle = 0.500;
         break;
       case 0x03:
-        mPulseSequencerTwo.sequence = 0b10011111;
+        // mPulseSequencerTwo.sequence = 0b10011111;
+        mPulseOscilatorTwo.dutycycle = 0.750;
         break;
     }
     mPulseSequencerTwo.enabled = (data & 0x20);
@@ -50,7 +58,14 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   }
 }
 
-uint8_t Apu::CpuRead(uint16_t addr) { return 0; }
+uint8_t Apu::CpuRead(uint16_t addr) {
+  if (addr == 0x4015) {
+    auto pulseTimerOne = mPulseSequencerOne.timer != 0;
+    auto pulseTimerTwo = mPulseSequencerTwo.timer != 0;
+    return (pulseTimerTwo << 1) | pulseTimerOne;
+  }
+  return 0;
+}
 
 float Apu::GetNextSample() {
   auto result = buffer.Read();
@@ -61,7 +76,7 @@ void Apu::Clock() {
   if (mClockCounter % 6 == 0) {
     mPulseSequencerOne.Clock();
     mPulseSequencerTwo.Clock();
-    auto output = ((1.0 * mPulseSequencerOne.output) - 0.8) * 0.1 + ((1.0 * mPulseSequencerTwo.output) - 0.8) * 0.1;
+    auto output = mPulseSequencerOne.output + mPulseSequencerTwo.output;
     buffer.Write(output);
   }
   mClockCounter++;
