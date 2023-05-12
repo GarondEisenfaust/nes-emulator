@@ -30,7 +30,7 @@
 Apu apu;
 
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
-  *reinterpret_cast<double*>(pOutput) = apu.GetNextSample();
+  *reinterpret_cast<float*>(pOutput) = apu.GetNextSample();
 };
 
 void RenderCompleteFrame(Bus& bus, Grid& grid) {

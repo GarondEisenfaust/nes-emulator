@@ -4,32 +4,25 @@
 template <typename TYPE, int SIZE>
 class CircularBuffer {
  public:
-  CircularBuffer() : mBuffer({0}), mWritePointer(mBuffer.begin()), mReadPointer(mBuffer.begin()) {}
+  CircularBuffer() : mBuffer({0}), mReadIndex(0), mWriteIndex(0) {}
 
   void Write(TYPE value) {
-    *mWritePointer = value;
-    if (value != 0) {
-      auto p = 0;
-    }
-    mWritePointer = NextPointer(mWritePointer);
+    mBuffer[mWriteIndex] = value;
+    IncrementIndex(mWriteIndex);
   }
 
   TYPE Read() {
-    auto value = *mWritePointer;
-    mWritePointer = NextPointer(mWritePointer);
+    auto value = mBuffer[mReadIndex];
+    if (mReadIndex < mWriteIndex) {
+      IncrementIndex(mReadIndex);
+    }
     return value;
   }
 
  private:
   std::array<TYPE, SIZE> mBuffer;
-  TYPE* mWritePointer;
-  TYPE* mReadPointer;
+  int mWriteIndex;
+  int mReadIndex;
 
-  TYPE* NextPointer(TYPE* pointer) {
-    pointer++;
-    if (pointer == mBuffer.end()) {
-      pointer = mBuffer.begin();
-    }
-    return pointer;
-  }
+  void IncrementIndex(int& index) { index = (index + 1) % mBuffer.size(); }
 };

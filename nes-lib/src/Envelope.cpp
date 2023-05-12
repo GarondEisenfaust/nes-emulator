@@ -1,4 +1,5 @@
 #include "Envelope.h"
+#include <iostream>
 
 void Envelope::Clock() {
   if (startFlag) {
@@ -18,6 +19,5 @@ void Envelope::Clock() {
       decayLevelCounter = 15;
     }
   }
-
   output = constantVolume ? volume : decayLevelCounter;
 }

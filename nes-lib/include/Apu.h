@@ -1,7 +1,6 @@
 #pragma once
 #include "CircularBuffer.h"
-#include "Oscilator.h"
-#include "Sequencer.h"
+#include "PulseChannel.h"
 #include <cstdint>
 
 class Bus;
@@ -22,10 +21,8 @@ class Apu {
  private:
   Bus* mBus;
   int mClockCounter;
-  Sequencer mPulseSequencerOne;
-  Sequencer mPulseSequencerTwo;
-  Oscilator mPulseOscilatorOne;
-  Oscilator mPulseOscilatorTwo;
+  PulseChannel mPulseChannelOne;
+  PulseChannel mPulseChannelTwo;
 
-  CircularBuffer<float, 1024> buffer;
+  CircularBuffer<float, 2048> buffer;
 };

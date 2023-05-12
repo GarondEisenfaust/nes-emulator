@@ -9,7 +9,7 @@ class Envelope {
   bool constantVolume;
   Divider divider;
   uint8_t decayLevelCounter = 0;
-   uint8_t volume = 0;
- uint8_t output = 0;
+  uint8_t volume = 0;
+  uint8_t output = 0;
   void Clock();
 };

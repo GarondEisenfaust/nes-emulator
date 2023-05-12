@@ -78,7 +78,10 @@
     "typeindex": "cpp",
     "charconv": "cpp",
     "regex": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "format": "cpp",
+    "span": "cpp",
+    "stdfloat": "cpp"
   },
   "cmake.configureOnOpen": false,
   "cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",

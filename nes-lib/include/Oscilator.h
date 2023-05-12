@@ -10,5 +10,5 @@ class Oscilator {
   Oscilator() = default;
   ~Oscilator() = default;
 
-  double Sample(double time);
+  double Sample(int time);
 };
