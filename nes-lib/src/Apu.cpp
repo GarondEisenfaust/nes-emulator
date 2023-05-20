@@ -82,10 +82,12 @@ void Apu::Clock() {
   if (mClockCounter % 6 == 0) {
     mPulseChannelOne.Clock();
     mPulseChannelTwo.Clock();
-    mPulseChannelOne.mOscilator.frequency = 1789773.0 / (16.0 * (double)(mPulseChannelOne.mSequencer.reload + 1));
-    mPulseChannelTwo.mOscilator.frequency = 1789773.0 / (16.0 * (double)(mPulseChannelTwo.mSequencer.reload + 1));
+    mPulseChannelOne.mOscilator.frequency =
+        1789773.0 / (16.0 * static_cast<double>(mPulseChannelOne.mSequencer.reload + 1));
+    mPulseChannelTwo.mOscilator.frequency =
+        1789773.0 / (16.0 * static_cast<double>(mPulseChannelTwo.mSequencer.reload + 1));
 
-    auto output = mPulseChannelOne.output + mPulseChannelTwo.output;
+    auto output = mPulseChannelOne.mSequencer.output + mPulseChannelTwo.mSequencer.output;
     buffer.Write(output);
   }
   mClockCounter++;

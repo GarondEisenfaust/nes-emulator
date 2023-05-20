@@ -4,6 +4,7 @@
 #include "Controller.h"
 #include "Cpu.h"
 #include "Definitions.h"
+#include "Miniaudio.h"
 #include "Ppu.h"
 #include "Ram.h"
 #include "fmt/format.h"
@@ -18,19 +19,13 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#define MA_NO_DECODING
-#define MA_NO_ENCODING
-#define MINIAUDIO_IMPLEMENTATION
-#include "miniaudio.h"
-
-#define DEVICE_FORMAT ma_format_f32
-#define DEVICE_CHANNELS 1
-#define DEVICE_SAMPLE_RATE 44100
 
 Apu apu;
-
+ma_waveform waveform;
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
-  *reinterpret_cast<float*>(pOutput) = apu.GetNextSample();
+  for (int i = 0; i < frameCount; i++) {
+    reinterpret_cast<float*>(pOutput)[i] = apu.GetNextSample();
+  }
 };
 
 void RenderCompleteFrame(Bus& bus, Grid& grid) {

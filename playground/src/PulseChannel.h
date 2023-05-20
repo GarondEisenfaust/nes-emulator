@@ -8,7 +8,7 @@ class PulseChannel {
   Envelope mEnvelope;
   Sequencer mSequencer;
   Oscilator mOscilator;
-  uint8_t output = 0;
+  double output = 0;
 
   void Clock();
 

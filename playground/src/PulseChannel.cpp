@@ -6,9 +6,9 @@ void PulseChannel::Clock() {
   mSequencer.Clock();
 
   output = 0;
-  if (mSequencer.output != 0) {
-    output = mEnvelope.output * mOscilator.Sample(mClock);
-  }
+  // if (mSequencer.output != 0) {
+  output = mOscilator.Sample(mClock);
+  // }
   mClock += 1.0 / 14833.5;
   // std::cout << mClock << "\n";
 }
