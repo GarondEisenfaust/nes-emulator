@@ -3,7 +3,7 @@
 
 double ApproximateSin(double x) {
   double t = x * 0.15915;
-  t = t - std::floor(t);
+  t = t - (int)t;
   return 20.785 * t * (t - 0.5) * (t - 1.0);
 }
 

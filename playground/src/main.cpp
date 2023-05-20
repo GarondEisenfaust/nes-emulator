@@ -5,6 +5,8 @@
 #include "PulseChannel.h"
 #include "miniaudio.h"
 #include <chrono>
+#include <cmath>
+#include <queue>
 #include <stdio.h>
 #include <thread>
 #include <vector>
@@ -20,25 +22,19 @@ void main_loop__em() {}
 #define DEVICE_SAMPLE_RATE 44100
 
 PulseChannel pulseChannel;
-CircularBuffer<float, 10 * 2048> circularBuffer;
+// CircularBuffer<float, 4 * 44100> circularBuffer;
+std::queue<float> queue;
 auto frameFinished = false;
+float sineIdx = 0.0f;
 
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
-  if (!frameFinished) {
-    return;
-  }
-
-  std::vector<float> up;
-  up.resize(frameCount);
-  up = {1};
-  std::vector<float> down;
-  down.resize(frameCount);
-  down = {0};
-
-  up.push_back(down);
-
   for (int i = 0; i < frameCount; i++) {
-    auto u = circularBuffer.Read();
+    if (queue.size() <= 0) {
+      frameCount = i;
+      break;
+    }
+    auto u = queue.front();
+    queue.pop();
     reinterpret_cast<float*>(pOutput)[i] = static_cast<float>(u);
   }
   frameFinished = false;
@@ -81,8 +77,8 @@ int main(int argc, char** argv) {
   pulseChannel.mEnvelope.volume = 10;
   pulseChannel.mSequencer.reload = 15;
   pulseChannel.mSequencer.timer = 15;
-
-  pulseChannel.mOscilator.frequency = 1789773.0 / (16.0 * static_cast<double>(pulseChannel.mSequencer.reload + 1));
+  pulseChannel.mEnvelope.divider.SetPeriod(150000);
+  pulseChannel.mOscilator.frequency = DEVICE_SAMPLE_RATE / 440;
 
   using namespace std::chrono_literals;
   auto diff = (1000ms / 60);
@@ -92,7 +88,8 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 14834; i++) {
       pulseChannel.Clock();
       std::cout << std::to_string(pulseChannel.output) << "\n";
-      circularBuffer.Write(pulseChannel.output);
+      queue.push(pulseChannel.output);
+      // circularBuffer.Write(pulseChannel.output);
     }
     clock++;
     frameFinished = true;

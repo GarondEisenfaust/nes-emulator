@@ -9,14 +9,14 @@ double ApproximateSin(double x) {
 }
 
 double Oscilator::Sample(double time) {
-  double f = time - std::floor(time);
-  double r;
-  // std::cout << std::to_string(f) << "\n";
-  if (f < 0.5) {
-    r = 1;
-  } else {
-    r = 0;
-  }
+  double p = dutycycle * 2.0 * M_PI;
+  double first = 0;
+  double second = 0;
 
-  return r;
+  for (int n = 1; n < harmonics; n++) {
+    auto c = n * frequency * 2.0 * M_PI * time;
+    first += ApproximateSin(c) / n;
+    second += ApproximateSin(c - p * n) / n;
+  }
+  return first - second;
 }

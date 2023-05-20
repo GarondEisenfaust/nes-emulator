@@ -11,4 +11,7 @@ class Oscilator {
   ~Oscilator() = default;
 
   double Sample(double time);
+
+ private:
+  double sineIdx = 0;
 };

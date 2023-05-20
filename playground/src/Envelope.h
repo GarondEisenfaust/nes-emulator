@@ -6,7 +6,7 @@ class Envelope {
  public:
   bool startFlag = false;
   bool loop = false;
-  bool constantVolume;
+  bool constantVolume = false;
   Divider divider;
   uint8_t decayLevelCounter = 0;
   uint8_t volume = 0;
