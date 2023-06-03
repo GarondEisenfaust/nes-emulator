@@ -21,7 +21,7 @@
 #include <thread>
 
 Apu apu;
-ma_waveform waveform;
+
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
   for (int i = 0; i < frameCount; i++) {
     reinterpret_cast<float*>(pOutput)[i] = apu.GetNextSample();

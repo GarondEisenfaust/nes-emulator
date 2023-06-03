@@ -2,6 +2,7 @@
 #include "CircularBuffer.h"
 #include "PulseChannel.h"
 #include <cstdint>
+#include <queue>
 
 class Bus;
 class Apu {
@@ -23,6 +24,5 @@ class Apu {
   int mClockCounter;
   PulseChannel mPulseChannelOne;
   PulseChannel mPulseChannelTwo;
-
-  CircularBuffer<float, 2048> buffer;
+  std::queue<float> queue;
 };

@@ -74,7 +74,12 @@ uint8_t Apu::CpuRead(uint16_t addr) {
 }
 
 float Apu::GetNextSample() {
-  auto result = buffer.Read();
+  if (queue.size() == 0) {
+    return 0;
+  }
+
+  auto result = queue.front();
+  queue.pop();
   return result;
 }
 
@@ -88,7 +93,7 @@ void Apu::Clock() {
         1789773.0 / (16.0 * static_cast<double>(mPulseChannelTwo.mSequencer.reload + 1));
 
     auto output = mPulseChannelOne.mSequencer.output + mPulseChannelTwo.mSequencer.output;
-    buffer.Write(output);
+    queue.push(output);
   }
   mClockCounter++;
 }
