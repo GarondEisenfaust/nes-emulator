@@ -7,6 +7,7 @@
 #include "Miniaudio.h"
 #include "Ppu.h"
 #include "Ram.h"
+#include "RingBuffer.h"
 #include "fmt/format.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -20,11 +21,15 @@
 #include <string>
 #include <thread>
 
-Apu apu;
+Grid grid(WIDTH, HEIGHT, 256, 240);
+
+float out = 1;
 
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
+  auto* asFloatPointer = reinterpret_cast<float*>(pOutput);
+  auto* ringBuffer = reinterpret_cast<RingBuffer*>(pDevice->pUserData);
   for (int i = 0; i < frameCount; i++) {
-    reinterpret_cast<float*>(pOutput)[i] = apu.GetNextSample();
+    asFloatPointer[i] = ringBuffer->Read();
   }
 };
 
@@ -54,7 +59,6 @@ int main(int argc, char* argv[]) {
   }
 
   RenderContext renderContext;
-  Grid grid(WIDTH, HEIGHT, 256, 240);
   grid.Init();
 
   auto pixels = std::make_shared<Buffer<GLfloat>>(0, 3, GL_STATIC_DRAW);
@@ -74,6 +78,11 @@ int main(int argc, char* argv[]) {
   Bus bus(*ram);
   Cpu cpu;
   Ppu ppu(grid);
+  ma_pcm_rb rb;
+  ma_result result = ma_pcm_rb_init(DEVICE_FORMAT, DEVICE_CHANNELS, 4000, NULL, NULL, &rb);
+
+  RingBuffer ringBuffer;
+  Apu apu(ringBuffer);
 
   Controller controller(renderContext.GetWindow());
 
@@ -94,7 +103,7 @@ int main(int argc, char* argv[]) {
   deviceConfig.playback.format = DEVICE_FORMAT;
   deviceConfig.playback.channels = DEVICE_CHANNELS;
   deviceConfig.sampleRate = DEVICE_SAMPLE_RATE;
-
+  deviceConfig.pUserData = reinterpret_cast<void*>(&ringBuffer);
   deviceConfig.dataCallback = data_callback;
 
   if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {

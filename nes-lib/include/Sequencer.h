@@ -7,7 +7,7 @@ class Sequencer {
   uint16_t timer = 0x0000;
   uint16_t reload = 0x0000;
   uint8_t output = 0x00;
-  bool enabled = false;
+  bool enabled = true;
 
   void Clock();
 };

@@ -5,7 +5,7 @@ void PulseChannel::Clock() {
   // mEnvelope.Clock();
   mSequencer.Clock();
 
-  output = mSequencer.output * 4;
+  output = mSequencer.output;
   if (output != 0) {
     auto p = 0;
   }

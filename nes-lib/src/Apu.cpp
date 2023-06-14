@@ -1,6 +1,8 @@
 #include "Apu.h"
 #include "Bus.h"
 
+Apu::Apu(IAudioOutputDevice& outputDevice) : mOutputDevice(outputDevice) {}
+
 void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   if (addr == 0x4000) {
     switch ((data & 0xC0) >> 6) {
@@ -21,9 +23,9 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
         mPulseChannelOne.mOscilator.dutycycle = 0.750;
         break;
     }
-    mPulseChannelOne.mSequencer.enabled = data & 0x20;
-    mPulseChannelOne.mEnvelope.startFlag = data & 0x10;
-    mPulseChannelOne.mEnvelope.volume = data & 0x0F;
+    // mPulseChannelOne.mSequencer.enabled = data & 0x20;
+    // mPulseChannelOne.mEnvelope.startFlag = data & 0x10;
+    // mPulseChannelOne.mEnvelope.volume = data & 0x0F;
   } else if (addr == 0x4002) {
     mPulseChannelOne.mSequencer.reload = (mPulseChannelOne.mSequencer.sequence & 0xFF00) | data;
   } else if (addr == 0x4003) {
@@ -49,9 +51,9 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
         mPulseChannelTwo.mOscilator.dutycycle = 0.750;
         break;
     }
-    mPulseChannelTwo.mSequencer.enabled = data & 0x20;
-    mPulseChannelTwo.mEnvelope.startFlag = data & 0x10;
-    mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
+    // mPulseChannelTwo.mSequencer.enabled = data & 0x20;
+    // mPulseChannelTwo.mEnvelope.startFlag = data & 0x10;
+    // mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
   } else if (addr == 0x4005) {
     mPulseChannelTwo.mSequencer.reload = (mPulseChannelTwo.mSequencer.sequence & 0xFF00) | data;
   } else if (addr == 0x4006) {
@@ -77,8 +79,11 @@ float Apu::GetNextSample() {
   if (queue.size() == 0) {
     return 0;
   }
-
+  // std::cout << queue.size() << "\n";
   auto result = queue.front();
+  if (result != 0) {
+    auto l = 0;
+  }
   queue.pop();
   return result;
 }
@@ -92,13 +97,20 @@ void Apu::Clock() {
     mPulseChannelTwo.mOscilator.frequency =
         1789773.0 / (16.0 * static_cast<double>(mPulseChannelTwo.mSequencer.reload + 1));
 
-    auto output = mPulseChannelOne.mSequencer.output + mPulseChannelTwo.mSequencer.output;
-    queue.push(output);
+    output = static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
+  }
+
+  if (mClockCounter % 121 == 0) {
+    mOutputDevice.Write(output);
   }
   mClockCounter++;
 }
 
 void Apu::Reset() {}
+
+void Apu::Lock() { queueMutex.lock(); }
+
+void Apu::Unlock() { queueMutex.unlock(); }
 
 void Apu::ConnectBus(Bus* bus) {
   mBus = bus;
