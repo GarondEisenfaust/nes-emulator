@@ -1,14 +1,18 @@
 #pragma once
 #include "IAudioOutputDevice.h"
-#include <queue>
 
 class RingBuffer : public IAudioOutputDevice {
  public:
-  RingBuffer();
-  ~RingBuffer() = default;
+  RingBuffer(int size);
+  ~RingBuffer();
   void Write(float data) override;
   float Read() override;
+  float* Advance(float* current);
 
  private:
-  std::queue<float> mQueue;
+  float* mStart;
+  float* mEnd;
+
+  float* writePointer;
+  float* readPointer;
 };

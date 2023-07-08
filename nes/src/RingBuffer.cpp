@@ -2,15 +2,29 @@
 #include <cstring>
 #include <vector>
 
-RingBuffer::RingBuffer() {}
+RingBuffer::RingBuffer(int size) {
+  mStart = new float[size]{0};
+  mEnd = mStart + size;
+  readPointer = mStart;
+  writePointer = mEnd;
+}
 
-void RingBuffer::Write(float data) { mQueue.push(data); }
+RingBuffer::~RingBuffer() { delete[] mStart; }
+
+void RingBuffer::Write(float data) {
+  *writePointer = data;
+  writePointer = Advance(writePointer);
+}
 
 float RingBuffer::Read() {
-  if (mQueue.empty()) {
-    return 0;
-  }
-  auto temp = mQueue.front();
-  mQueue.pop();
+  auto temp = *readPointer;
+  readPointer = Advance(readPointer);
   return temp;
+}
+
+float* RingBuffer::Advance(float* current) {
+  if (current == mEnd) {
+    return mStart;
+  }
+  return ++current;
 }

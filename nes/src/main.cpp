@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
   ma_pcm_rb rb;
   ma_result result = ma_pcm_rb_init(DEVICE_FORMAT, DEVICE_CHANNELS, 4000, NULL, NULL, &rb);
 
-  RingBuffer ringBuffer;
+  RingBuffer ringBuffer(1470);
   Apu apu(ringBuffer);
 
   Controller controller(renderContext.GetWindow());
