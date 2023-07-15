@@ -1,17 +1,17 @@
 #include "PulseChannel.h"
 #include <iostream>
 
+PulseChannel::PulseChannel(bool firstChannel) : mSweeper(firstChannel) {}
+
 void PulseChannel::Clock() {
-  // mEnvelope.Clock();
+  mEnvelope.Clock();
+  auto newTimer = mSweeper.Clock(mSequencer.timer);
+  mSequencer.timer = newTimer;
   mSequencer.Clock();
 
-  output = mSequencer.output;
-  if (output != 0) {
-    auto p = 0;
+  if (mSweeper.ShouldMute()) {
+    output = 0;
+    return;
   }
-  // if (mSequencer.output != 0) {
-  //   output = mEnvelope.output * mOscilator.Sample(mClock);
-  // }
-  // mClock += 1.0 / 14833.5;
-  // std::cout << mClock << "\n";
+  output = mEnvelope.output * mSequencer.output;
 }

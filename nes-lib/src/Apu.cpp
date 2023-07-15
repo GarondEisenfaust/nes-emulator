@@ -1,7 +1,8 @@
 #include "Apu.h"
 #include "Bus.h"
 
-Apu::Apu(IAudioOutputDevice& outputDevice) : mOutputDevice(outputDevice) {}
+Apu::Apu(IAudioOutputDevice& outputDevice)
+    : mOutputDevice(outputDevice), mPulseChannelOne(true), mPulseChannelTwo(false) {}
 
 void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   if (addr == 0x4000) {
@@ -24,8 +25,10 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
         break;
     }
     // mPulseChannelOne.mSequencer.enabled = data & 0x20;
-    // mPulseChannelOne.mEnvelope.startFlag = data & 0x10;
-    // mPulseChannelOne.mEnvelope.volume = data & 0x0F;
+    mPulseChannelOne.mEnvelope.startFlag = data & 0x10;
+    mPulseChannelOne.mEnvelope.volume = data & 0x0F;
+  } else if (addr == 0x4001) {
+    mPulseChannelOne.mSweeper.UpdateState(data);
   } else if (addr == 0x4002) {
     mPulseChannelOne.mSequencer.reload = (mPulseChannelOne.mSequencer.sequence & 0xFF00) | data;
   } else if (addr == 0x4003) {
@@ -52,9 +55,10 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
         break;
     }
     // mPulseChannelTwo.mSequencer.enabled = data & 0x20;
-    // mPulseChannelTwo.mEnvelope.startFlag = data & 0x10;
-    // mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
+    mPulseChannelTwo.mEnvelope.startFlag = data & 0x10;
+    mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
   } else if (addr == 0x4005) {
+    mPulseChannelTwo.mSweeper.UpdateState(data);
     mPulseChannelTwo.mSequencer.reload = (mPulseChannelTwo.mSequencer.sequence & 0xFF00) | data;
   } else if (addr == 0x4006) {
     mPulseChannelTwo.mSequencer.reload =
@@ -75,27 +79,13 @@ uint8_t Apu::CpuRead(uint16_t addr) {
   return 0;
 }
 
-float Apu::GetNextSample() {
-  if (queue.size() == 0) {
-    return 0;
-  }
-  // std::cout << queue.size() << "\n";
-  auto result = queue.front();
-  if (result != 0) {
-    auto l = 0;
-  }
-  queue.pop();
-  return result;
-}
-
 void Apu::Clock() {
   if (mClockCounter % 6 == 0) {
     mPulseChannelOne.Clock();
     mPulseChannelTwo.Clock();
-    mPulseChannelOne.mOscilator.frequency =
-        1789773.0 / (16.0 * static_cast<double>(mPulseChannelOne.mSequencer.reload + 1));
-    mPulseChannelTwo.mOscilator.frequency =
-        1789773.0 / (16.0 * static_cast<double>(mPulseChannelTwo.mSequencer.reload + 1));
+
+    mPulseChannelOne.mOscilator.frequency = 1789773.0 / (16.0 * (double)(mPulseChannelOne.mSequencer.reload + 1));
+    mPulseChannelTwo.mOscilator.frequency = 1789773.0 / (16.0 * (double)(mPulseChannelTwo.mSequencer.reload + 1));
 
     output = static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
   }

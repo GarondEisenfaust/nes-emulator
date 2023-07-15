@@ -14,7 +14,6 @@ class Apu {
 
   void CpuWrite(uint16_t addr, uint8_t data);
   uint8_t CpuRead(uint16_t addr);
-  float GetNextSample();
 
   void Clock();
   void Reset();
