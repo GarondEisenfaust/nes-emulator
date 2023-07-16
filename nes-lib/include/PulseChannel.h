@@ -1,6 +1,5 @@
 #pragma once
 #include "Envelope.h"
-#include "Oscilator.h"
 #include "Sequencer.h"
 #include "Sweeper.h"
 
@@ -9,7 +8,6 @@ class PulseChannel {
   PulseChannel(bool firstChannel);
   Envelope mEnvelope;
   Sequencer mSequencer;
-  Oscilator mOscilator;
   Sweeper mSweeper;
   uint8_t output = 0;
 

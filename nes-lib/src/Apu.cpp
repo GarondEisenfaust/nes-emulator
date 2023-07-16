@@ -9,19 +9,15 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
     switch ((data & 0xC0) >> 6) {
       case 0x00:
         mPulseChannelOne.mSequencer.sequence = 0b01000000;
-        mPulseChannelOne.mOscilator.dutycycle = 0.125;
         break;
       case 0x01:
         mPulseChannelOne.mSequencer.sequence = 0b01100000;
-        mPulseChannelOne.mOscilator.dutycycle = 0.250;
         break;
       case 0x02:
         mPulseChannelOne.mSequencer.sequence = 0b01111000;
-        mPulseChannelOne.mOscilator.dutycycle = 0.500;
         break;
       case 0x03:
         mPulseChannelOne.mSequencer.sequence = 0b10011111;
-        mPulseChannelOne.mOscilator.dutycycle = 0.750;
         break;
     }
     // mPulseChannelOne.mSequencer.enabled = data & 0x20;
@@ -39,19 +35,15 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
     switch ((data & 0xC0) >> 6) {
       case 0x00:
         mPulseChannelTwo.mSequencer.sequence = 0b01000000;
-        mPulseChannelTwo.mOscilator.dutycycle = 0.125;
         break;
       case 0x01:
         mPulseChannelTwo.mSequencer.sequence = 0b01100000;
-        mPulseChannelTwo.mOscilator.dutycycle = 0.250;
         break;
       case 0x02:
         mPulseChannelTwo.mSequencer.sequence = 0b01111000;
-        mPulseChannelTwo.mOscilator.dutycycle = 0.500;
         break;
       case 0x03:
         mPulseChannelTwo.mSequencer.sequence = 0b10011111;
-        mPulseChannelTwo.mOscilator.dutycycle = 0.750;
         break;
     }
     // mPulseChannelTwo.mSequencer.enabled = data & 0x20;
@@ -83,10 +75,6 @@ void Apu::Clock() {
   if (mClockCounter % 6 == 0) {
     mPulseChannelOne.Clock();
     mPulseChannelTwo.Clock();
-
-    mPulseChannelOne.mOscilator.frequency = 1789773.0 / (16.0 * (double)(mPulseChannelOne.mSequencer.reload + 1));
-    mPulseChannelTwo.mOscilator.frequency = 1789773.0 / (16.0 * (double)(mPulseChannelTwo.mSequencer.reload + 1));
-
     output = static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
   }
 
