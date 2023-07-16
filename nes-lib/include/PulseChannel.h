@@ -11,7 +11,7 @@ class PulseChannel {
   Sweeper mSweeper;
   uint8_t output = 0;
 
-  void Clock();
+  void Clock(bool quarter, bool half);
 
  private:
   int mClock = 0;

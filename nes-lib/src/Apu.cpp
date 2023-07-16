@@ -1,5 +1,7 @@
 #include "Apu.h"
 #include "Bus.h"
+#include <algorithm>
+#include <array>
 
 Apu::Apu(IAudioOutputDevice& outputDevice)
     : mOutputDevice(outputDevice), mPulseChannelOne(true), mPulseChannelTwo(false) {}
@@ -71,24 +73,29 @@ uint8_t Apu::CpuRead(uint16_t addr) {
   return 0;
 }
 
+template <typename T, typename... Opts>
+bool AnyOf(T val, Opts... opts) {
+  return (... || (val == opts));
+}
+
 void Apu::Clock() {
   if (mClockCounter % 6 == 0) {
-    mPulseChannelOne.Clock();
-    mPulseChannelTwo.Clock();
-    output = static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
-  }
+    auto quarter = AnyOf(mFrameClockCounter, 3708, 7416, 11124, 14832);
+    auto half = AnyOf(mFrameClockCounter, 7416, 14832);
 
-  if (mClockCounter % 121 == 0) {
-    mOutputDevice.Write(output);
+    mPulseChannelOne.Clock(quarter, half);
+    mPulseChannelTwo.Clock(quarter, half);
+    output = static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
+
+    if (mFrameClockCounter % 20 == 0) {
+      mOutputDevice.Write(output);
+    }
+    mFrameClockCounter = (mFrameClockCounter + 1) % 14833;
   }
   mClockCounter++;
 }
 
 void Apu::Reset() {}
-
-void Apu::Lock() { queueMutex.lock(); }
-
-void Apu::Unlock() { queueMutex.unlock(); }
 
 void Apu::ConnectBus(Bus* bus) {
   mBus = bus;

@@ -5,7 +5,15 @@ Sweeper ::Sweeper(bool onesComplement) : mOnesComplement(onesComplement) {}
 
 uint16_t Sweeper::Clock(uint16_t timerPeriod) {
   mDivider.Clock();
-  auto changeAmount = (negate ? (mOnesComplement ? ~1 : -1) : 1) * (timerPeriod >> shiftCount);
+  auto changeAmount = timerPeriod >> shiftCount;
+  if (negate) {
+    if (mOnesComplement) {
+      changeAmount = -changeAmount;
+    } else {
+      changeAmount = -changeAmount;
+    }
+  }
+
   auto targetPeriod = std::clamp(timerPeriod + changeAmount, 0, UINT16_MAX);
 
   mMute = false;

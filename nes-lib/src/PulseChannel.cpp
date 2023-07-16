@@ -3,10 +3,15 @@
 
 PulseChannel::PulseChannel(bool firstChannel) : mSweeper(firstChannel) {}
 
-void PulseChannel::Clock() {
-  mEnvelope.Clock();
+void PulseChannel::Clock(bool quarter, bool half) {
+  if (quarter) {
+    mEnvelope.Clock();
+  }
+
   auto newTimer = mSweeper.Clock(mSequencer.timer);
-  mSequencer.timer = newTimer;
+  if (half) {
+    mSequencer.timer = newTimer;
+  }
   mSequencer.Clock();
 
   if (mSweeper.ShouldMute()) {
