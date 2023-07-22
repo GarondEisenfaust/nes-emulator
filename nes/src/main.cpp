@@ -23,13 +23,23 @@
 
 Grid grid(WIDTH, HEIGHT, 256, 240);
 
-float out = 1;
+float Normalize(float value, float min, float max, float minDesired = -1, float maxDesired = 1) {
+  auto firstPart = (value - min) / (max - min);
+  auto range = maxDesired - minDesired;
+  return firstPart * range + minDesired;
+}
+
+float minReceivedSample = 0;
+float maxReceivedSample = 0;
 
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
   auto* asFloatPointer = reinterpret_cast<float*>(pOutput);
   auto* ringBuffer = reinterpret_cast<RingBuffer*>(pDevice->pUserData);
   for (int i = 0; i < frameCount; i++) {
-    asFloatPointer[i] = ringBuffer->Read();
+    auto value = ringBuffer->Read();
+    minReceivedSample = std::min(value, minReceivedSample);
+    maxReceivedSample = std::max(value, maxReceivedSample);
+    asFloatPointer[i] = Normalize(value, minReceivedSample, maxReceivedSample);
   }
 };
 
