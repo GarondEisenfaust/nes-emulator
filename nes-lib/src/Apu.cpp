@@ -77,15 +77,10 @@ uint8_t Apu::CpuRead(uint16_t addr) {
   return 0;
 }
 
-template <typename T, typename... Opts>
-bool AnyOf(T val, Opts... opts) {
-  return (... || (val == opts));
-}
-
 void Apu::Clock() {
   if (mClockCounter % 6 == 0) {
-    auto quarter = AnyOf(mFrameClockCounter, 3708, 7416, 11124, 14832);
-    auto half = AnyOf(mFrameClockCounter, 7416, 14832);
+    auto quarter = IsQuarterFrameClock(mFrameClockCounter);
+    auto half = IsHalfFrameClock(mFrameClockCounter);
 
     mPulseChannelOne.Clock(quarter, half);
     mPulseChannelTwo.Clock(quarter, half);
@@ -104,4 +99,15 @@ void Apu::Reset() {}
 void Apu::ConnectBus(Bus* bus) {
   mBus = bus;
   mBus->mApu = this;
+}
+
+template <typename T, typename... Opts>
+inline bool IsAnyOf(T val, Opts... opts) {
+  return (... || (val == opts));
+}
+
+bool Apu::IsHalfFrameClock(int clock) { return IsAnyOf(clock, halfFrameClocks[0], halfFrameClocks[1]); }
+
+bool Apu::IsQuarterFrameClock(int clock) {
+  return IsAnyOf(clock, quarterFrameClocks[0], quarterFrameClocks[1], quarterFrameClocks[2], quarterFrameClocks[3]);
 }

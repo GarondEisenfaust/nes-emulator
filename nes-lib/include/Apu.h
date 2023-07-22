@@ -31,4 +31,10 @@ class Apu {
 
   float minOutputSound = 0;
   float maxOutputSound = 0;
+
+  const int halfFrameClocks[2] = {7416, 14832};
+  const int quarterFrameClocks[4] = {3708, halfFrameClocks[0], 11124, halfFrameClocks[1]};
+
+  inline bool IsHalfFrameClock(int clock);
+  inline bool IsQuarterFrameClock(int clock);
 };
