@@ -9,7 +9,7 @@ uint16_t Sweeper::Clock(uint16_t timerPeriod) {
     if (mOnesComplement) {
       changeAmount = -changeAmount;
     } else {
-      changeAmount = -changeAmount;
+      changeAmount = ~changeAmount;
     }
   }
 
