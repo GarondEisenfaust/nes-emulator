@@ -4,7 +4,6 @@
 Sweeper ::Sweeper(bool onesComplement) : mOnesComplement(onesComplement) {}
 
 uint16_t Sweeper::Clock(uint16_t timerPeriod) {
-  mDivider.Clock();
   auto changeAmount = timerPeriod >> shiftCount;
   if (negate) {
     if (mOnesComplement) {
@@ -20,7 +19,16 @@ uint16_t Sweeper::Clock(uint16_t timerPeriod) {
   if (timerPeriod < 8 || targetPeriod > 0x07FF) {
     mMute = true;
   }
-  return mMute ? timerPeriod : targetPeriod;
+
+  if (mDivider.Notify()) {
+    if (!mMute && enable) {
+      return targetPeriod;
+    }
+    mDivider.Reset();
+  } else {
+    mDivider.Clock();
+  }
+  return timerPeriod;
 }
 
 void Sweeper::UpdateState(uint8_t data) {

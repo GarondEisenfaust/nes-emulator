@@ -3,10 +3,11 @@
 void Divider::Clock() {
   mCounter--;
   mNotify = false;
-  if (mCounter == 0) {
-    Reset();
-    mNotify = true;
+  if (mCounter > 0) {
+    return;
   }
+  Reset();
+  mNotify = true;
 }
 
 void Divider::SetPeriod(int period) { mPeriod = period; }
