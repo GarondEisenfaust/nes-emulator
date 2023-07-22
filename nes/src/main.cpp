@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
   Bus bus(*ram);
   Cpu cpu;
   Ppu ppu(grid);
-  RingBuffer ringBuffer(1470);
+  RingBuffer ringBuffer(10000);
   Apu apu(ringBuffer);
 
   Controller controller(renderContext.GetWindow());

@@ -13,7 +13,6 @@ void PulseChannel::Clock(bool quarter, bool half) {
     mSequencer.timer = newTimer;
   }
   mSequencer.Clock();
-
   if (mSweeper.ShouldMute()) {
     output = 0;
     return;

@@ -10,18 +10,22 @@ Apu::Apu(IAudioOutputDevice& outputDevice)
 void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   if (addr == 0x4000) {
     switch ((data & 0xC0) >> 6) {
-      case 0x00:
+      case 0x00: {
         mPulseChannelOne.mSequencer.sequence = 0b01000000;
         break;
-      case 0x01:
+      }
+      case 0x01: {
         mPulseChannelOne.mSequencer.sequence = 0b01100000;
         break;
-      case 0x02:
+      }
+      case 0x02: {
         mPulseChannelOne.mSequencer.sequence = 0b01111000;
         break;
-      case 0x03:
+      }
+      case 0x03: {
         mPulseChannelOne.mSequencer.sequence = 0b10011111;
         break;
+      }
     }
     mPulseChannelOne.mEnvelope.loop = data & 0x20;
     mPulseChannelOne.mEnvelope.constantVolume = data & 0x10;
@@ -34,31 +38,38 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
     mPulseChannelOne.mSequencer.reload =
         static_cast<uint16_t>(data & 0x07) << 8 | (mPulseChannelOne.mSequencer.reload & 0x00FF);
     mPulseChannelOne.mSequencer.timer = mPulseChannelOne.mSequencer.reload;
+    mPulseChannelOne.mEnvelope.startFlag = true;
   } else if (addr == 0x4004) {
     switch ((data & 0xC0) >> 6) {
-      case 0x00:
+      case 0x00: {
         mPulseChannelTwo.mSequencer.sequence = 0b01000000;
         break;
-      case 0x01:
+      }
+      case 0x01: {
         mPulseChannelTwo.mSequencer.sequence = 0b01100000;
         break;
-      case 0x02:
+      }
+      case 0x02: {
         mPulseChannelTwo.mSequencer.sequence = 0b01111000;
         break;
-      case 0x03:
+      }
+      case 0x03: {
         mPulseChannelTwo.mSequencer.sequence = 0b10011111;
         break;
+      }
     }
     mPulseChannelTwo.mEnvelope.loop = data & 0x20;
     mPulseChannelTwo.mEnvelope.constantVolume = data & 0x10;
     mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
   } else if (addr == 0x4005) {
     mPulseChannelTwo.mSweeper.UpdateState(data);
-    mPulseChannelTwo.mSequencer.reload = (mPulseChannelTwo.mSequencer.sequence & 0xFF00) | data;
   } else if (addr == 0x4006) {
+    mPulseChannelTwo.mSequencer.reload = (mPulseChannelTwo.mSequencer.sequence & 0xFF00) | data;
+  } else if (addr == 0x4007) {
     mPulseChannelTwo.mSequencer.reload =
         static_cast<uint16_t>(data & 0x07) << 8 | (mPulseChannelTwo.mSequencer.reload & 0x00FF);
     mPulseChannelTwo.mSequencer.timer = mPulseChannelTwo.mSequencer.reload;
+    mPulseChannelTwo.mEnvelope.startFlag = true;
   } else if (addr == 0x400F) {
     mPulseChannelOne.mEnvelope.startFlag = true;
     mPulseChannelTwo.mEnvelope.startFlag = true;
