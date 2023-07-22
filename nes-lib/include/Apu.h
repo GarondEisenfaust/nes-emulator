@@ -28,4 +28,7 @@ class Apu {
   PulseChannel mPulseChannelTwo;
   std::queue<float> queue;
   float output;
+
+  float minOutputSound = 0;
+  float maxOutputSound = 0;
 };

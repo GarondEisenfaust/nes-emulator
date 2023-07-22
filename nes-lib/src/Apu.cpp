@@ -2,6 +2,7 @@
 #include "Bus.h"
 #include <algorithm>
 #include <array>
+#include <math.h>
 
 Apu::Apu(IAudioOutputDevice& outputDevice)
     : mOutputDevice(outputDevice), mPulseChannelOne(true), mPulseChannelTwo(false) {}
@@ -78,6 +79,12 @@ bool AnyOf(T val, Opts... opts) {
   return (... || (val == opts));
 }
 
+float Normalize(float value, float min, float max, float minDesired = -1, float maxDesired = 1) {
+  auto firstPart = (value - min) / (max - min);
+  auto range = maxDesired - minDesired;
+  return firstPart * range + minDesired;
+}
+
 void Apu::Clock() {
   if (mClockCounter % 6 == 0) {
     auto quarter = AnyOf(mFrameClockCounter, 3708, 7416, 11124, 14832);
@@ -85,7 +92,11 @@ void Apu::Clock() {
 
     mPulseChannelOne.Clock(quarter, half);
     mPulseChannelTwo.Clock(quarter, half);
-    output = static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
+    auto notNormalizedOutput = static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
+
+    minOutputSound = std::min(notNormalizedOutput, minOutputSound);
+    maxOutputSound = std::max(notNormalizedOutput, maxOutputSound);
+    output = Normalize(notNormalizedOutput, minOutputSound, maxOutputSound);
 
     if (mFrameClockCounter % 20 == 0) {
       mOutputDevice.Write(output);
