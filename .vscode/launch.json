@@ -2,20 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "nes debug",
-      "type": "cppdbg",
-      "cwd": "${command:cmake.buildDirectory}/bin",
-      "request": "launch",
-      "program": "${command:cmake.buildDirectory}/bin/nes",
-      "args": ["roms/smb.nes"],
-      "preLaunchTask": "${defaultBuildTask}"
-    },
-    {
       "name": "nes",
       "type": "cppdbg",
       "cwd": "${command:cmake.buildDirectory}/bin",
       "request": "launch",
-      "noDebug": true,
       "program": "${command:cmake.buildDirectory}/bin/nes",
       "args": ["roms/smb.nes"],
       "preLaunchTask": "${defaultBuildTask}"
