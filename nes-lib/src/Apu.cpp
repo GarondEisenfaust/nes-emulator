@@ -27,6 +27,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
         break;
       }
     }
+    mPulseChannelOne.mLengthCounter.SetHalt(data & 0x20);
     mPulseChannelOne.mEnvelope.loop = data & 0x20;
     mPulseChannelOne.mEnvelope.constantVolume = data & 0x10;
     mPulseChannelOne.mEnvelope.volume = data & 0x0F;
@@ -35,6 +36,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4002) {
     mPulseChannelOne.mSequencer.reload = (mPulseChannelOne.mSequencer.sequence & 0xFF00) | data;
   } else if (addr == 0x4003) {
+    mPulseChannelOne.mLengthCounter.SetCounter((data & 0xF8) >> 3);
     mPulseChannelOne.mSequencer.reload =
         static_cast<uint16_t>(data & 0x07) << 8 | (mPulseChannelOne.mSequencer.reload & 0x00FF);
     mPulseChannelOne.mSequencer.timer = mPulseChannelOne.mSequencer.reload;
@@ -58,6 +60,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
         break;
       }
     }
+    mPulseChannelTwo.mLengthCounter.SetHalt(data & 0x20);
     mPulseChannelTwo.mEnvelope.loop = data & 0x20;
     mPulseChannelTwo.mEnvelope.constantVolume = data & 0x10;
     mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
@@ -66,6 +69,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4006) {
     mPulseChannelTwo.mSequencer.reload = (mPulseChannelTwo.mSequencer.sequence & 0xFF00) | data;
   } else if (addr == 0x4007) {
+    mPulseChannelTwo.mLengthCounter.SetCounter((data & 0xF8) >> 3);
     mPulseChannelTwo.mSequencer.reload =
         static_cast<uint16_t>(data & 0x07) << 8 | (mPulseChannelTwo.mSequencer.reload & 0x00FF);
     mPulseChannelTwo.mSequencer.timer = mPulseChannelTwo.mSequencer.reload;
@@ -74,8 +78,10 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
     mPulseChannelOne.mEnvelope.startFlag = true;
     mPulseChannelTwo.mEnvelope.startFlag = true;
   } else if (addr == 0x4015) {
-    mPulseChannelTwo.mSequencer.enabled = data & 0x01;
+    mPulseChannelOne.mSequencer.enabled = data & 0x01;
     mPulseChannelTwo.mSequencer.enabled = data & 0x02;
+    mPulseChannelOne.mLengthCounter.SetEnabled(data & 0x01);
+    mPulseChannelTwo.mLengthCounter.SetEnabled(data & 0x02);
   }
 }
 
