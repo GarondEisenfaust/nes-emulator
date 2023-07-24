@@ -95,7 +95,7 @@ void Apu::Clock() {
 
     mPulseChannelOne.Clock(quarter, half);
     mPulseChannelTwo.Clock(quarter, half);
-    output = static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
+    output = Mix(mPulseChannelOne.output, mPulseChannelTwo.output);
 
     if (mFrameClockCounter % 20 == 0) {
       mOutputDevice.Write(output);
@@ -121,4 +121,10 @@ bool Apu::IsHalfFrameClock(int clock) { return IsAnyOf(clock, halfFrameClocks[0]
 
 bool Apu::IsQuarterFrameClock(int clock) {
   return IsAnyOf(clock, quarterFrameClocks[0], quarterFrameClocks[1], quarterFrameClocks[2], quarterFrameClocks[3]);
+}
+
+inline float Apu::Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput) {
+  auto pulseOut = 0.00752f * static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
+  auto tndOut = 0.f;
+  return pulseOut + tndOut;
 }

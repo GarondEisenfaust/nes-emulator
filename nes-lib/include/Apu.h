@@ -37,4 +37,5 @@ class Apu {
 
   inline bool IsHalfFrameClock(int clock);
   inline bool IsQuarterFrameClock(int clock);
+  inline float Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput);
 };
