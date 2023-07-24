@@ -20,11 +20,12 @@ uint16_t Sweeper::Clock(uint16_t timerPeriod) {
     mMute = true;
   }
 
-  if (mDivider.Notify()) {
+  if (mDivider.Notify() || mReload) {
     if (!mMute && enable) {
       return targetPeriod;
     }
     mDivider.Reset();
+    mReload = false;
   } else {
     mDivider.Clock();
   }
@@ -36,6 +37,7 @@ void Sweeper::UpdateState(uint8_t data) {
   mDivider.SetPeriod((data & 0x70) >> 4);
   negate = data & (1 << 3);
   shiftCount = (data & 0x07) >> 0;
+  mReload = true;
 }
 
 bool Sweeper::ShouldMute() { return mMute; }

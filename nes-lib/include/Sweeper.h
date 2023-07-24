@@ -11,6 +11,7 @@ class Sweeper {
   uint8_t shiftCount;
   Divider mDivider;
   bool mMute;
+  bool mReload;
 
   uint16_t Clock(uint16_t timerPeriod);
   void UpdateState(uint8_t data);
