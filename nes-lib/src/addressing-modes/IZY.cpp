@@ -1,7 +1,6 @@
 #include "addressing-modes/IZY.h"
 #include "Bus.h"
 #include "Cpu.h"
-#include "fmt/format.h"
 
 IZY::IZY(Cpu* cpu) : IAddressingMode(cpu) {}
 

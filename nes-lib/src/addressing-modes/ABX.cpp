@@ -1,7 +1,6 @@
 #include "addressing-modes/ABX.h"
 #include "Bus.h"
 #include "Cpu.h"
-#include "fmt/format.h"
 
 ABX::ABX(Cpu* cpu) : IAddressingMode(cpu) {}
 

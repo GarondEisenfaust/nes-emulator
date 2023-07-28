@@ -1,7 +1,6 @@
 #include "addressing-modes/ZP0.h"
 #include "Bus.h"
 #include "Cpu.h"
-#include "fmt/format.h"
 
 ZP0::ZP0(Cpu* cpu) : IAddressingMode(cpu) {}
 

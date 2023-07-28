@@ -1,7 +1,6 @@
 #include "addressing-modes/IZX.h"
 #include "Bus.h"
 #include "Cpu.h"
-#include "fmt/format.h"
 
 IZX::IZX(Cpu* cpu) : IAddressingMode(cpu) {}
 

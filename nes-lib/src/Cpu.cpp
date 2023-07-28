@@ -1,7 +1,6 @@
 #include "Cpu.h"
 #include "Bus.h"
 #include "Definitions.h"
-#include "fmt/format.h"
 #include <cstdint>
 #include <iostream>
 

@@ -8,7 +8,6 @@
 #include "Ppu.h"
 #include "Ram.h"
 #include "RingBuffer.h"
-#include "fmt/format.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -64,7 +63,7 @@ void MakeOneStep(Bus& bus) {
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << "You have to specify a ROM to load!" << std::endl;
+    std::cout << "You have to specify a ROM to load!\n";
     return 1;
   }
 
@@ -114,20 +113,20 @@ int main(int argc, char* argv[]) {
   deviceConfig.dataCallback = data_callback;
 
   if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
-    printf("Failed to open playback device.\n");
+    std::cout << "Failed to open playback device.\n";
     return -4;
   }
 
-  printf("Device Name: %s\n", device.playback.name);
+  std::cout << "Device Name: " << device.playback.name << "\n";
 
   if (ma_device_start(&device) != MA_SUCCESS) {
-    printf("Failed to start playback device.\n");
+    std::cout << "Failed to start playback device.\n";
     ma_device_uninit(&device);
     return -5;
   }
 
   using namespace std::chrono_literals;
-  auto diff = (1000ms / 60);
+  auto diff = (1000ms / 120);
   renderContext.GameLoop([&]() {
     static auto next = std::chrono::system_clock::now();
     controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_1);

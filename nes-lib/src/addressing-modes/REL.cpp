@@ -1,7 +1,6 @@
 #include "addressing-modes/REL.h"
 #include "Bus.h"
 #include "Cpu.h"
-#include "fmt/format.h"
 
 REL::REL(Cpu* cpu) : IAddressingMode(cpu) {}
 

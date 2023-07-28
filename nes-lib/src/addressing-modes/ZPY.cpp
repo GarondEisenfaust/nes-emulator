@@ -1,7 +1,6 @@
 #include "addressing-modes/ZPY.h"
 #include "Bus.h"
 #include "Cpu.h"
-#include "fmt/format.h"
 
 ZPY::ZPY(Cpu* cpu) : IAddressingMode(cpu) {}
 

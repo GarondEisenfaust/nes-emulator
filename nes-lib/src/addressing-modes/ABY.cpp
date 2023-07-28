@@ -1,7 +1,6 @@
 #include "addressing-modes/ABY.h"
 #include "Bus.h"
 #include "Cpu.h"
-#include "fmt/format.h"
 
 ABY::ABY(Cpu* cpu) : IAddressingMode(cpu) {}
 

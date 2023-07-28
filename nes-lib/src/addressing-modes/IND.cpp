@@ -1,7 +1,6 @@
 #include "addressing-modes/IND.h"
 #include "Bus.h"
 #include "Cpu.h"
-#include "fmt/format.h"
 
 IND::IND(Cpu* cpu) : IAddressingMode(cpu) {}
 
