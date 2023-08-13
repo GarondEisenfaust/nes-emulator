@@ -1,6 +1,7 @@
 #pragma once
 #include "CircularBuffer.h"
 #include "IAudioOutputDevice.h"
+#include "NoiseChannel.h"
 #include "PulseChannel.h"
 #include <cstdint>
 #include <queue>
@@ -26,6 +27,7 @@ class Apu {
   int mFrameClockCounter;
   PulseChannel mPulseChannelOne;
   PulseChannel mPulseChannelTwo;
+  NoiseChannel mNoiseChannel;
   std::queue<float> queue;
   float output;
 
@@ -37,5 +39,5 @@ class Apu {
 
   inline bool IsHalfFrameClock(int clock);
   inline bool IsQuarterFrameClock(int clock);
-  inline float Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput);
+  inline float Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t noiseOutput);
 };
