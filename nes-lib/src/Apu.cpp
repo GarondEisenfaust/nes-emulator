@@ -82,6 +82,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
     mPulseChannelTwo.mSequencer.enabled = data & 0x02;
     mPulseChannelOne.mLengthCounter.SetEnabled(data & 0x01);
     mPulseChannelTwo.mLengthCounter.SetEnabled(data & 0x02);
+    mNoiseChannel.mLengthCounter.SetEnabled(data & 0x08);
   }
   mNoiseChannel.UpdateState(addr, data);
 }
