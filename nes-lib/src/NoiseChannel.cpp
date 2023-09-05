@@ -8,7 +8,7 @@ NoiseChannel::NoiseChannel() {
 
 void NoiseChannel::UpdateState(uint16_t addr, uint8_t data) {
   if (addr == 0x400C) {
-    mLengthCounter.SetHalt(!(data & 0x20));
+    mLengthCounter.SetHalt( data & 0x20) ;
     mEnvelope.loop = data & 0x20;
     mEnvelope.constantVolume = data & 0x10;
     mEnvelope.volume = data & 0x0F;

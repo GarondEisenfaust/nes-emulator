@@ -8,7 +8,7 @@ void Sequencer::Clock() {
     if (timer == 0xFFFF) {
       timer = reload;
       sequence = Rotate(sequence);
-      output = sequence & 0x00000001;
+      output = sequence & 0x01;
     }
   }
 }

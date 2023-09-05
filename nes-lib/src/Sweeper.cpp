@@ -15,10 +15,7 @@ uint16_t Sweeper::Clock(uint16_t timerPeriod) {
 
   auto targetPeriod = std::clamp(timerPeriod + changeAmount, 0, UINT16_MAX);
 
-  mMute = false;
-  if (timerPeriod < 8 || targetPeriod > 0x07FF) {
-    mMute = true;
-  }
+  mMute = timerPeriod < 8 || targetPeriod > 0x07FF;
 
   if (mDivider.Notify() || mReload) {
     if (!mMute && enable) {
@@ -33,10 +30,10 @@ uint16_t Sweeper::Clock(uint16_t timerPeriod) {
 }
 
 void Sweeper::UpdateState(uint8_t data) {
-  enable = data & (1 << 7);
+  enable = data & 0x80;
   mDivider.SetPeriod((data & 0x70) >> 4);
-  negate = data & (1 << 3);
-  shiftCount = (data & 0x07) >> 0;
+  negate = data & 0x08;
+  shiftCount = data & 0x07;
   mReload = true;
 }
 

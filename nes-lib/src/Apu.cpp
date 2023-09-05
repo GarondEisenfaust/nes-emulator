@@ -27,8 +27,8 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
         break;
       }
     }
-    mPulseChannelOne.mLengthCounter.SetHalt(data & 0x20);
-    // mPulseChannelOne.mEnvelope.loop = data & 0x20;
+    mPulseChannelOne.mLengthCounter.SetHalt(!(data & 0x20));
+    mPulseChannelOne.mEnvelope.loop = data & 0x20;
     mPulseChannelOne.mEnvelope.constantVolume = data & 0x10;
     mPulseChannelOne.mEnvelope.volume = data & 0x0F;
   } else if (addr == 0x4001) {
@@ -60,8 +60,8 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
         break;
       }
     }
-    mPulseChannelTwo.mLengthCounter.SetHalt(data & 0x20);
-    // mPulseChannelTwo.mEnvelope.loop = data & 0x20;
+    mPulseChannelTwo.mLengthCounter.SetHalt(!(data & 0x20));
+    mPulseChannelTwo.mEnvelope.loop = data & 0x20;
     mPulseChannelTwo.mEnvelope.constantVolume = data & 0x10;
     mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
   } else if (addr == 0x4005) {

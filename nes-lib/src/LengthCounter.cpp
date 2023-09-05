@@ -19,7 +19,7 @@ void LengthCounter::SetEnabled(bool enable) {
 }
 
 void LengthCounter::Clock() {
-  if (mHalt && mCounter > 0) {
+  if (!mHalt && mCounter > 0) {
     mCounter--;
   }
 }
