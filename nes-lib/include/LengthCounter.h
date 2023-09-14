@@ -8,9 +8,9 @@ class LengthCounter {
   bool ShouldMute();
   void SetEnabled(bool enable);
   void Clock();
+  uint8_t mCounter;
 
  private:
-  uint8_t mCounter;
   bool mHalt;
   bool mEnabled;
 };

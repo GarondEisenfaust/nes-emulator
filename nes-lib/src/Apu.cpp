@@ -82,9 +82,11 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
     mPulseChannelTwo.mSequencer.enabled = data & 0x02;
     mPulseChannelOne.mLengthCounter.SetEnabled(data & 0x01);
     mPulseChannelTwo.mLengthCounter.SetEnabled(data & 0x02);
+    mTriangleChannel.mLengthCounter.SetEnabled(data & 0x04);
     mNoiseChannel.mLengthCounter.SetEnabled(data & 0x08);
   }
   mNoiseChannel.UpdateState(addr, data);
+  mTriangleChannel.UpdateState(addr, data);
 }
 
 uint8_t Apu::CpuRead(uint16_t addr) {
@@ -104,7 +106,12 @@ void Apu::Clock() {
     mPulseChannelOne.Clock(quarter, half);
     mPulseChannelTwo.Clock(quarter, half);
     mNoiseChannel.Clock(quarter, half);
-    output = Mix(mPulseChannelOne.output, mPulseChannelTwo.output, mNoiseChannel.output);
+
+    for (int i = 0; i < 2; i++) {
+      mTriangleChannel.Clock(quarter, half);
+    }
+
+    output = Mix(mPulseChannelOne.output, mPulseChannelTwo.output, mTriangleChannel.output, mNoiseChannel.output);
 
     if (mFrameClockCounter % 20 == 0) {
       mOutputDevice.Write(output);
@@ -132,8 +139,8 @@ bool Apu::IsQuarterFrameClock(int clock) {
   return IsAnyOf(clock, quarterFrameClocks[0], quarterFrameClocks[1], quarterFrameClocks[2], quarterFrameClocks[3]);
 }
 
-inline float Apu::Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t noiseOutput) {
+inline float Apu::Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput) {
   auto pulseOut = 0.00752f * static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
-  auto tndOut = 0.00494 * noiseOutput;
+  auto tndOut = 0.00494 * noiseOutput + 0.00494 * triangleOutput;
   return pulseOut + tndOut;
 }

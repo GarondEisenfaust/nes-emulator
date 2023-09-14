@@ -3,6 +3,7 @@
 #include "IAudioOutputDevice.h"
 #include "NoiseChannel.h"
 #include "PulseChannel.h"
+#include "TriangleChannel.h"
 #include <cstdint>
 #include <queue>
 
@@ -28,6 +29,7 @@ class Apu {
   PulseChannel mPulseChannelOne;
   PulseChannel mPulseChannelTwo;
   NoiseChannel mNoiseChannel;
+  TriangleChannel mTriangleChannel;
   std::queue<float> queue;
   float output;
 
@@ -39,5 +41,5 @@ class Apu {
 
   inline bool IsHalfFrameClock(int clock);
   inline bool IsQuarterFrameClock(int clock);
-  inline float Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t noiseOutput);
+  inline float Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput);
 };
