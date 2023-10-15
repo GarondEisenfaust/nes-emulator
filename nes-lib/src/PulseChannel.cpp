@@ -7,7 +7,7 @@ void PulseChannel::Clock(bool quarter, bool half) {
   mSequencer.Clock();
 
   auto newTimer = 0;
-  newTimer = mSweeper.Clock(mSequencer.timer);
+  newTimer = mSweeper.Clock(mSequencer.mDivider.mPeriod);
 
   if (quarter) {
     mEnvelope.Clock();
@@ -15,7 +15,7 @@ void PulseChannel::Clock(bool quarter, bool half) {
 
   if (half) {
     mLengthCounter.Clock();
-    mSequencer.timer = newTimer;
+    mSequencer.mDivider.SetPeriod(newTimer);
   }
 
   if (mSweeper.ShouldMute()) {

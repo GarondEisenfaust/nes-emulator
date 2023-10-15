@@ -11,22 +11,23 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   if (addr == 0x4000) {
     switch ((data & 0xC0) >> 6) {
       case 0x00: {
-        mPulseChannelOne.mSequencer.sequence = 0b01000000;
+        mPulseChannelOne.mSequencer.reloadSequence = 0b01000000;
         break;
       }
       case 0x01: {
-        mPulseChannelOne.mSequencer.sequence = 0b01100000;
+        mPulseChannelOne.mSequencer.reloadSequence = 0b01100000;
         break;
       }
       case 0x02: {
-        mPulseChannelOne.mSequencer.sequence = 0b01111000;
+        mPulseChannelOne.mSequencer.reloadSequence = 0b01111000;
         break;
       }
       case 0x03: {
-        mPulseChannelOne.mSequencer.sequence = 0b10011111;
+        mPulseChannelOne.mSequencer.reloadSequence = 0b10011111;
         break;
       }
     }
+    mPulseChannelOne.mSequencer.Reload();
     mPulseChannelOne.mLengthCounter.SetHalt(!(data & 0x20));
     mPulseChannelOne.mEnvelope.loop = data & 0x20;
     mPulseChannelOne.mEnvelope.constantVolume = data & 0x10;
@@ -34,32 +35,33 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4001) {
     mPulseChannelOne.mSweeper.UpdateState(data);
   } else if (addr == 0x4002) {
-    mPulseChannelOne.mSequencer.reload = (mPulseChannelOne.mSequencer.sequence & 0xFF00) | data;
+    mPulseChannelOne.mSequencer.mDivider.SetPeriod((mPulseChannelOne.mSequencer.sequence & 0xFF00) | data);
   } else if (addr == 0x4003) {
     mPulseChannelOne.mLengthCounter.SetCounter((data & 0xF8) >> 3);
-    mPulseChannelOne.mSequencer.reload =
-        static_cast<uint16_t>(data & 0x07) << 8 | (mPulseChannelOne.mSequencer.reload & 0x00FF);
-    mPulseChannelOne.mSequencer.timer = mPulseChannelOne.mSequencer.reload;
+    mPulseChannelOne.mSequencer.mDivider.SetPeriod(static_cast<uint16_t>(data & 0x07) << 8 |
+                                                   (mPulseChannelOne.mSequencer.mDivider.mPeriod & 0x00FF));
     mPulseChannelOne.mEnvelope.startFlag = true;
+    mPulseChannelOne.mSequencer.Reload();
   } else if (addr == 0x4004) {
     switch ((data & 0xC0) >> 6) {
       case 0x00: {
-        mPulseChannelTwo.mSequencer.sequence = 0b01000000;
+        mPulseChannelTwo.mSequencer.reloadSequence = 0b01000000;
         break;
       }
       case 0x01: {
-        mPulseChannelTwo.mSequencer.sequence = 0b01100000;
+        mPulseChannelTwo.mSequencer.reloadSequence = 0b01100000;
         break;
       }
       case 0x02: {
-        mPulseChannelTwo.mSequencer.sequence = 0b01111000;
+        mPulseChannelTwo.mSequencer.reloadSequence = 0b01111000;
         break;
       }
       case 0x03: {
-        mPulseChannelTwo.mSequencer.sequence = 0b10011111;
+        mPulseChannelTwo.mSequencer.reloadSequence = 0b10011111;
         break;
       }
     }
+    mPulseChannelTwo.mSequencer.Reload();
     mPulseChannelTwo.mLengthCounter.SetHalt(!(data & 0x20));
     mPulseChannelTwo.mEnvelope.loop = data & 0x20;
     mPulseChannelTwo.mEnvelope.constantVolume = data & 0x10;
@@ -67,19 +69,17 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4005) {
     mPulseChannelTwo.mSweeper.UpdateState(data);
   } else if (addr == 0x4006) {
-    mPulseChannelTwo.mSequencer.reload = (mPulseChannelTwo.mSequencer.sequence & 0xFF00) | data;
+    mPulseChannelTwo.mSequencer.mDivider.SetPeriod((mPulseChannelTwo.mSequencer.sequence & 0xFF00) | data);
   } else if (addr == 0x4007) {
     mPulseChannelTwo.mLengthCounter.SetCounter((data & 0xF8) >> 3);
-    mPulseChannelTwo.mSequencer.reload =
-        static_cast<uint16_t>(data & 0x07) << 8 | (mPulseChannelTwo.mSequencer.reload & 0x00FF);
-    mPulseChannelTwo.mSequencer.timer = mPulseChannelTwo.mSequencer.reload;
+    mPulseChannelTwo.mSequencer.mDivider.SetPeriod(static_cast<uint16_t>(data & 0x07) << 8 |
+                                                   (mPulseChannelTwo.mSequencer.mDivider.mPeriod & 0x00FF));
     mPulseChannelTwo.mEnvelope.startFlag = true;
+    mPulseChannelTwo.mSequencer.Reload();
   } else if (addr == 0x400F) {
     mPulseChannelOne.mEnvelope.startFlag = true;
     mPulseChannelTwo.mEnvelope.startFlag = true;
   } else if (addr == 0x4015) {
-    mPulseChannelOne.mSequencer.enabled = data & 0x01;
-    mPulseChannelTwo.mSequencer.enabled = data & 0x02;
     mPulseChannelOne.mLengthCounter.SetEnabled(data & 0x01);
     mPulseChannelTwo.mLengthCounter.SetEnabled(data & 0x02);
     mTriangleChannel.mLengthCounter.SetEnabled(data & 0x04);
@@ -91,8 +91,8 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
 
 uint8_t Apu::CpuRead(uint16_t addr) {
   if (addr == 0x4015) {
-    auto pulseTimerOne = mPulseChannelOne.mSequencer.timer != 0;
-    auto pulseTimerTwo = mPulseChannelTwo.mSequencer.timer != 0;
+    auto pulseTimerOne = mPulseChannelOne.mSequencer.mDivider.mCounter != 0;
+    auto pulseTimerTwo = mPulseChannelTwo.mSequencer.mDivider.mCounter != 0;
     return (pulseTimerTwo << 1) | pulseTimerOne;
   }
   return 0;

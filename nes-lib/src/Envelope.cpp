@@ -8,16 +8,16 @@ void Envelope::Clock() {
     divider.Reset();
   } else {
     divider.Clock();
-  }
-
-  if (divider.Notify()) {
-    // divider.SetPeriod(volume);
-    // divider.Reset();
-    if (decayLevelCounter > 0) {
-      decayLevelCounter--;
-    } else if (loop) {
-      decayLevelCounter = 15;
+    if (divider.Notify()) {
+      divider.SetPeriod(volume);
+      // divider.Reset();
+      if (decayLevelCounter > 0) {
+        decayLevelCounter--;
+      } else if (loop) {
+        decayLevelCounter = 15;
+      }
     }
   }
+
   output = constantVolume ? volume : decayLevelCounter;
 }

@@ -44,14 +44,12 @@ void TriangleChannel::Clock(bool quarter, bool half) {
 
   output = 0;
   mLengthCounter.Clock();
-  std::cout << std::to_string(mLengthCounter.mCounter) << "\n";
 
   if (mLengthCounter.ShouldMute()) {
     return;
   }
 
   output = mSequence[mSequenceIndex];
-  std::cout << std::to_string(output) << "\n";
   if (mCounter > 0) {
     mSequenceIndex++;
   }

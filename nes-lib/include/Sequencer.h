@@ -1,13 +1,15 @@
 #pragma once
+#include "Divider.h"
 #include <cstdint>
 
 class Sequencer {
  public:
   uint32_t sequence = 0x00000000;
-  uint16_t timer = 0x0000;
-  uint16_t reload = 0x0000;
+  uint32_t reloadSequence = 0x00000000;
   uint8_t output = 0x00;
-  bool enabled = true;
+  // bool enabled = true;
+  Divider mDivider;
 
   void Clock();
+  void Reload();
 };

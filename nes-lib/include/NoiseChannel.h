@@ -7,6 +7,7 @@
 class NoiseChannel {
  public:
   NoiseChannel();
+  ~NoiseChannel() = default;
   void UpdateState(uint16_t addr, uint8_t data);
   void Clock(bool quarter, bool half);
   uint8_t output = 0;

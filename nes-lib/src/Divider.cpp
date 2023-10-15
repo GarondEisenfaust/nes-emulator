@@ -22,7 +22,7 @@ void Divider::SetPeriod(int period) { mPeriod = period; }
 // void Divider::Reset() { mReload = true; }
 void Divider::Reset() {
   mCounter = mPeriod;
-  // mReload = true;
+  mReload = true;
 }
 
 bool Divider::Notify() { return mNotify; }

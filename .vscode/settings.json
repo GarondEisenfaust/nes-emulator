@@ -89,5 +89,7 @@
   "[cpp]": {
     "editor.defaultFormatter": "xaver.clang-format"
   },
-  "python.formatting.provider": "yapf"
+  "[python]": {
+    "editor.defaultFormatter": "eeyore.yapf"
+  }
 }
