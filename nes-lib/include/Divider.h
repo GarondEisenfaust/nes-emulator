@@ -4,6 +4,8 @@ class Divider {
  public:
   void Clock();
   void SetPeriod(int period);
+  void SetLowerPeriodBits(int period);
+  void SetUpperPeriodBits(int period);
   void Reset();
   bool Notify();
   int mPeriod = 0;

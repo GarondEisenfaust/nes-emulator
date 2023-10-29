@@ -35,11 +35,10 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4001) {
     mPulseChannelOne.mSweeper.UpdateState(data);
   } else if (addr == 0x4002) {
-    mPulseChannelOne.mSequencer.mDivider.SetPeriod((mPulseChannelOne.mSequencer.mDivider.mPeriod & 0xFF00) | data);
+    mPulseChannelOne.mSequencer.mDivider.SetLowerPeriodBits(data);
   } else if (addr == 0x4003) {
     mPulseChannelOne.mLengthCounter.SetCounter((data & 0xF8) >> 3);
-    mPulseChannelOne.mSequencer.mDivider.SetPeriod(static_cast<uint16_t>(data & 0x07) << 8 |
-                                                   (mPulseChannelOne.mSequencer.mDivider.mPeriod & 0x00FF));
+    mPulseChannelOne.mSequencer.mDivider.SetUpperPeriodBits(data);
     mPulseChannelOne.mEnvelope.startFlag = true;
     mPulseChannelOne.mSequencer.Reload();
   } else if (addr == 0x4004) {
@@ -69,11 +68,10 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4005) {
     mPulseChannelTwo.mSweeper.UpdateState(data);
   } else if (addr == 0x4006) {
-    mPulseChannelTwo.mSequencer.mDivider.SetPeriod((mPulseChannelTwo.mSequencer.mDivider.mPeriod & 0xFF00) | data);
+    mPulseChannelTwo.mSequencer.mDivider.SetLowerPeriodBits(data);
   } else if (addr == 0x4007) {
     mPulseChannelTwo.mLengthCounter.SetCounter((data & 0xF8) >> 3);
-    mPulseChannelTwo.mSequencer.mDivider.SetPeriod(static_cast<uint16_t>(data & 0x07) << 8 |
-                                                   (mPulseChannelTwo.mSequencer.mDivider.mPeriod & 0x00FF));
+    mPulseChannelTwo.mSequencer.mDivider.SetUpperPeriodBits(data);
     mPulseChannelTwo.mEnvelope.startFlag = true;
     mPulseChannelTwo.mSequencer.Reload();
   } else if (addr == 0x400F) {
