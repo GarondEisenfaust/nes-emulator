@@ -40,6 +40,10 @@ void Controller::SetControllerBitBasedOnInput(int gamepadIndex) {
       PressedKeyboard(GLFW_KEY_H) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_X);
   mControllerRegister[gamepadIndex].a =
       PressedKeyboard(GLFW_KEY_J) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_A);
+
+  if (mControllerRegister[gamepadIndex].a) {
+    auto bb = 9;
+  }
 }
 
 bool Controller::PressedKeyboard(int keyToCheck) {
