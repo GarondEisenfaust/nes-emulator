@@ -28,7 +28,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
       }
     }
     mPulseChannelOne.mSequencer.Reload();
-    mPulseChannelOne.mLengthCounter.SetHalt(!(data & 0x20));
+    mPulseChannelOne.mLengthCounter.SetHalt(data & 0x20);
     mPulseChannelOne.mEnvelope.loop = data & 0x20;
     mPulseChannelOne.mEnvelope.constantVolume = data & 0x10;
     mPulseChannelOne.mEnvelope.volume = data & 0x0F;
@@ -37,7 +37,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4002) {
     mPulseChannelOne.mSequencer.mDivider.SetLowerPeriodBits(data);
   } else if (addr == 0x4003) {
-    mPulseChannelOne.mLengthCounter.SetCounter((data & 0xF8) >> 3);
+    mPulseChannelOne.mLengthCounter.SetCounter(data >> 3);
     mPulseChannelOne.mSequencer.mDivider.SetUpperPeriodBits(data);
     mPulseChannelOne.mEnvelope.startFlag = true;
     mPulseChannelOne.mSequencer.Reload();
@@ -61,7 +61,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
       }
     }
     mPulseChannelTwo.mSequencer.Reload();
-    mPulseChannelTwo.mLengthCounter.SetHalt(!(data & 0x20));
+    mPulseChannelTwo.mLengthCounter.SetHalt(data & 0x20);
     mPulseChannelTwo.mEnvelope.loop = data & 0x20;
     mPulseChannelTwo.mEnvelope.constantVolume = data & 0x10;
     mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
@@ -70,7 +70,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   } else if (addr == 0x4006) {
     mPulseChannelTwo.mSequencer.mDivider.SetLowerPeriodBits(data);
   } else if (addr == 0x4007) {
-    mPulseChannelTwo.mLengthCounter.SetCounter((data & 0xF8) >> 3);
+    mPulseChannelTwo.mLengthCounter.SetCounter(data >> 3);
     mPulseChannelTwo.mSequencer.mDivider.SetUpperPeriodBits(data);
     mPulseChannelTwo.mEnvelope.startFlag = true;
     mPulseChannelTwo.mSequencer.Reload();
