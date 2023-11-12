@@ -16,4 +16,5 @@ class Sweeper {
   uint16_t Clock(uint16_t timerPeriod);
   void UpdateState(uint8_t data);
   bool ShouldMute();
+  bool ShouldSetPeriod();
 };

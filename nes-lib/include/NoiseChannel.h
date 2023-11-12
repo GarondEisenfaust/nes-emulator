@@ -12,11 +12,10 @@ class NoiseChannel {
   void Clock(bool quarter, bool half);
   uint8_t output = 0;
   LengthCounter mLengthCounter;
+  Envelope mEnvelope;
 
  private:
-  Envelope mEnvelope;
   std::array<int, 16> mTimerTable;
-  std::array<int, 32> mLengthTable;
   uint16_t shiftRegister = 0x01;
   bool mode;
   int mTimer;

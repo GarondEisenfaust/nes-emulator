@@ -74,9 +74,6 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
     mPulseChannelTwo.mSequencer.mDivider.SetUpperPeriodBits(data);
     mPulseChannelTwo.mEnvelope.startFlag = true;
     mPulseChannelTwo.mSequencer.Reload();
-  } else if (addr == 0x400F) {
-    mPulseChannelOne.mEnvelope.startFlag = true;
-    mPulseChannelTwo.mEnvelope.startFlag = true;
   } else if (addr == 0x4015) {
     mPulseChannelOne.mLengthCounter.SetEnabled(data & 0x01);
     mPulseChannelTwo.mLengthCounter.SetEnabled(data & 0x02);
