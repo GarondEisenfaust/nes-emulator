@@ -1,6 +1,7 @@
 #pragma once
 #include "IRenderer.h"
 #include "Pixel.h"
+#include <array>
 #include <vector>
 
 class Grid : public IRenderer {
@@ -19,6 +20,7 @@ class Grid : public IRenderer {
 
   int GetGridWidth();
   int GetGridHeight();
+  std::array<PixelColor, 256 * 240> mTextureData;
 
  private:
   std::vector<Pixel> mPixels;
@@ -28,4 +30,5 @@ class Grid : public IRenderer {
 
   int mGridWidth;
   int mGridHeight;
+  int mCurrentPixel = 0;
 };

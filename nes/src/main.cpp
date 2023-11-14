@@ -125,15 +125,25 @@ int main(int argc, char* argv[]) {
     return -5;
   }
 
+  unsigned int texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
   using namespace std::chrono_literals;
-  auto diff = (1000ms / 120);
+  auto diff = (1000ms / 60);
   renderContext.GameLoop([&]() {
     static auto next = std::chrono::system_clock::now();
     controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_1);
     controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_2);
 
-    auto colorData = grid.MakeColorData();
-    colors->SetData(colorData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 240, 0, GL_RGB, GL_UNSIGNED_BYTE, grid.mTextureData.data());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     RenderCompleteFrame(bus, grid);
     std::this_thread::sleep_until(next);

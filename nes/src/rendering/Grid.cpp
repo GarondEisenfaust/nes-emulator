@@ -41,7 +41,7 @@ std::vector<float> Grid::MakeColorData() {
       result.push_back(color.r);
       result.push_back(color.g);
       result.push_back(color.b);
-      result.push_back(color.a);
+      // result.push_back(color.a);
     }
   }
 
@@ -56,7 +56,8 @@ void Grid::SetPixelColor(int x, int y, PixelColor& color) {
   auto height = GetGridHeight();
 
   if ((0 <= x && x < width) && (0 <= y && y < height)) {
-    GetPixel(x, y).SetColor(color);
+    mTextureData[mCurrentPixel] = color;
+    mCurrentPixel = (mCurrentPixel + 1) % (256 * 240);
   }
 }
 
