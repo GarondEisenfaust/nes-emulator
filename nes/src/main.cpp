@@ -20,7 +20,7 @@
 #include <string>
 #include <thread>
 
-Grid grid(WIDTH, HEIGHT, 256, 240);
+Grid grid(256, 240);
 
 float Normalize(float value, float min, float max, float minDesired = -1, float maxDesired = 1) {
   auto firstPart = (value - min) / (max - min);
@@ -68,20 +68,6 @@ int main(int argc, char* argv[]) {
   }
 
   RenderContext renderContext;
-  grid.Init();
-
-  auto pixels = std::make_shared<Buffer<GLfloat>>(0, 3, GL_STATIC_DRAW);
-  auto colors = std::make_shared<Buffer<GLfloat>>(1, 4, GL_DYNAMIC_DRAW);
-  auto vertexArray = std::make_shared<VertexArray>();
-
-  auto gridData = grid.MakePixelData();
-  pixels->SetData(gridData);
-
-  vertexArray->Attach(colors);
-  vertexArray->Attach(pixels);
-  vertexArray->SetDrawBuffer(pixels);
-
-  renderContext.AddVertexArray(vertexArray);
 
   auto ram = std::make_unique<Ram>();
   Bus bus(*ram);
@@ -131,7 +117,6 @@ int main(int argc, char* argv[]) {
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   using namespace std::chrono_literals;
@@ -141,7 +126,7 @@ int main(int argc, char* argv[]) {
     controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_1);
     controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_2);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 240, 0, GL_RGB, GL_UNSIGNED_BYTE, grid.mTextureData.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 240, 0, GL_RGBA, GL_UNSIGNED_BYTE, grid.mTextureData.data());
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
 

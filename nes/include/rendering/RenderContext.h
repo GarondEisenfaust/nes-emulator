@@ -1,9 +1,6 @@
 #pragma once
 #include "ShaderProgram.h"
 #include "glm/vec3.hpp"
-#include "rendering/Buffer.h"
-#include "rendering/IBuffer.h"
-#include "rendering/VertexArray.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <array>
@@ -21,7 +18,6 @@ class RenderContext {
   int GetHeight();
   int GetWidth();
   GLFWwindow* GetWindow();
-  void AddVertexArray(std::shared_ptr<VertexArray> vertexArray);
 
  private:
   int mWidth;
@@ -29,7 +25,4 @@ class RenderContext {
   GLFWwindow* mWindow;
 
   ShaderProgram mShaderProgram;
-  std::vector<std::shared_ptr<VertexArray>> mVertexArrays;
-
-  void UpdateBuffers();
 };
