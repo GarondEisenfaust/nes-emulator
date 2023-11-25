@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "rendering/RenderContext.h"
 #include "rendering/Shader.h"
 #include <chrono>
 #include <cstdlib>
@@ -66,13 +67,13 @@ void RenderContext::GameLoop(std::function<void()> loop) {
 
   unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
-  unsigned int VAO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
+  unsigned int vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
 
-  unsigned int VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  unsigned int vbo;
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(0 * sizeof(float)));
@@ -80,10 +81,20 @@ void RenderContext::GameLoop(std::function<void()> loop) {
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
 
-  unsigned int EBO;
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  unsigned int ebo;
+  glGenBuffers(1, &ebo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+  unsigned int texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
   while (!glfwWindowShouldClose(mWindow)) {
     glfwPollEvents();
@@ -94,10 +105,13 @@ void RenderContext::GameLoop(std::function<void()> loop) {
 
     loop();
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glBindVertexArray(VAO);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 240, 0, GL_RGBA, GL_UNSIGNED_BYTE, GetTextureDataPointer());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLE_FAN, 6, GL_UNSIGNED_INT, 0);
 
     ImGui::Render();
@@ -107,7 +121,19 @@ void RenderContext::GameLoop(std::function<void()> loop) {
   }
 }
 
-int RenderContext::GetHeight() { return mHeight; }
-int RenderContext::GetWidth() { return mWidth; }
-
 GLFWwindow* RenderContext::GetWindow() { return mWindow; }
+
+void RenderContext::SetPixelColor(int x, int y, PixelColor& color) {
+  if ((0 <= x && x < mGridWidth) && (0 <= y && y < mGridHeight)) {
+    mTextureData[mCurrentPixel] = color;
+    mCurrentPixel = (mCurrentPixel + 1) % (mGridWidth * mGridHeight);
+  }
+}
+
+void RenderContext::CommitFrame() { mFrameComplete = true; }
+
+void RenderContext::StartNewFrame() { mFrameComplete = false; }
+
+bool RenderContext::FrameComplete() { return mFrameComplete; }
+
+uint8_t* RenderContext::GetTextureDataPointer() { return reinterpret_cast<uint8_t*>(mTextureData.data()); }

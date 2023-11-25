@@ -1,4 +1,6 @@
 #pragma once
+#include "IRenderer.h"
+#include "PixelColor.h"
 #include "ShaderProgram.h"
 #include "glm/vec3.hpp"
 #include <GL/glew.h>
@@ -6,23 +8,29 @@
 #include <array>
 #include <functional>
 #include <memory>
-#include <vector>
 
-class RenderContext {
+class RenderContext : public IRenderer {
  public:
   using KeyCallback = std::function<void(GLFWwindow* window, int key, int scancode, int action, int mods)>;
   RenderContext();
   ~RenderContext();
 
   void GameLoop(std::function<void()> loop);
-  int GetHeight();
-  int GetWidth();
   GLFWwindow* GetWindow();
+  void SetPixelColor(int x, int y, PixelColor& color);
+  void CommitFrame();
+  void StartNewFrame();
+  bool FrameComplete();
+  uint8_t* GetTextureDataPointer();
 
  private:
   int mWidth;
   int mHeight;
+  static const int mGridWidth = 256;
+  static const int mGridHeight = 240;
+  std::array<PixelColor, mGridWidth * mGridHeight> mTextureData;
+  bool mFrameComplete = false;
+  int mCurrentPixel = 0;
   GLFWwindow* mWindow;
-
   ShaderProgram mShaderProgram;
 };

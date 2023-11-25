@@ -11,7 +11,6 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "rendering/Grid.h"
 #include "rendering/RenderContext.h"
 #include <array>
 #include <chrono>
@@ -19,8 +18,6 @@
 #include <iostream>
 #include <string>
 #include <thread>
-
-Grid grid(256, 240);
 
 float Normalize(float value, float min, float max, float minDesired = -1, float maxDesired = 1) {
   auto firstPart = (value - min) / (max - min);
@@ -42,11 +39,11 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
   }
 };
 
-void RenderCompleteFrame(Bus& bus, Grid& grid) {
-  while (!grid.FrameComplete()) {
+void RenderCompleteFrame(Bus& bus, IRenderer& renderer) {
+  while (!renderer.FrameComplete()) {
     bus.Clock();
   }
-  grid.StartNewFrame();
+  renderer.StartNewFrame();
 }
 
 void MakeOneStep(Bus& bus) {
@@ -72,7 +69,7 @@ int main(int argc, char* argv[]) {
   auto ram = std::make_unique<Ram>();
   Bus bus(*ram);
   Cpu cpu;
-  Ppu ppu(grid);
+  Ppu ppu(renderContext);
   RingBuffer ringBuffer(10000);
   Apu apu(ringBuffer);
 
@@ -111,26 +108,13 @@ int main(int argc, char* argv[]) {
     return -5;
   }
 
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
   using namespace std::chrono_literals;
-  auto diff = (1000ms / 60);
+  const auto diff = (1000ms / 60);
+  auto next = std::chrono::system_clock::now();
   renderContext.GameLoop([&]() {
-    static auto next = std::chrono::system_clock::now();
     controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_1);
     controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_2);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 240, 0, GL_RGBA, GL_UNSIGNED_BYTE, grid.mTextureData.data());
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    RenderCompleteFrame(bus, grid);
+    RenderCompleteFrame(bus, renderContext);
     std::this_thread::sleep_until(next);
     next += diff;
   });
