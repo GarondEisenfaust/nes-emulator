@@ -7,6 +7,9 @@
 #include <cstdint>
 #include <queue>
 
+#define APU_RAM_START 0x4000
+#define APU_RAM_END 0x400F
+
 class Bus;
 class Apu {
  public:
