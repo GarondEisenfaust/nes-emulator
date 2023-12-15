@@ -4,6 +4,7 @@
 #include "Controller.h"
 #include "Cpu.h"
 #include "Definitions.h"
+#include "ForegroundRenderer.h"
 #include "Miniaudio.h"
 #include "Ppu.h"
 #include "Ram.h"
@@ -72,6 +73,14 @@ int main(int argc, char* argv[]) {
   Ppu ppu(renderContext);
   RingBuffer ringBuffer(10000);
   Apu apu(ringBuffer);
+
+  ForegroundRenderer foregroundRenderer;
+  foregroundRenderer.SetPpu(&ppu);
+  ppu.SetForegroundRenderer(&foregroundRenderer);
+
+  BackgroundRenderer backgroundRenderer;
+  backgroundRenderer.SetPpu(&ppu);
+  ppu.SetBackgroundRenderer(&backgroundRenderer);
 
   Controller controller(renderContext.GetWindow());
 

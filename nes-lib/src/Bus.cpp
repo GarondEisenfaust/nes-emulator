@@ -1,5 +1,6 @@
 #include "Bus.h"
 #include "Definitions.h"
+#include "ForegroundRenderer.h"
 #include "IRenderer.h"
 
 #define DMA_ADDRESS 0x4014
@@ -71,7 +72,7 @@ void Bus::Dma(uint8_t page) {
   uint16_t address = page << 8;
 
   for (auto i = 0; i < 256; i++) {
-    mPpu->mOamPtr[i] = CpuRead(address);
+    mPpu->WriteOamData(i, CpuRead(address));
     address++;
   }
 

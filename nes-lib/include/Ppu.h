@@ -1,4 +1,5 @@
 #pragma once
+#include "BackgroundRenderer.h"
 #include "Cartridge.h"
 #include "ColorPalette.h"
 #include "FramePalette.h"
@@ -8,11 +9,7 @@
 #include "PixelInfo.h"
 #include "PpuPort.h"
 #include "PpuRegisterDefinitions.h"
-#include "Sprite.h"
-#include "ppu-states/HorizontalBlankState.h"
-#include "ppu-states/IPpuState.h"
-#include "ppu-states/RenderingState.h"
-#include "ppu-states/VerticalBlankState.h"
+#include "Shifter.h"
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -29,6 +26,7 @@
 #define FRAME_PALETTE_END PPU_RAM_END
 
 class Bus;
+class ForegroundRenderer;
 
 class Ppu {
  public:
@@ -45,44 +43,33 @@ class Ppu {
   void InsertCartridge(Cartridge* cartridge);
   void Clock();
   void Reset();
+  void UpdateShifters();
+  void WriteOamData(int index, uint8_t data);
 
   PixelColor& GetColorFromPalette(uint8_t palette, uint8_t pixel);
   void NonMaskableInterrupt();
+  void SetSpriteOverflowFlag(bool overflow);
+  bool GetSpriteSizeFlag();
+  bool GetPatternSpriteFlag();
 
-  uint8_t* mOamPtr = (uint8_t*)mOam.data();
+  void SetForegroundRenderer(ForegroundRenderer* foregroundRenderer);
+  void SetBackgroundRenderer(BackgroundRenderer* backgroundRenderer);
+
+  int16_t mCycle;
+  int16_t mScanline;
 
  private:
   PixelColor& CalculatePixelColor();
 
-  void VRamFetch();
-  void IncrementScrollY();
-  void IncrementScrollX();
-  void TransferAddressY();
-  void TransferAddressX();
-  void UpdateShifters();
-  void LoadBackgroundShifters();
-  void TransitionState();
-
-  void WriteControl(uint16_t addr, uint8_t data);
-  void WriteMask(uint16_t addr, uint8_t data);
-  void WriteOamAddress(uint16_t addr, uint8_t data);
-  void WriteOamData(uint16_t addr, uint8_t data);
-  void WriteScroll(uint16_t addr, uint8_t data);
-  void WritePpuAddress(uint16_t addr, uint8_t data);
-  void WritePpuData(uint16_t addr, uint8_t data);
-
-  uint8_t ReadStatus(uint16_t addr);
-  uint8_t ReadOamData(uint16_t addr);
-  uint8_t ReadPpuData(uint16_t addr);
-
-  BackgroundPixelInfo CalculateBackgroundPixelInfo();
-  ForegroundPixelInfo CalculateForegroundPixelInfo();
   PixelInfo DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPixelInfo,
                                      const ForegroundPixelInfo& foregroundPixelInfo);
 
+  void DetectSpriteZeroHit();
+
+  ForegroundRenderer* mForegroundRenderer;
+  BackgroundRenderer* mBackgroundRenderer;
   Cartridge* mCartridge;
-  int16_t mCycle;
-  int16_t mScanline;
+
   Bus* mBus;
   IRenderer& mRenderer;
   std::unique_ptr<ColorPalette> mColorPalette;
@@ -92,53 +79,4 @@ class Ppu {
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
   FramePalette mFramePalette;
-
-  StatusRegister mStatusRegister;
-  MaskRegister mMaskRegister;
-  ControlRegister mControlRegister;
-
-  bool mAddressLatch;
-  uint8_t mPpuDataBuffer;
-
-  LoopyRegister mVRamAddr;
-  LoopyRegister mTRamAddr;
-
-  uint8_t mFineX;
-
-  struct {
-    std::array<uint8_t, 8> low;
-    std::array<uint8_t, 8> high;
-  } mSpriteShifterPattern;
-
-  struct {
-    uint8_t nextTileId;
-    uint8_t nextTileAttribute;
-    uint8_t nextTileLsb;
-    uint8_t nextTileMsb;
-    uint16_t shifterPatternLow;
-    uint16_t shifterPatternHigh;
-    uint16_t shifterAttributeLow;
-    uint16_t shifterAttributeHigh;
-  } mBackground;
-
-  std::array<ObjectAttributeEntry, 64> mOam;
-  uint8_t mOamAddr;
-
-  std::array<ObjectAttributeEntry, 8> mSpriteOnScanline;
-  uint8_t mSpriteCount;
-
-  struct {
-    bool onScanline;
-    bool beingRendered;
-  } mSpriteZero;
-
-  IPpuState* mState;
-
-  RenderingState mRenderingState;
-  VerticalBlankState mVerticalBlankState;
-  HorizontalBlankState mHorizontalBlankState;
-
-  friend RenderingState;
-  friend VerticalBlankState;
-  friend HorizontalBlankState;
 };
