@@ -1,5 +1,4 @@
 #include "Mirror.h"
-#include "fmt/format.h"
 #include <stdexcept>
 
 uint8_t& MirrorHorizontal(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr) {
@@ -14,7 +13,7 @@ uint8_t& MirrorHorizontal(std::array<std::array<uint8_t, 1024>, 2>& nameTable, u
   } else if (0x0C00 <= truncated && truncated <= 0x0FFF) {
     nameTableIndex = 1;
   } else {
-    throw std::runtime_error(fmt::format("The address {:#06x} is not in the nametable address range!", addr));
+    throw std::runtime_error("Address is not in the nametable address range!");
   }
   return nameTable[nameTableIndex][truncated & 0x03FF];
 }
@@ -31,7 +30,7 @@ uint8_t& MirrorVertical(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uin
   } else if (0x0C00 <= truncated && truncated <= 0x0FFF) {
     nameTableIndex = 1;
   } else {
-    throw std::runtime_error(fmt::format("The address {:#06x} is not in the nametable address range!", addr));
+    throw std::runtime_error("Address is not in the nametable address range!");
   }
   return nameTable[nameTableIndex][truncated & 0x03FF];
 }
@@ -42,5 +41,5 @@ uint8_t& Mirror(std::array<std::array<uint8_t, 1024>, 2>& nameTable, MirrorMode 
   } else if (mirror == MirrorMode::Horizontal) {
     return MirrorHorizontal(nameTable, addr);
   }
-  throw std::runtime_error(fmt::format("The address {:#06x} could not be mirrored!", addr));
+  throw std::runtime_error("Address could not be mirrored!");
 }

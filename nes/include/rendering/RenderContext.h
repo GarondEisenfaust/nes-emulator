@@ -2,7 +2,6 @@
 #include "IRenderer.h"
 #include "PixelColor.h"
 #include "ShaderProgram.h"
-#include "glm/vec3.hpp"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <array>

@@ -24,5 +24,4 @@ target_link_libraries(
   PRIVATE CONAN_PKG::miniaudio
   PRIVATE CONAN_PKG::glfw
   PRIVATE CONAN_PKG::glew
-  PRIVATE CONAN_PKG::glm
   PRIVATE CONAN_PKG::imgui)
