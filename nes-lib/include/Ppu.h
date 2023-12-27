@@ -4,6 +4,7 @@
 #include "ColorPalette.h"
 #include "FramePalette.h"
 #include "IRenderer.h"
+#include "NtscSignalGenerator.h"
 #include "ObjectAttributeEntry.h"
 #include "PixelColor.h"
 #include "PixelInfo.h"
@@ -46,7 +47,6 @@ class Ppu {
   void UpdateShifters();
   void WriteOamData(int index, uint8_t data);
 
-  PixelColor& GetColorFromPalette(uint8_t palette, uint8_t pixel);
   void NonMaskableInterrupt();
   void SetSpriteOverflowFlag(bool overflow);
   bool GetSpriteSizeFlag();
@@ -59,7 +59,8 @@ class Ppu {
   int16_t mScanline;
 
  private:
-  PixelColor& CalculatePixelColor();
+  uint8_t CalculatePixelColor();
+  uint8_t GetColorFromPalette(uint8_t palette, uint8_t pixel);
 
   PixelInfo DetermineActualPixelInfo(const BackgroundPixelInfo& backgroundPixelInfo,
                                      const ForegroundPixelInfo& foregroundPixelInfo);
@@ -79,4 +80,7 @@ class Ppu {
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
   FramePalette mFramePalette;
+  NtscSignalGenerator mNtscSignalGenerator;
+  unsigned int mPpuCycle = 0;
+  unsigned int mPpuCycleForScanline = 0;
 };

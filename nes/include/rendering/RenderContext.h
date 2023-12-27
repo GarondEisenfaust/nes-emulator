@@ -20,6 +20,7 @@ class RenderContext : public IRenderer {
   void CommitFrame();
   void StartNewFrame();
   bool FrameComplete();
+  void SetData(int index, PixelColor color);
   uint8_t* GetTextureDataPointer();
 
  private:

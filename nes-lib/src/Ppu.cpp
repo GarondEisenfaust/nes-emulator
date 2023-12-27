@@ -71,18 +71,34 @@ void Ppu::Clock() {
   mBackgroundRenderer->Clock();
   mForegroundRenderer->Clock();
 
-  auto xPosOnScreen = mCycle - 1;
-  auto yPosOnScreen = mScanline;
-  auto& color = CalculatePixelColor();
-  mRenderer.SetPixelColor(xPosOnScreen, yPosOnScreen, color);
+  uint16_t xPosOnScreen = mCycle - 1;
+  uint16_t yPosOnScreen = mScanline;
+  auto color = CalculatePixelColor();
+
+  if ((0 <= xPosOnScreen && xPosOnScreen < 256) && (0 <= yPosOnScreen && yPosOnScreen < 240)) {
+    mNtscSignalGenerator.RenderNtscPixel(yPosOnScreen, xPosOnScreen, color, mPpuCycle);
+  }
+
+  // mRenderer.SetPixelColor(xPosOnScreen, yPosOnScreen, color);
 
   mCycle++;
+  mPpuCycle++;
 
   if (mCycle >= 341) {
     mCycle = 0;
+    if (0 <= yPosOnScreen && yPosOnScreen < 240) {
+      int lineStart = mScanline * mNtscSignalGenerator.mWidth;
+      lineStart = lineStart >= 0 ? lineStart : 0;
+      mNtscSignalGenerator.ConvertToYiq(&mNtscSignalGenerator.mNtscSignals[lineStart],
+                                        &mNtscSignalGenerator.mYiqBuffer[lineStart], mPpuCycleForScanline * 8 + 3.9);
+    }
     mScanline++;
+    mPpuCycleForScanline = mPpuCycle % 12;
     if (mScanline >= 261) {
       mScanline = -1;
+      for (int i = 0; i < mNtscSignalGenerator.mYiqBuffer.size(); i++) {
+        mRenderer.SetData(i, mNtscSignalGenerator.ConvertToRgb(mNtscSignalGenerator.mYiqBuffer[i]));
+      }
       mRenderer.CommitFrame();
     }
   }
@@ -93,10 +109,9 @@ void Ppu::ConnectBus(Bus* bus) {
   mBus->mPpu = this;
 }
 
-PixelColor& Ppu::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
+uint8_t Ppu::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
   auto address = FRAME_PALETTE_START + (palette << 2) + pixel;
-  auto index = PpuRead(address);
-  return mColorPalette->at(index);
+  return PpuRead(address);
 }
 
 void Ppu::NonMaskableInterrupt() { mBus->NonMaskableInterrupt(); }
@@ -158,7 +173,7 @@ void Ppu::DetectSpriteZeroHit() {
   }
 }
 
-PixelColor& Ppu::CalculatePixelColor() {
+uint8_t Ppu::CalculatePixelColor() {
   auto backgroundInfo = mBackgroundRenderer->CalculateBackgroundPixelInfo();
 
   ForegroundPixelInfo foregroundInfo;

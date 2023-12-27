@@ -137,3 +137,5 @@ void RenderContext::StartNewFrame() { mFrameComplete = false; }
 bool RenderContext::FrameComplete() { return mFrameComplete; }
 
 uint8_t* RenderContext::GetTextureDataPointer() { return reinterpret_cast<uint8_t*>(mTextureData.data()); }
+
+void RenderContext::SetData(int index, PixelColor color) { mTextureData[index] = color; }
