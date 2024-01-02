@@ -27,7 +27,7 @@ float NtscSignalGenerator::NtscSignal(int pixel, int phase) {  // Voltage levels
   }  // For colors 13..15, only low level is emitted
 
   // Generate the square wave
-  auto InColorPhase = [=](int color) { return (color + phase) % 12 < 6; };  // Inline function
+  const auto InColorPhase = [=](int color) { return (color + phase) % 12 < 6; };  // Inline function
   float signal = InColorPhase(color) ? high : low;
 
   // When de-emphasis bits are set, some parts of the signal are attenuated:
@@ -36,7 +36,7 @@ float NtscSignalGenerator::NtscSignal(int pixel, int phase) {  // Voltage levels
     signal = signal * attenuation;
   }
 
-  return signal;
+  return (signal - black) / (white - black);
 }
 
 void NtscSignalGenerator::RenderNtscPixel(unsigned int scanline, unsigned int x, int pixel, int PPU_cycle_counter) {
@@ -46,8 +46,8 @@ void NtscSignalGenerator::RenderNtscPixel(unsigned int scanline, unsigned int x,
     float signal = NtscSignal(pixel, phase + p);  // Calculated as above
     // Optionally apply some lowpass-filtering to the signal here.
     // Optionally normalize the signal to 0..1 range:
-    static const float black = .518f, white = 1.962f;
-    signal = (signal - black) / (white - black);
+    // printf("%f\n", signal);
+    // signal = (signal - 0) / (2 - 0);
     // Save the signal for this pixel.
     SetNtscSignal(scanline, x, p, signal);
   }
@@ -56,19 +56,19 @@ void NtscSignalGenerator::RenderNtscPixel(unsigned int scanline, unsigned int x,
 void NtscSignalGenerator::ConvertToYiq(float* ntscScanlineSignal, YiqData* yiqScanlineSignal, float phase) {
   for (unsigned x = 0; x < mWidth; x++) {
     // Determine the region of scanline signal to sample. Take 12 samples.
-    int center = x * (256 * 8) / mWidth + 0;
+    int center = x * (256 * 10) / mWidth + 0;
     int begin = center - 6;
     if (begin < 0) {
       begin = 0;
     }
     int end = center + 6;
-    if (end > 256 * 8) {
-      end = 256 * 8;
+    if (end > 256 * 10) {
+      end = 256 * 10;
     }
     float y = 0.f, i = 0.f, q = 0.f;   // Calculate the color in YIQ.
     for (int p = begin; p < end; ++p)  // Collect and accumulate samples
     {
-      float level = ntscScanlineSignal[p] / 12.f;
+      const float level = ntscScanlineSignal[p] / 12.f;
       y += level;
       i += level * std::cos(M_PI * (phase + p) / 6);
       q += level * std::sin(M_PI * (phase + p) / 6);
@@ -87,39 +87,75 @@ PixelColor NtscSignalGenerator::ConvertToRgb(YiqData yiqValue) {
     return v > 255 ? 255 : v;
   };
 
-  PixelColor rgb{clamp(255.95 * gammafix(yiqValue.y + 0.946882f * yiqValue.i + 0.623557f * yiqValue.q)),
-                 clamp(255.95 * gammafix(yiqValue.y + -0.274788f * yiqValue.i + -0.635691f * yiqValue.q)),
-                 clamp(255.95 * gammafix(yiqValue.y + -1.108545f * yiqValue.i + 1.709007f * yiqValue.q)), 255};
+  PixelColor rgb{clamp(256 * (yiqValue.y + 0.956f * yiqValue.i + 0.619f * yiqValue.q)),
+                 clamp(256 * (yiqValue.y + -0.272f * yiqValue.i + -0.647f * yiqValue.q)),
+                 clamp(256 * (yiqValue.y + -1.106f * yiqValue.i + 1.703f * yiqValue.q)), 255};
   // int rgbAsInt = temp;
   // PixelColor rgb = *reinterpret_cast<PixelColor*>(&rgbAsInt);
   // rgb.r = rgb.g;
   // rgb.g = rgb.b;
   // rgb.b = rgb.a;
   // rgb.a = 255;
-  printf("%i %i %i %i\n", rgb.r, rgb.g, rgb.b, rgb.a);
+  // printf("%i %i %i %i\n", rgb.r, rgb.g, rgb.b, rgb.a);
   return rgb;
 }
 
 void NtscSignalGenerator::ConvertYiqToTextureData() {
-  std::transform(mYiqBuffer.begin(), mYiqBuffer.end(), mTextureData.begin(),
+  std::transform(mColorBuffer.begin(), mColorBuffer.end(), mTextureData.begin(),
                  [&](YiqData data) { return ConvertToRgb(data); });
 }
 
 void NtscSignalGenerator::SetNtscSignal(unsigned int scanline, unsigned int x, unsigned int offset, float signal) {
-  int index = scanline * mWidth + x * 8 + offset;
-  if (index < 300) {
-    printf("Signal %i\n", scanline);
-  }
+  const int index = scanline * mWidth * 10 + x * 10 + offset;
   mNtscSignals[index] = signal;
 }
 
 float NtscSignalGenerator::GetNtscSignal(unsigned int scanline, unsigned int x, unsigned int offset) {
-  int index = scanline * mWidth + x * 8 + offset;
+  const int index = scanline * mWidth * 10 + x * 10 + offset;
   return mNtscSignals[index];
 }
 
 void NtscSignalGenerator::SetYiqPixelValue(unsigned int x, unsigned int y, YiqData value) {
-  mYiqBuffer[y * mWidth + x] = value;
+  mColorBuffer[y * mWidth + x] = value;
 }
 
-YiqData NtscSignalGenerator::GetYiqPixelValue(unsigned int x, unsigned int y) { return mYiqBuffer[y * mWidth + x]; }
+YiqData NtscSignalGenerator::GetYiqPixelValue(unsigned int x, unsigned int y) { return mColorBuffer[y * mWidth + x]; }
+
+void NtscSignalGenerator::SetNextColor(uint8_t color) {
+  mColorBufferNext[mCurrentSignalIndex] = color;
+  mCurrentSignalIndex = (mCurrentSignalIndex + 1) % mColorBufferNext.size();
+}
+
+void NtscSignalGenerator::GenerateTexture(unsigned int ppuCycle) {
+  unsigned int scanlinePhase = ppuCycle;
+  for (unsigned int y = 0; y < 341; y++) {
+    unsigned int takenSamples = 0;
+    YiqData yiqData{0, 0, 0};
+
+    for (unsigned int x = 0; x < 261; x++) {
+      const unsigned int pixelPhase = ppuCycle * 12;
+
+      if ((0 <= x && x < 256) && (0 <= y && y < 240)) {
+        const unsigned int i = y * 256 + x;
+        for (unsigned int p = 0; p < 12; p++) {
+          const uint8_t pixel = mColorBufferNext[i];
+          const float signal = NtscSignal(pixel, pixelPhase + p);
+          const float level = signal / 12.f;
+          yiqData.y += level;
+          yiqData.i += level * std::cos(M_PI * (takenSamples + scanlinePhase) / 6);
+          yiqData.q += level * std::sin(M_PI * (takenSamples + scanlinePhase) / 6);
+
+          // printf("%f\n", yiqData.q);
+
+          takenSamples++;
+          if (takenSamples % 11 == 0) {
+            mTextureData[i] = ConvertToRgb(yiqData);
+            yiqData = {0, 0, 0};
+          }
+        }
+      }
+      ppuCycle++;
+    }
+    scanlinePhase = static_cast<int>((scanlinePhase + 341) * 12 + 3.9) % 12;
+  }
+}

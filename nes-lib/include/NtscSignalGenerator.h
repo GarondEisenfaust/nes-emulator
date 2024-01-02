@@ -24,9 +24,16 @@ class NtscSignalGenerator {
   void SetYiqPixelValue(unsigned int x, unsigned int y, YiqData value);
   YiqData GetYiqPixelValue(unsigned int x, unsigned int y);
 
+  void SetNextColor(uint8_t color);
+  void GenerateTexture(unsigned int ppuCycle);
+
   static const unsigned int mWidth = 256;
   static const unsigned int mHeight = 240;
-  std::array<float, mWidth * mHeight * 8> mNtscSignals;
-  std::array<YiqData, mWidth * mHeight> mYiqBuffer;
+
+  std::array<uint8_t, mWidth * mHeight> mColorBufferNext;
+
+  std::array<float, mWidth * mHeight * 10> mNtscSignals;
+  std::array<YiqData, mWidth * mHeight> mColorBuffer;
   std::array<PixelColor, mWidth * mHeight> mTextureData;
+  unsigned int mCurrentSignalIndex = 0;
 };

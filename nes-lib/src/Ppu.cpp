@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <unordered_set>
 #include <vector>
 
 Ppu::Ppu(IRenderer& renderer)
@@ -66,7 +67,7 @@ uint8_t Ppu::PpuRead(uint16_t addr) {
 }
 
 void Ppu::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
-
+std::unordered_set<PixelColor> theColors;
 void Ppu::Clock() {
   mBackgroundRenderer->Clock();
   mForegroundRenderer->Clock();
@@ -76,7 +77,7 @@ void Ppu::Clock() {
   auto color = CalculatePixelColor();
 
   if ((0 <= xPosOnScreen && xPosOnScreen < 256) && (0 <= yPosOnScreen && yPosOnScreen < 240)) {
-    mNtscSignalGenerator.RenderNtscPixel(yPosOnScreen, xPosOnScreen, color, mPpuCycle);
+    mNtscSignalGenerator.SetNextColor(color);
   }
 
   // mRenderer.SetPixelColor(xPosOnScreen, yPosOnScreen, color);
@@ -86,19 +87,33 @@ void Ppu::Clock() {
 
   if (mCycle >= 341) {
     mCycle = 0;
-    if (0 <= yPosOnScreen && yPosOnScreen < 240) {
-      int lineStart = mScanline * mNtscSignalGenerator.mWidth;
-      lineStart = lineStart >= 0 ? lineStart : 0;
-      mNtscSignalGenerator.ConvertToYiq(&mNtscSignalGenerator.mNtscSignals[lineStart],
-                                        &mNtscSignalGenerator.mYiqBuffer[lineStart], mPpuCycleForScanline * 8 + 3.9);
-    }
+    // if (0 <= yPosOnScreen && yPosOnScreen < 240) {
+    //   int lineStart = (yPosOnScreen - 1) * mNtscSignalGenerator.mWidth;
+    //   lineStart = lineStart > 0 ? lineStart : 0;
+    //   mNtscSignalGenerator.ConvertToYiq(&mNtscSignalGenerator.mNtscSignals[lineStart > 0 ? lineStart * 10 : 0],
+    //                                     &mNtscSignalGenerator.mColorBuffer[lineStart], mPpuCycleForScanline * 10
+    //                                     + 3.9);
+    // }
     mScanline++;
-    mPpuCycleForScanline = mPpuCycle % 12;
     if (mScanline >= 261) {
       mScanline = -1;
-      for (int i = 0; i < mNtscSignalGenerator.mYiqBuffer.size(); i++) {
-        mRenderer.SetData(i, mNtscSignalGenerator.ConvertToRgb(mNtscSignalGenerator.mYiqBuffer[i]));
+      // for (int i = 0; i < mNtscSignalGenerator.mColorBuffer.size(); i++) {
+      //   const auto asRgb = mNtscSignalGenerator.ConvertToRgb(mNtscSignalGenerator.mColorBuffer[i]);
+      //   theColors.insert(asRgb);
+      //   mRenderer.SetData(i, asRgb);
+      // }
+      // printf("------------------------------\n");
+      // for (auto c : theColors) {
+      //   printf("%02X%02X%02X%02X\n", c.r, c.g, c.b, c.a);
+      // }
+      // theColors.clear();
+
+      mNtscSignalGenerator.GenerateTexture(mPpuCycleForScanline);
+      for (int i = 0; i < mNtscSignalGenerator.mTextureData.size(); i++) {
+        mRenderer.SetData(i, mNtscSignalGenerator.mTextureData[i]);
       }
+      mPpuCycleForScanline = mPpuCycle;
+
       mRenderer.CommitFrame();
     }
   }
