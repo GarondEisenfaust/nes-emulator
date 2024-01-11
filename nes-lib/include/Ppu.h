@@ -82,5 +82,5 @@ class Ppu {
   FramePalette mFramePalette;
   NtscSignalGenerator mNtscSignalGenerator;
   unsigned int mPpuCycle = 0;
-  unsigned int mPpuCycleForScanline = 0;
+  unsigned int mPpuCycleForFrame = 0;
 };
