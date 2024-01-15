@@ -34,20 +34,21 @@ float NtscSignalGenerator::NtscSignal(int pixel, int phase) {
   if (color > 12) {
     high = low;
   }
-  return InColorPhase(color) ? high : low;
+  auto signal = InColorPhase(color) ? high : low;
+  return (signal - black) / (white - black);
 }
 
 PixelColor NtscSignalGenerator::ConvertToRgb(YiqData yiqValue) {
-  float gamma = 1.5;
+  float gamma = 2;
   auto gammafix = [=](float f) -> double { return f <= 0.f ? 0.f : std::pow(f, 2.2f / gamma); };
 
   PixelColor rgb;
-  rgb.r =
-      static_cast<uint8_t>(std::clamp(255.95 * (yiqValue.y + 0.956f * yiqValue.i + 0.619f * yiqValue.q), 0.0, 255.0));
-  rgb.g =
-      static_cast<uint8_t>(std::clamp(255.95 * (yiqValue.y + -0.272f * yiqValue.i + -0.647f * yiqValue.q), 0.0, 255.0));
-  rgb.b =
-      static_cast<uint8_t>(std::clamp(255.95 * (yiqValue.y + -1.106f * yiqValue.i + 1.703f * yiqValue.q), 0.0, 255.0));
+  rgb.r = static_cast<uint8_t>(
+      std::clamp(255.95 * gammafix(yiqValue.y + 0.946882f * yiqValue.i + 0.623557f * yiqValue.q), 0.0, 255.0));
+  rgb.g = static_cast<uint8_t>(
+      std::clamp(255.95 * gammafix(yiqValue.y + -0.274788f * yiqValue.i + -0.635691f * yiqValue.q), 0.0, 255.0));
+  rgb.b = static_cast<uint8_t>(
+      std::clamp(255.95 * gammafix(yiqValue.y + -1.108545f * yiqValue.i + 1.709007f * yiqValue.q), 0.0, 255.0));
   rgb.a = static_cast<uint8_t>(255);
 
   // printf(" %f %f %f -> %i %i %i %i\n", yiqValue.y, yiqValue.i, yiqValue.q, rgb.r, rgb.g, rgb.b, rgb.a);
@@ -63,6 +64,8 @@ void NtscSignalGenerator::GenerateNtscSignal(unsigned int ppuCycle) {
   auto colorBufferPointer = mColorBufferNext.begin();
 
   for (unsigned int y = 0; y < mHeight; y++) {
+    ppuCycle = (ppuCycle * mSamplesToGeneratePerPixel) % mSamplesToTakePerPixel;
+
     for (unsigned int x = 0; x < mWidth; x++) {
       const int firstPixelOfLineIndex = y * mWidth * mSamplesToGeneratePerPixel;
       const int lastPixelOfLineIndex = firstPixelOfLineIndex + mWidth * mSamplesToGeneratePerPixel;
@@ -75,10 +78,9 @@ void NtscSignalGenerator::GenerateNtscSignal(unsigned int ppuCycle) {
       for (unsigned int i = begin; i < end; i++) {
         mNtscSignals[i] = NtscSignal(pixel, ppuCycle + i);
       }
-
-      ppuCycle = (ppuCycle + 8) % mSamplesToTakePerPixel;
       colorBufferPointer++;
     }
+    ppuCycle += mCyclesForScanline;
   }
 }
 
@@ -98,8 +100,7 @@ void NtscSignalGenerator::GenerateTexture(unsigned int ppuCycle) {
 
       YiqData yiqData{0, 0, 0};
       for (unsigned int i = begin; i < end; i++) {
-        const float ntscSignal = mNtscSignals[i];
-        const float level = ntscSignal / mSamplesToTakePerPixel;
+        const float level = mNtscSignals[i] / mSamplesToTakePerPixel;
         yiqData.y += level;
         yiqData.i += level * std::cos(M_PI * (i + ppuCycle) / offset);
         yiqData.q += level * std::sin(M_PI * (i + ppuCycle) / offset);
@@ -107,6 +108,6 @@ void NtscSignalGenerator::GenerateTexture(unsigned int ppuCycle) {
       *texturePointer = ConvertToRgb(yiqData);
       texturePointer++;
     }
-    ppuCycle = ppuCycle + mCyclesForScanline;
+    ppuCycle += mCyclesForScanline;
   }
 }

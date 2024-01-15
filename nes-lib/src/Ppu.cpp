@@ -68,6 +68,7 @@ uint8_t Ppu::PpuRead(uint16_t addr) {
 
 void Ppu::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
 
+bool even = true;
 void Ppu::Clock() {
   mBackgroundRenderer->Clock();
   mForegroundRenderer->Clock();
@@ -95,7 +96,8 @@ void Ppu::Clock() {
       for (int i = 0; i < mNtscSignalGenerator.mTextureData.size(); i++) {
         mRenderer.SetData(i, mNtscSignalGenerator.mTextureData[i]);
       }
-      mPpuCycleForFrame = mPpuCycle;
+      mPpuCycleForFrame = mPpuCycle + even;
+      even = !even;
       mRenderer.CommitFrame();
     }
   }
