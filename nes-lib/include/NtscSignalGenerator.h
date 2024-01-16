@@ -19,11 +19,12 @@ class NtscSignalGenerator {
   float NtscSignal(int pixel, int phase);
   PixelColor ConvertToRgb(YiqData yiqValue);
 
-  static const int mWidth = 256;
-  static const int mHeight = 240;
-  static const int mSamplesToGeneratePerPixel = 8;
-  static const int mSamplesToTakePerPixel = 12;
-  static const int mCyclesForScanline = 341;
+  constexpr static const int mWidth = 256;
+  constexpr static const int mHeight = 240;
+  constexpr static const int mSamplesToGeneratePerPixel = 8;
+  constexpr static const int mSamplesToTakePerPixel = 12;
+  constexpr static const int mCyclesForScanline = 341;
+  constexpr static const float mHueFix = -3;
 
   std::array<uint8_t, mWidth * mHeight> mColorBufferNext;
 
