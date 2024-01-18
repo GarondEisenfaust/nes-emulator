@@ -1,11 +1,9 @@
 #include "NtscSignalGenerator.h"
-#include "SineValues.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 
 float NtscSignalGenerator::NtscSignal(int pixel, int phase) {
-  // Terminated voltage levels
   static const float black = 0.312f, white = 1.100f,
                      levels[16] = {
                          0.228f, 0.312f, 0.552f, 0.880f,  // Signal low
@@ -87,23 +85,6 @@ void NtscSignalGenerator::GenerateNtscSignal(unsigned int ppuCycle) {
   }
 }
 
-float SineLookUp(float x) {
-  int timesPi = static_cast<int>(x / M_PI);
-  bool negate = timesPi % 2 != 0;
-  x -= timesPi * M_PI;
-
-  auto index = static_cast<size_t>(x / SINE_STEP);
-  float result = sineValues[index];
-
-  if (negate) {
-    result = -result;
-  }
-
-  return result;
-}
-
-float CosineLookUp(float x) { return SineLookUp(x + (M_PI / 2)); }
-
 void NtscSignalGenerator::GenerateTexture(unsigned int ppuCycle) {
   auto texturePointer = mTextureData.begin();
 
@@ -122,8 +103,8 @@ void NtscSignalGenerator::GenerateTexture(unsigned int ppuCycle) {
       for (unsigned int i = begin; i < end; i++) {
         const float level = mNtscSignals[i] / mSamplesToTakePerPixel;
         yiqData.y += level;
-        yiqData.i += level * CosineLookUp((M_PI / offset) * (ppuCycle + i + mHueFix));
-        yiqData.q += level * SineLookUp((M_PI / offset) * (ppuCycle + i + mHueFix));
+        yiqData.i += level * mSineTable.CosineLookUp((M_PI / offset) * (ppuCycle + i + mHueFix));
+        yiqData.q += level * mSineTable.SineLookUp((M_PI / offset) * (ppuCycle + i + mHueFix));
       }
       *texturePointer = ConvertToRgb(yiqData);
       texturePointer++;

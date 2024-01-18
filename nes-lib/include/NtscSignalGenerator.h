@@ -1,5 +1,6 @@
 #pragma once
 #include "PixelColor.h"
+#include "SineTable.h"
 #include <array>
 #include <cstdint>
 
@@ -32,4 +33,6 @@ class NtscSignalGenerator {
   std::array<YiqData, mWidth * mHeight> mColorBuffer;
   std::array<PixelColor, mWidth * mHeight> mTextureData;
   unsigned int mCurrentSignalIndex = 0;
+
+  SineTable<50000> mSineTable;
 };
