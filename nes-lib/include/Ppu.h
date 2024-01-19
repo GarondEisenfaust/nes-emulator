@@ -4,7 +4,6 @@
 #include "ColorPalette.h"
 #include "FramePalette.h"
 #include "IRenderer.h"
-#include "NtscSignalGenerator.h"
 #include "ObjectAttributeEntry.h"
 #include "PixelColor.h"
 #include "PixelInfo.h"
@@ -80,7 +79,6 @@ class Ppu {
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
   FramePalette mFramePalette;
-  NtscSignalGenerator mNtscSignalGenerator;
   unsigned int mPpuCycle = 0;
   unsigned int mPpuCycleForFrame = 0;
 };

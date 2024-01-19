@@ -1,21 +1,23 @@
 #pragma once
+#include "IFrameDecoder.h"
 #include "PixelColor.h"
 #include "SineTable.h"
 #include <array>
 #include <cstdint>
 
 struct YiqData {
-  float y = -6;
+  float y = 0;
   float i = 0;
   float q = 0;
 };
 
-class NtscSignalGenerator {
+class NtscSignalFrameDecoder : public IFrameDecoder {
  public:
-  NtscSignalGenerator() = default;
-  ~NtscSignalGenerator() = default;
-  void SetNextColor(uint8_t color);
-  void GenerateNtscSignal(unsigned int ppuCycle);
+  void Decode(uint16_t* nesFrameDataBegin, uint16_t* nesFrameDataEnd, unsigned int ppuCycle) override;
+  PixelColor* GetDecodedFrame() override;
+
+ private:
+  void GenerateNtscSignal(uint16_t* nesFrameData, unsigned int ppuCycle);
   void GenerateTexture(unsigned int ppuCycle);
   float NtscSignal(int pixel, int phase);
   PixelColor ConvertToRgb(YiqData yiqValue);
@@ -27,12 +29,9 @@ class NtscSignalGenerator {
   constexpr static const int mCyclesForScanline = 341;
   constexpr static const float mHueFix = -3;
 
-  std::array<uint8_t, mWidth * mHeight> mColorBufferNext;
-
+  std::array<uint16_t, mWidth * mHeight> mNesFrameBuffer;
   std::array<float, mWidth * mHeight * mSamplesToGeneratePerPixel> mNtscSignals;
-  std::array<YiqData, mWidth * mHeight> mColorBuffer;
   std::array<PixelColor, mWidth * mHeight> mTextureData;
-  unsigned int mCurrentSignalIndex = 0;
 
   SineTable<50000> mSineTable;
 };

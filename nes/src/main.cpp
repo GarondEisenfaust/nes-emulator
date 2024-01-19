@@ -12,6 +12,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "rendering/LookupTableFrameDecoder.h"
+#include "rendering/NtscSignalFrameDecoder.h"
 #include "rendering/RenderContext.h"
 #include <array>
 #include <chrono>
@@ -27,9 +29,9 @@ float Normalize(float value, float min, float max, float minDesired = -1, float 
 }
 
 float minReceivedSample = 0;
-float maxReceivedSample = 0;
+float maxReceivedSample = 0.001;
 
-void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
+void AudioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
   auto* asFloatPointer = reinterpret_cast<float*>(pOutput);
   auto* ringBuffer = reinterpret_cast<RingBuffer*>(pDevice->pUserData);
   for (int i = 0; i < frameCount; i++) {
@@ -66,6 +68,8 @@ int main(int argc, char* argv[]) {
   }
 
   RenderContext renderContext;
+  NtscSignalFrameDecoder lookupTableFrameDecoder;
+  renderContext.SetFrameDecoder(&lookupTableFrameDecoder);
 
   auto ram = std::make_unique<Ram>();
   Bus bus(*ram);
@@ -102,7 +106,7 @@ int main(int argc, char* argv[]) {
   deviceConfig.playback.channels = DEVICE_CHANNELS;
   deviceConfig.sampleRate = DEVICE_SAMPLE_RATE;
   deviceConfig.pUserData = reinterpret_cast<void*>(&ringBuffer);
-  deviceConfig.dataCallback = data_callback;
+  deviceConfig.dataCallback = AudioCallback;
 
   if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
     std::cout << "Failed to open playback device.\n";

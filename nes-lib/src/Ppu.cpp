@@ -76,11 +76,7 @@ void Ppu::Clock() {
   uint16_t yPosOnScreen = mScanline;
   auto color = CalculatePixelColor();
 
-  if ((0 <= xPosOnScreen && xPosOnScreen < 256) && (0 <= yPosOnScreen && yPosOnScreen < 240)) {
-    mNtscSignalGenerator.SetNextColor(color);
-  }
-
-  // mRenderer.SetPixelColor(xPosOnScreen, yPosOnScreen, color);
+  mRenderer.SetNesPixel(xPosOnScreen, yPosOnScreen, color);
 
   mCycle++;
   mPpuCycle++;
@@ -90,13 +86,8 @@ void Ppu::Clock() {
     mScanline++;
     if (mScanline >= 261) {
       mScanline = -1;
-      mNtscSignalGenerator.GenerateNtscSignal(mPpuCycleForFrame);
-      mNtscSignalGenerator.GenerateTexture(mPpuCycleForFrame);
-      for (int i = 0; i < mNtscSignalGenerator.mTextureData.size(); i++) {
-        mRenderer.SetData(i, mNtscSignalGenerator.mTextureData[i]);
-      }
+      mRenderer.CommitFrame(mPpuCycleForFrame);
       mPpuCycleForFrame = mPpuCycle;
-      mRenderer.CommitFrame();
     }
   }
 }

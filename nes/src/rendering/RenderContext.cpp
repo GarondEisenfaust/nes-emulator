@@ -31,12 +31,6 @@ RenderContext::RenderContext() : mShaderProgram() {
   ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
   ImGui_ImplOpenGL3_Init();
 
-  glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-    auto* callback = (KeyCallback*)glfwGetWindowUserPointer(window);
-    if (callback) {
-      (*callback)(window, key, scancode, action, mods);
-    }
-  });
   glewInit();
 
   glfwGetFramebufferSize(mWindow, &mWidth, &mHeight);
@@ -107,7 +101,8 @@ void RenderContext::GameLoop(std::function<void()> loop) {
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 240, 0, GL_RGBA, GL_UNSIGNED_BYTE, GetTextureDataPointer());
+    mFrameDecoder->Decode(mNesFrameData.begin(), mNesFrameData.end(), mFramePpuCycle);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 240, 0, GL_RGBA, GL_UNSIGNED_BYTE, mFrameDecoder->GetDecodedFrame());
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -123,19 +118,22 @@ void RenderContext::GameLoop(std::function<void()> loop) {
 
 GLFWwindow* RenderContext::GetWindow() { return mWindow; }
 
-void RenderContext::SetPixelColor(int x, int y, PixelColor& color) {
+void RenderContext::SetNesPixel(int x, int y, uint8_t pixel) {
   if ((0 <= x && x < mGridWidth) && (0 <= y && y < mGridHeight)) {
-    mTextureData[mCurrentPixel] = color;
-    mCurrentPixel = (mCurrentPixel + 1) % (mGridWidth * mGridHeight);
+    const size_t index = y * mGridWidth + x;
+    mNesFrameData[index] = pixel;
   }
 }
 
-void RenderContext::CommitFrame() { mFrameComplete = true; }
+void RenderContext::SetFrameDecoder(IFrameDecoder* frameDecoder) { mFrameDecoder = frameDecoder; }
+
+void RenderContext::CommitFrame(unsigned int ppuCycle) {
+  mFramePpuCycle = ppuCycle;
+  mFrameComplete = true;
+}
 
 void RenderContext::StartNewFrame() { mFrameComplete = false; }
 
 bool RenderContext::FrameComplete() { return mFrameComplete; }
 
 uint8_t* RenderContext::GetTextureDataPointer() { return reinterpret_cast<uint8_t*>(mTextureData.data()); }
-
-void RenderContext::SetData(int index, PixelColor color) { mTextureData[index] = color; }
