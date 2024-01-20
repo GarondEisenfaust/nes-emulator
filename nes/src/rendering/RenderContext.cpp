@@ -57,10 +57,8 @@ void RenderContext::GameLoop(std::function<void()> loop) {
   mShaderProgram.Use();
 
   float vertices[] = {
-      1, -1, 0, 1, 1, 1, 1, 0, 1, 0, -1, 1, 0, 0, 0, -1, -1, 0, 0, 1,
+      -1, -1, 0, 0, 1, 1, -1, 0, 1, 1, 1, 1, 0, 1, 0, -1, 1, 0, 0, 0,
   };
-
-  unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
   unsigned int vao;
   glGenVertexArrays(1, &vao);
@@ -76,12 +74,7 @@ void RenderContext::GameLoop(std::function<void()> loop) {
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
 
-  unsigned int ebo;
-  glGenBuffers(1, &ebo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-  Texture texture(mGridWidth, mGridHeight          , GL_NEAREST);
+  Texture texture(mGridWidth, mGridHeight, GL_NEAREST);
 
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -101,7 +94,7 @@ void RenderContext::GameLoop(std::function<void()> loop) {
     texture.Bind();
 
     glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLE_FAN, 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
