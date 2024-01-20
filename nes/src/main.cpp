@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
   }
 
   RenderContext renderContext;
-  NtscSignalFrameDecoder lookupTableFrameDecoder;
+  LookupTableFrameDecoder lookupTableFrameDecoder;
   renderContext.SetFrameDecoder(&lookupTableFrameDecoder);
 
   auto ram = std::make_unique<Ram>();
