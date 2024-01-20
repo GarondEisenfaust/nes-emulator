@@ -1,6 +1,7 @@
 #include "rendering/RenderContext.h"
 #include "Definitions.h"
 #include "FragmentShader.h"
+#include "Texture.h"
 #include "VertexShader.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -80,13 +81,7 @@ void RenderContext::GameLoop(std::function<void()> loop) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  Texture texture(mGridWidth, mGridHeight          , GL_NEAREST);
 
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -102,9 +97,8 @@ void RenderContext::GameLoop(std::function<void()> loop) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     mFrameDecoder->Decode(mNesFrameData.begin(), mNesFrameData.end(), mFramePpuCycle);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 240, 0, GL_RGBA, GL_UNSIGNED_BYTE, mFrameDecoder->GetDecodedFrame());
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    texture.UpdateData(reinterpret_cast<uint8_t*>(mFrameDecoder->GetDecodedFrame()));
+    texture.Bind();
 
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLE_FAN, 6, GL_UNSIGNED_INT, 0);
