@@ -74,7 +74,7 @@ void RenderContext::GameLoop(std::function<void()> loop) {
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
 
-  Texture texture(mGridWidth, mGridHeight, GL_NEAREST);
+  Texture texture(mGridWidth, mGridHeight, GL_NEAREST, mNesFrameData.begin());
 
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -89,8 +89,8 @@ void RenderContext::GameLoop(std::function<void()> loop) {
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-    mFrameDecoder->Decode(mNesFrameData.begin(), mNesFrameData.end(), mFramePpuCycle);
-    texture.UpdateData(reinterpret_cast<uint8_t*>(mFrameDecoder->GetDecodedFrame()));
+    // mFrameDecoder->Decode(mNesFrameData.begin(), mNesFrameData.end(), mFramePpuCycle);
+    texture.UpdateData(mNesFrameData.begin());
     texture.Bind();
 
     glBindVertexArray(vao);

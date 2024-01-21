@@ -27,7 +27,7 @@ class NtscSignalFrameDecoder : public IFrameDecoder {
   constexpr static const int mSamplesToGeneratePerPixel = 8;
   constexpr static const int mSamplesToTakePerPixel = 12;
   constexpr static const int mCyclesForScanline = 341;
-  constexpr static const float mHueFix = -3;
+  constexpr static const float mHueFix = 0;
 
   std::array<uint16_t, mWidth * mHeight> mNesFrameBuffer;
   std::array<float, mWidth * mHeight * mSamplesToGeneratePerPixel> mNtscSignals;

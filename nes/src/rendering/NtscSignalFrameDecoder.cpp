@@ -64,7 +64,7 @@ PixelColor* NtscSignalFrameDecoder::GetDecodedFrame() { return mTextureData.begi
 
 void NtscSignalFrameDecoder::GenerateNtscSignal(uint16_t* nesFrameData, unsigned int ppuCycle) {
   for (unsigned int y = 0; y < mHeight; y++) {
-    ppuCycle = (ppuCycle % mSamplesToTakePerPixel * mSamplesToGeneratePerPixel);
+    ppuCycle = ppuCycle % mSamplesToTakePerPixel * mSamplesToGeneratePerPixel;
 
     for (unsigned int x = 0; x < mWidth; x++) {
       const int firstPixelOfLineIndex = y * mWidth * mSamplesToGeneratePerPixel;
@@ -88,7 +88,7 @@ void NtscSignalFrameDecoder::GenerateTexture(unsigned int ppuCycle) {
   auto texturePointer = mTextureData.begin();
 
   for (unsigned int y = 0; y < mHeight; y++) {
-    ppuCycle = static_cast<int>(ppuCycle % mSamplesToTakePerPixel * mSamplesToGeneratePerPixel + 3.9);
+    ppuCycle = ppuCycle % mSamplesToTakePerPixel * mSamplesToGeneratePerPixel;
 
     for (unsigned int x = 0; x < mWidth; x++) {
       const int firstPixelOfLineIndex = y * mWidth * mSamplesToGeneratePerPixel;

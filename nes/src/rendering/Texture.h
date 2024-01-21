@@ -3,9 +3,9 @@
 
 class Texture {
  public:
-  Texture(size_t width, size_t height, int samplingMode, uint8_t* data = nullptr);
+  Texture(size_t width, size_t height, int samplingMode, uint16_t* data = nullptr);
   ~Texture();
-  void UpdateData(uint8_t* data);
+  void UpdateData(uint16_t* data);
   void Bind();
 
  private:
