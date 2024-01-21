@@ -90,7 +90,7 @@ void RenderContext::GameLoop(std::function<void()> loop) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // mFrameDecoder->Decode(mNesFrameData.begin(), mNesFrameData.end(), mFramePpuCycle);
-    texture.UpdateData(mNesFrameData.begin());
+    texture.UpdateData(mNesFrameData.data());
     texture.Bind();
 
     glBindVertexArray(vao);
