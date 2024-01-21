@@ -6,6 +6,7 @@
 class ShaderProgram {
  public:
   ShaderProgram();
+  ~ShaderProgram();
   void AttachShader(const Shader& shader);
   GLuint GetHandle();
   void Link();

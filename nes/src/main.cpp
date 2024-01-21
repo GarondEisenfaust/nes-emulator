@@ -14,6 +14,7 @@
 #include "imgui_impl_opengl3.h"
 #include "rendering/LookupTableFrameDecoder.h"
 #include "rendering/NtscSignalFrameDecoder.h"
+#include "rendering/NtscSignalFrameDecoderGpu.h"
 #include "rendering/RenderContext.h"
 #include <array>
 #include <chrono>
@@ -68,8 +69,8 @@ int main(int argc, char* argv[]) {
   }
 
   RenderContext renderContext;
-  NtscSignalFrameDecoder lookupTableFrameDecoder;
-  renderContext.SetFrameDecoder(&lookupTableFrameDecoder);
+  NtscSignalFrameDecoderGpu decoder;
+  renderContext.SetFrameDecoder(&decoder);
 
   auto ram = std::make_unique<Ram>();
   Bus bus(*ram);

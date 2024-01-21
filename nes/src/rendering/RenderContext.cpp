@@ -1,8 +1,7 @@
 #include "rendering/RenderContext.h"
 #include "Definitions.h"
-#include "FragmentShader.h"
+#include "Surface.h"
 #include "Texture.h"
-#include "VertexShader.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -48,34 +47,6 @@ RenderContext::~RenderContext() {
 }
 
 void RenderContext::GameLoop(std::function<void()> loop) {
-  Shader fragmentShader(FragmentShaderCode, GL_FRAGMENT_SHADER);
-  Shader vertexShader(VertexShaderCode, GL_VERTEX_SHADER);
-
-  mShaderProgram.AttachShader(fragmentShader);
-  mShaderProgram.AttachShader(vertexShader);
-  mShaderProgram.Link();
-  mShaderProgram.Use();
-
-  float vertices[] = {
-      -1, -1, 0, 0, 1, 1, -1, 0, 1, 1, 1, 1, 0, 1, 0, -1, 1, 0, 0, 0,
-  };
-
-  unsigned int vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-  unsigned int vbo;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(0 * sizeof(float)));
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-
-  Texture texture(mGridWidth, mGridHeight, GL_NEAREST, mNesFrameData.begin());
-
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
   while (!glfwWindowShouldClose(mWindow)) {
@@ -88,13 +59,7 @@ void RenderContext::GameLoop(std::function<void()> loop) {
     loop();
 
     glClear(GL_COLOR_BUFFER_BIT);
-
-    // mFrameDecoder->Decode(mNesFrameData.begin(), mNesFrameData.end(), mFramePpuCycle);
-    texture.UpdateData(mNesFrameData.data());
-    texture.Bind();
-
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    mFrameDecoder->DecodeAndDraw(mNesFrameData.data(), mFramePpuCycle);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

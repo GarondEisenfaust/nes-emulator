@@ -1,7 +1,19 @@
 #include "NtscSignalFrameDecoder.h"
+#include "FragmentShader.h"
+#include "VertexShader.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+
+NtscSignalFrameDecoder::NtscSignalFrameDecoder() : mTexture(mWidth, mHeight, GL_NEAREST) {
+  Shader fragmentShader(FragmentShader().source, GL_FRAGMENT_SHADER);
+  Shader vertexShader(VertexShader().source, GL_VERTEX_SHADER);
+
+  mShaderProgram.AttachShader(fragmentShader);
+  mShaderProgram.AttachShader(vertexShader);
+  mShaderProgram.Link();
+  mShaderProgram.Use();
+}
 
 float NtscSignalFrameDecoder::NtscSignal(int pixel, int phase) {
   static const float black = 0.312f, white = 1.100f,
@@ -55,12 +67,17 @@ PixelColor NtscSignalFrameDecoder::ConvertToRgb(YiqData yiqValue) {
   return rgb;
 }
 
-void NtscSignalFrameDecoder::Decode(uint16_t* nesFrameDataBegin, uint16_t* nesFrameDataEnd, unsigned int ppuCycle) {
-  GenerateNtscSignal(nesFrameDataBegin, ppuCycle);
+void NtscSignalFrameDecoder::DecodeAndDraw(uint16_t* frameData, unsigned int ppuCycle) {
+  GenerateNtscSignal(frameData, ppuCycle);
   GenerateTexture(ppuCycle);
+  mTexture.UpdateData(reinterpret_cast<uint8_t*>(mTextureData.data()));
+  Draw();
 }
 
-PixelColor* NtscSignalFrameDecoder::GetDecodedFrame() { return mTextureData.begin(); }
+void NtscSignalFrameDecoder::Draw() {
+  mTexture.Bind();
+  mSurface.Draw();
+}
 
 void NtscSignalFrameDecoder::GenerateNtscSignal(uint16_t* nesFrameData, unsigned int ppuCycle) {
   for (unsigned int y = 0; y < mHeight; y++) {

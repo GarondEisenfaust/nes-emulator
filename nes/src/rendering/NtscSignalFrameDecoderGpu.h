@@ -1,25 +1,22 @@
 #pragma once
-#include "ColorPalette.h"
+
+#include "SingleChannelTexture.h"
 #include "Surface.h"
-#include "Texture.h"
 #include "rendering/IFrameDecoder.h"
 #include "rendering/ShaderProgram.h"
-#include <memory>
+#include <cstdint>
 
-class LookupTableFrameDecoder : public IFrameDecoder {
+class NtscSignalFrameDecoderGpu : public IFrameDecoder {
  public:
-  LookupTableFrameDecoder();
+  NtscSignalFrameDecoderGpu();
   void DecodeAndDraw(uint16_t* frameData, unsigned int ppuCycle);
 
  private:
-  Texture mTexture;
+  SingleChannelTexture mTexture;
   Surface mSurface;
   ShaderProgram mShaderProgram;
 
   static const size_t mTextureWidth = 256;
   static const size_t mTextureHeight = 240;
-
-  std::unique_ptr<ColorPalette> mColorPalette;
-  std::array<PixelColor, mTextureWidth * mTextureHeight> mTextureData;
   void Draw();
 };

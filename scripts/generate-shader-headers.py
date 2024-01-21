@@ -6,9 +6,11 @@ shader_path = Path(argv[1])
 output_path = Path(argv[2])
 
 template = """#pragma once
-const char* {name}Code = R"======(
+struct {name}Shader {{
+  const char* source = R"======(
 {code}
 )======";
+}};
 """
 
 if shader_path.is_dir():

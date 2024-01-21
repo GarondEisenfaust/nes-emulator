@@ -2,6 +2,8 @@
 
 ShaderProgram::ShaderProgram() { mHandle.reset(); }
 
+ShaderProgram::~ShaderProgram() { glDeleteProgram(*mHandle); }
+
 void ShaderProgram::AttachShader(const Shader& shader) { glAttachShader(GetHandle(), shader.GetHandle()); }
 
 void ShaderProgram::Link() { glLinkProgram(GetHandle()); }

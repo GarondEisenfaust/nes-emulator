@@ -4,14 +4,16 @@ in vec2 TexCoord;
 out vec4 FragColor;
 uniform usampler2D theTexture;
 
-#define M_PI 3.1415926535897932384626433832795
-const mat3 rgbMatrix = mat3(vec3(1, 1, 1), vec3(0.946882, -0.274788, -1.108545), vec3(0.623557, -0.635691, 1.709007));
+const int samplesToGenerate = 12;
+const int samplesToTake = 12;
+const float pi = 3.14159265358979323846;
 const float black = 0.312f;
 const float white = 1.100f;
 const float levels[16] = float[16](0.228f, 0.312f, 0.552f, 0.880f, 0.616f, 0.840f, 1.100f, 1.100f, 0.192f, 0.256f,
                                    0.448f, 0.712f, 0.500f, 0.676f, 0.896f, 0.896f);
+const mat3 yiqToRgbMatrix = mat3(1, 1, 1, 0.946882, -0.274788, -1.108545, 0.623557, -0.635691, 1.709007);
 
-bool InColorPhase(int color, int phase) { return (color + phase + 12) % 12 < 6; }
+bool InColorPhase(int color, int phase) { return (color + phase + samplesToGenerate) % samplesToTake < 6; }
 bool BitIsSet(int value, int bitNum) { return (value & bitNum) > 0; }
 
 float NtscSignal(int pixel, int phase) {
@@ -48,13 +50,14 @@ float NtscSignal(int pixel, int phase) {
 void main() {
   int pixel = int(texture(theTexture, TexCoord).r);
 
-  vec3 signal = vec3(0);
-  for (int i = 0; i < 12; i++) {
-    float level = NtscSignal(pixel, i) / 12;
-    signal += vec3(1, cos((M_PI / 6) * (i - 8)), sin((M_PI / 6) * (i - 8))) * level;
+  int offset = samplesToTake / 2;
+  vec3 yiq = vec3(0);
+  for (int i = 0; i < samplesToGenerate; i++) {
+    float level = NtscSignal(pixel, i) / samplesToGenerate;
+    yiq += vec3(1, cos((pi / offset) * (i - 8)), sin((pi / offset) * (i - 8))) * level;
   }
 
-  vec3 asRgb = rgbMatrix * signal;
+  vec3 rgb = yiqToRgbMatrix * yiq;
 
-  FragColor = vec4(asRgb, 1.0);
+  FragColor = vec4(rgb, 1.0);
 }
