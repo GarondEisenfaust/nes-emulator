@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
   Bus bus(*ram);
   Cpu cpu;
   Ppu ppu(renderContext);
-  RingBuffer ringBuffer(10000);
+  RingBuffer ringBuffer(100000);
   Apu apu(ringBuffer);
 
   ForegroundRenderer foregroundRenderer;
