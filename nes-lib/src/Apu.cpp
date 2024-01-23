@@ -136,6 +136,6 @@ bool Apu::IsQuarterFrameClock(int clock) {
 
 inline float Apu::Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput) {
   auto pulseOut = 0.00752f * static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
-  auto tndOut = 0.00494 * noiseOutput + 0.00494 * triangleOutput;
+  auto tndOut = 0.00494f * noiseOutput + 0.00494f * triangleOutput;
   return pulseOut + tndOut;
 }
