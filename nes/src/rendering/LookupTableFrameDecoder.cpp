@@ -1,3 +1,4 @@
+#include "GL/glew.h"
 #include "LookupTableFrameDecoder.h"
 #include "FragmentShader.h"
 #include "VertexShader.h"

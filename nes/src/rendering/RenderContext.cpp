@@ -7,6 +7,7 @@
 #include "imgui_impl_opengl3.h"
 #include "rendering/RenderContext.h"
 #include "rendering/Shader.h"
+#include <GL/glew.h>
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>

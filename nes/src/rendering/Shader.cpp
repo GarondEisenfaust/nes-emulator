@@ -1,3 +1,4 @@
+#include "GL/glew.h"
 #include "rendering/Shader.h"
 #include <fstream>
 #include <iostream>
@@ -12,7 +13,7 @@ std::string ReadFile(std::string_view path) {
   return buffer.str();
 }
 
-Shader::Shader(const char* code, GLuint shaderType) {
+Shader::Shader(const char* code, unsigned int shaderType) {
   mShaderType = shaderType;
   auto [success, handle] = Compile(code, mShaderType);
   mSuccessful = success;
@@ -21,16 +22,16 @@ Shader::Shader(const char* code, GLuint shaderType) {
 
 Shader::~Shader() { Delete(); }
 
-GLuint Shader::GetHandle() const { return mHandle; }
+unsigned int Shader::GetHandle() const { return mHandle; }
 
 bool Shader::WasSuccessful() const { return mSuccessful; }
 
-std::tuple<GLint, GLuint> Shader::Compile(const GLchar* shaderProgram, GLuint shaderType) {
-  GLuint handle = glCreateShader(shaderType);
+std::tuple<int, unsigned int> Shader::Compile(const char* shaderProgram, unsigned int shaderType) {
+  unsigned int handle = glCreateShader(shaderType);
   glShaderSource(handle, 1, &shaderProgram, NULL);
   glCompileShader(handle);
 
-  GLint success;
+  int success;
   glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
 
   int logLength;

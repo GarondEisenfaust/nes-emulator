@@ -1,22 +1,21 @@
 #pragma once
-#include "GL/glew.h"
 #include <string>
 #include <string_view>
 #include <tuple>
 
 class Shader {
  public:
-  Shader(const char* code, GLuint shaderType);
+  Shader(const char* code, unsigned int shaderType);
   ~Shader();
-  GLuint GetHandle() const;
+  unsigned int GetHandle() const;
   bool WasSuccessful() const;
   void Delete();
 
  private:
-  GLuint mHandle;
+  unsigned int mHandle;
   bool mSuccessful;
   std::string mShaderCode;
-  GLuint mShaderType;
+  unsigned int mShaderType;
 
-  static std::tuple<GLint, GLuint> Compile(const GLchar* shaderProgram, GLuint shaderType);
+  static std::tuple<int, unsigned int> Compile(const char* shaderProgram, unsigned int shaderType);
 };
