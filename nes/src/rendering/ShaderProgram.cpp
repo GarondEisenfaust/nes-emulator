@@ -1,24 +1,20 @@
+#include "GL/glew.h"
 #include "rendering/ShaderProgram.h"
 
-ShaderProgram::ShaderProgram() { mHandle.reset(); }
+ShaderProgram::ShaderProgram() { mHandle = glCreateProgram(); }
 
-ShaderProgram::~ShaderProgram() { glDeleteProgram(*mHandle); }
-
-void ShaderProgram::AttachShader(const Shader& shader) { glAttachShader(GetHandle(), shader.GetHandle()); }
-
-void ShaderProgram::Link() { glLinkProgram(GetHandle()); }
-
-GLuint ShaderProgram::GetHandle() {
-  if (!mHandle) {
-    auto handle = glCreateProgram();
-    mHandle = std::make_unique<GLuint>(handle);
-  }
-  return *mHandle;
+ShaderProgram::~ShaderProgram() {
+  glUseProgram(0);
+  glDeleteProgram(mHandle);
 }
 
-void ShaderProgram::Use() { glUseProgram(GetHandle()); }
+void ShaderProgram::AttachShader(const Shader& shader) { glAttachShader(mHandle, shader.GetHandle()); }
+
+void ShaderProgram::Link() { glLinkProgram(mHandle); }
+
+void ShaderProgram::Use() { glUseProgram(mHandle); }
 
 void ShaderProgram::SetUniform(const char* name, float value) {
-  auto uniformLocation = glGetUniformLocation(GetHandle(), name);
+  auto uniformLocation = glGetUniformLocation(mHandle, name);
   glUniform1f(uniformLocation, value);
 }

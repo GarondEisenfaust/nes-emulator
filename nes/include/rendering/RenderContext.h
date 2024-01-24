@@ -38,5 +38,4 @@ class RenderContext : public IRenderer {
   int mCurrentPixel = 0;
   GLFWwindow* mWindow;
   IFrameDecoder* mFrameDecoder;
-  ShaderProgram mShaderProgram;
 };

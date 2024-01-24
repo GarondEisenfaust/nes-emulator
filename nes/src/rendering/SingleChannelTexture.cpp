@@ -11,7 +11,7 @@ SingleChannelTexture::SingleChannelTexture(size_t width, size_t height, int samp
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, samplingMode);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, samplingMode);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, mWidth, mHeight, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R16UI, mWidth, mHeight, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, data);
 }
 
 SingleChannelTexture::~SingleChannelTexture() { glDeleteTextures(1, &mTexture); }

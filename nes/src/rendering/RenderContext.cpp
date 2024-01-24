@@ -13,7 +13,7 @@
 #include <iostream>
 #include <thread>
 
-RenderContext::RenderContext() : mShaderProgram() {
+RenderContext::RenderContext() {
   glfwInit();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
