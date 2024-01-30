@@ -7,9 +7,10 @@ class Texture {
   ~Texture();
   void UpdateData(uint8_t* data);
   void Bind() const;
+  unsigned int GetHandle() const;
 
  private:
-  unsigned int mTexture;
+  unsigned int mHandle;
   size_t mWidth;
   size_t mHeight;
 };

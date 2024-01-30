@@ -15,6 +15,16 @@ void ShaderProgram::Link() { glLinkProgram(mHandle); }
 void ShaderProgram::Use() { glUseProgram(mHandle); }
 
 void ShaderProgram::SetUniform(const char* name, float value) {
-  auto uniformLocation = glGetUniformLocation(mHandle, name);
+  const auto uniformLocation = glGetUniformLocation(mHandle, name);
   glUniform1f(uniformLocation, value);
+}
+
+void ShaderProgram::SetUniform(const char* name, int value) {
+  const auto uniformLocation = glGetUniformLocation(mHandle, name);
+  glUniform1i(uniformLocation, value);
+}
+
+void ShaderProgram::SetUniform(const char* name, const ShortTexture& texture) {
+  const auto uniformLocation = glGetUniformLocation(mHandle, name);
+  glUniform1i(uniformLocation, texture.GetHandle());
 }

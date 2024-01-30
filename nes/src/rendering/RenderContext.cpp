@@ -1,12 +1,11 @@
 #include "rendering/RenderContext.h"
 #include "Definitions.h"
 #include "Surface.h"
-#include "Texture.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "rendering/RenderContext.h"
 #include "rendering/Shader.h"
+#include "rendering/Texture.h"
 #include <GL/glew.h>
 #include <chrono>
 #include <cstdlib>

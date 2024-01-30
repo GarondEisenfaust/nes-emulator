@@ -2,9 +2,9 @@
 #include "PixelColor.h"
 #include "SineTable.h"
 #include "Surface.h"
-#include "Texture.h"
 #include "rendering/IFrameDecoder.h"
 #include "rendering/ShaderProgram.h"
+#include "rendering/Texture.h"
 #include <array>
 #include <cstdint>
 #include <memory>

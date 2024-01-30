@@ -1,5 +1,6 @@
 #pragma once
 #include "Shader.h"
+#include "ShortTexture.h"
 #include <memory>
 
 class ShaderProgram {
@@ -10,6 +11,8 @@ class ShaderProgram {
   void Link();
   void Use();
   void SetUniform(const char* name, float value);
+  void SetUniform(const char* name, int value);
+  void SetUniform(const char* name, const ShortTexture& texture);
 
  private:
   unsigned int mHandle;

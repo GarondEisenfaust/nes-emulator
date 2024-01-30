@@ -7,7 +7,12 @@
       "cwd": "${command:cmake.buildDirectory}/bin",
       "request": "launch",
       "program": "${command:cmake.buildDirectory}/bin/nes",
-      "args": ["roms/smb.nes"],
+      "args": [
+        "--rom",
+        "roms/smb.nes",
+        "--decoder",
+        "ntsc-gpu"
+      ],
       "preLaunchTask": "${defaultBuildTask}"
     }
   ]

@@ -1,4 +1,5 @@
 #include "Apu.h"
+#include "ArgumentParser.h"
 #include "Bus.h"
 #include "Cartridge.h"
 #include "Controller.h"
@@ -18,6 +19,7 @@
 #include "rendering/RenderContext.h"
 #include <array>
 #include <chrono>
+#include <exception>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -62,15 +64,31 @@ void MakeOneStep(Bus& bus) {
   } while (bus.mCpu->cycles <= 0);
 }
 
+std::unique_ptr<IFrameDecoder> CreateDecoder(NesConfig::SignalDecoder decoder) {
+  switch (decoder) {
+    case NesConfig::SignalDecoder::Ntsc: {
+      return std::make_unique<NtscSignalFrameDecoder>();
+    }
+    case NesConfig::SignalDecoder::NtscGpu: {
+      return std::make_unique<NtscSignalFrameDecoderGpu>();
+    }
+    case NesConfig::SignalDecoder::LookupTable:
+    default: {
+      return std::make_unique<LookupTableFrameDecoder>();
+    }
+  }
+}
+
 int main(int argc, char* argv[]) {
-  if (argc < 2) {
-    std::cout << "You have to specify a ROM to load!\n";
-    return 1;
+  ArgumentParser argumentParser;
+  NesConfig config = argumentParser.Parse(argc, argv);
+  if (!config.Validate()) {
+    std::terminate();
   }
 
   RenderContext renderContext;
-  NtscSignalFrameDecoderGpu decoder;
-  renderContext.SetFrameDecoder(&decoder);
+  std::unique_ptr<IFrameDecoder> decoder = CreateDecoder(config.mDecoder);
+  renderContext.SetFrameDecoder(decoder.get());
 
   auto ram = std::make_unique<Ram>();
   Bus bus(*ram);
@@ -94,8 +112,7 @@ int main(int argc, char* argv[]) {
   ppu.ConnectBus(&bus);
   apu.ConnectBus(&bus);
 
-  std::string romPath = argv[1];
-  Cartridge cartridge(romPath);
+  Cartridge cartridge(config.mRomPath);
   bus.InsertCartridge(&cartridge);
   bus.Reset();
 
