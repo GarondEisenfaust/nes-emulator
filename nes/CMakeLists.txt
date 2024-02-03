@@ -17,6 +17,7 @@ set(SOURCE_FILES
 set(INCLUDES ${INCLUDES} ${CMAKE_BINARY_DIR}/bindings/ ${SHADER_HEADER_DIR})
 
 create_executable()
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(
   ${PROJECT_NAME}
