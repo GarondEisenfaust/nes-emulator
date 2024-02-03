@@ -1,15 +1,15 @@
 #pragma once
 #include "IAudioOutputDevice.h"
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 
-class RingBuffer : public IAudioOutputDevice {
+class RingBuffer {
  public:
   RingBuffer(int size);
   ~RingBuffer();
-  void Write(float data) override;
-  float Read() override;
-  float* Advance(float* current);
+  void Write(float data);
+  float Read();
 
  private:
   int mSize;
@@ -20,5 +20,8 @@ class RingBuffer : public IAudioOutputDevice {
   float* readPointer;
 
   float mLastRead;
-  std::atomic<unsigned long> mUnreadCount;
+  std::mutex mGuard;
+  std::condition_variable condition;
+  unsigned long mUnreadCount;
+  float* Advance(float* current);
 };

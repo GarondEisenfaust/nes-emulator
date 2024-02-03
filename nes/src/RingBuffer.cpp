@@ -10,21 +10,21 @@ RingBuffer::RingBuffer(int size) : mSize(size) {
 RingBuffer::~RingBuffer() { delete[] mStart; }
 
 void RingBuffer::Write(float data) {
-  if (mUnreadCount > mSize) {
-    return;
-  }
-
+  std::unique_lock<std::mutex> lock(mGuard);
+  condition.wait(lock, [&]() { return mUnreadCount < mSize; });
   *writePointer = data;
-  mUnreadCount++;
   writePointer = Advance(writePointer);
+  mUnreadCount++;
 }
 
 float RingBuffer::Read() {
+  std::unique_lock<std::mutex> lock(mGuard);
   if (mUnreadCount > 0) {
     mLastRead = *readPointer;
-    mUnreadCount--;
     readPointer = Advance(readPointer);
+    mUnreadCount--;
   }
+  condition.notify_one();
   return mLastRead;
 }
 
