@@ -51,6 +51,6 @@ void TriangleChannel::Clock(bool quarter, bool half) {
 
   output = mSequence[mSequenceIndex];
   if (mCounter > 0) {
-    mSequenceIndex++;
+    mSequenceIndex = (mSequenceIndex + 1) % mSequence.size();
   }
 }
