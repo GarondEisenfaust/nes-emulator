@@ -1,8 +1,5 @@
 #include "Apu.h"
 #include "Bus.h"
-#include <algorithm>
-#include <array>
-#include <math.h>
 
 Apu::Apu(IAudioOutputDevice& outputDevice)
     : mOutputDevice(outputDevice),
@@ -142,9 +139,6 @@ inline float Apu::Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t tr
   auto tndOut = mTndTable[3 * triangleOutput + 2 * noiseOutput];
 
   auto output = pulseOut + tndOut;
-  if (std::abs(output) > 500) {
-    printf("%i %i %i %i  %f\n", pulseOneOutput, pulseTwoOutput, triangleOutput, noiseOutput, output);
-  }
   return pulseOut + tndOut;
 }
 
