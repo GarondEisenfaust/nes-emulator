@@ -12,7 +12,6 @@
 
 class RenderContext : public IRenderer {
  public:
-  using KeyCallback = std::function<void(GLFWwindow* window, int key, int scancode, int action, int mods)>;
   RenderContext();
   ~RenderContext();
 
