@@ -1,27 +1,20 @@
 #include "Apu.h"
 #include "ArgumentParser.h"
 #include "AudioDevice.h"
+#include "BackgroundRenderer.h"
 #include "Bus.h"
-#include "Cartridge.h"
 #include "Controller.h"
 #include "Cpu.h"
-#include "Definitions.h"
 #include "ForegroundRenderer.h"
+#include "IRenderer.h"
+#include "NesConfig.h"
 #include "Ppu.h"
-#include "Ram.h"
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "rendering/IFrameDecoder.h"
 #include "rendering/LookupTableFrameDecoder.h"
 #include "rendering/NtscSignalFrameDecoder.h"
 #include "rendering/NtscSignalFrameDecoderGpu.h"
 #include "rendering/RenderContext.h"
-#include <array>
 #include <chrono>
-#include <exception>
-#include <filesystem>
-#include <iostream>
-#include <string>
 #include <thread>
 
 void RenderCompleteFrame(Bus& bus, IRenderer& renderer) {
@@ -99,8 +92,8 @@ int main(int argc, char* argv[]) {
   const auto diff = (1000ms / 60);
   auto next = std::chrono::system_clock::now();
   renderContext.GameLoop([&]() {
-    controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_1);
-    controller.SetControllerBitBasedOnInput(GLFW_JOYSTICK_2);
+    controller.SetControllerBitBasedOnInput(0);
+    controller.SetControllerBitBasedOnInput(1);
     RenderCompleteFrame(bus, renderContext);
     std::this_thread::sleep_until(next);
     next += diff;
