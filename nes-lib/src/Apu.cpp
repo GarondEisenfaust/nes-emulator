@@ -5,7 +5,11 @@
 #include <math.h>
 
 Apu::Apu(IAudioOutputDevice& outputDevice)
-    : mOutputDevice(outputDevice), mPulseChannelOne(true), mPulseChannelTwo(false) {}
+    : mOutputDevice(outputDevice),
+      mPulseChannelOne(true),
+      mPulseChannelTwo(false),
+      mPulseTable(PrecalculatePulseTable()),
+      mTndTable(PrecalculateTndTable()) {}
 
 void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   if (addr == 0x4000) {
@@ -106,12 +110,11 @@ void Apu::Clock() {
       mTriangleChannel.Clock(quarter, half);
     }
 
-    output = Mix(mPulseChannelOne.output, mPulseChannelTwo.output, mTriangleChannel.output, mNoiseChannel.output);
-
     if (mFrameClockCounter % 20 == 0) {
+      output = Mix(mPulseChannelOne.output, mPulseChannelTwo.output, mTriangleChannel.output, mNoiseChannel.output);
       mOutputDevice.Write(output);
     }
-    mFrameClockCounter = (mFrameClockCounter + 1) % 14833;
+    mFrameClockCounter = (mFrameClockCounter + 1) % onePeriod;
   }
   mClockCounter++;
 }
@@ -135,7 +138,28 @@ bool Apu::IsQuarterFrameClock(int clock) {
 }
 
 inline float Apu::Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput) {
-  auto pulseOut = 0.00752f * static_cast<float>(mPulseChannelOne.output + mPulseChannelTwo.output);
-  auto tndOut = 0.00494f * noiseOutput + 0.00494f * triangleOutput;
+  auto pulseOut = mPulseTable[pulseOneOutput + pulseTwoOutput];
+  auto tndOut = mTndTable[3 * triangleOutput + 2 * noiseOutput];
+
+  auto output = pulseOut + tndOut;
+  if (std::abs(output) > 500) {
+    printf("%i %i %i %i  %f\n", pulseOneOutput, pulseTwoOutput, triangleOutput, noiseOutput, output);
+  }
   return pulseOut + tndOut;
+}
+
+constexpr std::array<double, 31> Apu::PrecalculatePulseTable() {
+  std::array<double, 31> table = {0};
+  for (int i = 0; i < table.size(); i++) {
+    table[i] = 95.52 / (8128.0 / i + 100);
+  }
+  return table;
+}
+
+constexpr std::array<double, 203> Apu::PrecalculateTndTable() {
+  std::array<double, 203> table = {0};
+  for (int i = 0; i < table.size(); i++) {
+    table[i] = 163.67 / (24329.0 / i + 100);
+  }
+  return table;
 }

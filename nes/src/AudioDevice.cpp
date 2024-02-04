@@ -16,8 +16,7 @@ class AudioDevice::Impl {
   RingBuffer mRingBuffer;
   ma_device mDevice;
   float mMinReceivedSample = 0;
-  float mMaxReceivedSample = 0.001;
-
+  float mMaxReceivedSample = 0.1;
   static void AudioCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount);
 };
 
@@ -33,13 +32,14 @@ void AudioDevice::Impl::AudioCallback(ma_device* pDevice, void* pOutput, const v
   RingBuffer* ringBuffer = &audioDeviceImpl->mRingBuffer;
   for (int i = 0; i < frameCount; i++) {
     auto value = ringBuffer->Read();
+
     audioDeviceImpl->UpdateMinSample(value);
     audioDeviceImpl->UpdateMaxSample(value);
     asFloatPointer[i] = Normalize(value, audioDeviceImpl->mMinReceivedSample, audioDeviceImpl->mMaxReceivedSample);
   }
 };
 
-AudioDevice::Impl::Impl() : mRingBuffer(2000) {
+AudioDevice::Impl::Impl() : mRingBuffer(10000) {
   ma_device_config deviceConfig;
 
   deviceConfig = ma_device_config_init(ma_device_type_playback);

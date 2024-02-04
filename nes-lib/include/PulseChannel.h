@@ -17,5 +17,4 @@ class PulseChannel {
 
  private:
   int mClock = 0;
-  const int ONE_PERIOD = 14833;
 };

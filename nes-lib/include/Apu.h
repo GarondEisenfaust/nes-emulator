@@ -5,7 +5,6 @@
 #include "PulseChannel.h"
 #include "TriangleChannel.h"
 #include <cstdint>
-#include <queue>
 
 #define APU_RAM_START 0x4000
 #define APU_RAM_END 0x400F
@@ -33,16 +32,17 @@ class Apu {
   PulseChannel mPulseChannelTwo;
   NoiseChannel mNoiseChannel;
   TriangleChannel mTriangleChannel;
-  std::queue<float> queue;
+  std::array<double, 31> mPulseTable;
+  std::array<double, 203> mTndTable;
   float output;
-
-  float minOutputSound = 0;
-  float maxOutputSound = 0;
-
   const int halfFrameClocks[2] = {7456, 14914};
   const int quarterFrameClocks[4] = {3728, halfFrameClocks[0], 11185, halfFrameClocks[1]};
+  const int onePeriod = 14833;
 
   inline bool IsHalfFrameClock(int clock);
   inline bool IsQuarterFrameClock(int clock);
   inline float Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput);
+
+  constexpr std::array<double, 31> PrecalculatePulseTable();
+  constexpr std::array<double, 203> PrecalculateTndTable();
 };
