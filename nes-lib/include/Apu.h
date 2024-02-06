@@ -26,7 +26,6 @@ class Apu {
  private:
   IAudioOutputDevice& mOutputDevice;
   Bus* mBus;
-  int mClockCounter;
   int mFrameClockCounter;
   PulseChannel mPulseChannelOne;
   PulseChannel mPulseChannelTwo;

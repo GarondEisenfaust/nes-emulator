@@ -13,7 +13,6 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   mPulseChannelTwo.Write(addr, data);
   mNoiseChannel.Write(addr, data);
   mTriangleChannel.Write(addr, data);
-  mDmcChannel.Write(addr, data);
 }
 
 uint8_t Apu::CpuRead(uint16_t addr) {
@@ -26,7 +25,6 @@ uint8_t Apu::CpuRead(uint16_t addr) {
 }
 
 void Apu::Clock() {
-  if (mClockCounter % 6 == 0) {
     auto quarter = IsQuarterFrameClock(mFrameClockCounter);
     auto half = IsHalfFrameClock(mFrameClockCounter);
 
@@ -43,8 +41,6 @@ void Apu::Clock() {
       mOutputDevice.Write(output);
     }
     mFrameClockCounter = (mFrameClockCounter + 1) % onePeriod;
-  }
-  mClockCounter++;
 }
 
 void Apu::Reset() {}
