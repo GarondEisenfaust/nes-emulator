@@ -9,7 +9,7 @@ TriangleChannel::TriangleChannel() {
 
 TriangleChannel::~TriangleChannel() {}
 
-void TriangleChannel::UpdateState(uint16_t addr, uint8_t data) {
+void TriangleChannel::Write(uint16_t addr, uint8_t data) {
   if (addr == 0x4008) {
     mCounterControlFlag = data & 0x80;
     mCounterReloadValue = data & 0x7F;
@@ -20,6 +20,8 @@ void TriangleChannel::UpdateState(uint16_t addr, uint8_t data) {
     mLengthCounter.SetCounter(data >> 3);
     mDivider.SetPeriod((mDivider.mPeriod & 0x00FF) | ((data & 0x07) << 7));
     mCounterReload = true;
+  } else if (addr == 0x4015) {
+    mLengthCounter.SetEnabled(data & 0x04);
   }
 }
 

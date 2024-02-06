@@ -3,86 +3,17 @@
 
 Apu::Apu(IAudioOutputDevice& outputDevice)
     : mOutputDevice(outputDevice),
-      mPulseChannelOne(true),
-      mPulseChannelTwo(false),
+      mPulseChannelOne(false),
+      mPulseChannelTwo(true),
       mPulseTable(PrecalculatePulseTable()),
       mTndTable(PrecalculateTndTable()) {}
 
 void Apu::CpuWrite(uint16_t addr, uint8_t data) {
-  if (addr == 0x4000) {
-    switch ((data & 0xC0) >> 6) {
-      case 0x00: {
-        mPulseChannelOne.mSequencer.reloadSequence = 0b01000000;
-        break;
-      }
-      case 0x01: {
-        mPulseChannelOne.mSequencer.reloadSequence = 0b01100000;
-        break;
-      }
-      case 0x02: {
-        mPulseChannelOne.mSequencer.reloadSequence = 0b01111000;
-        break;
-      }
-      case 0x03: {
-        mPulseChannelOne.mSequencer.reloadSequence = 0b10011111;
-        break;
-      }
-    }
-    mPulseChannelOne.mSequencer.Reload();
-    mPulseChannelOne.mLengthCounter.SetHalt(data & 0x20);
-    mPulseChannelOne.mEnvelope.loop = data & 0x20;
-    mPulseChannelOne.mEnvelope.constantVolume = data & 0x10;
-    mPulseChannelOne.mEnvelope.volume = data & 0x0F;
-  } else if (addr == 0x4001) {
-    mPulseChannelOne.mSweeper.UpdateState(data);
-  } else if (addr == 0x4002) {
-    mPulseChannelOne.mSequencer.mDivider.SetLowerPeriodBits(data);
-  } else if (addr == 0x4003) {
-    mPulseChannelOne.mLengthCounter.SetCounter(data >> 3);
-    mPulseChannelOne.mSequencer.mDivider.SetUpperPeriodBits(data);
-    mPulseChannelOne.mEnvelope.startFlag = true;
-    mPulseChannelOne.mSequencer.Reload();
-  } else if (addr == 0x4004) {
-    switch ((data & 0xC0) >> 6) {
-      case 0x00: {
-        mPulseChannelTwo.mSequencer.reloadSequence = 0b01000000;
-        break;
-      }
-      case 0x01: {
-        mPulseChannelTwo.mSequencer.reloadSequence = 0b01100000;
-        break;
-      }
-      case 0x02: {
-        mPulseChannelTwo.mSequencer.reloadSequence = 0b01111000;
-        break;
-      }
-      case 0x03: {
-        mPulseChannelTwo.mSequencer.reloadSequence = 0b10011111;
-        break;
-      }
-    }
-    mPulseChannelTwo.mSequencer.Reload();
-    mPulseChannelTwo.mLengthCounter.SetHalt(data & 0x20);
-    mPulseChannelTwo.mEnvelope.loop = data & 0x20;
-    mPulseChannelTwo.mEnvelope.constantVolume = data & 0x10;
-    mPulseChannelTwo.mEnvelope.volume = data & 0x0F;
-  } else if (addr == 0x4005) {
-    mPulseChannelTwo.mSweeper.UpdateState(data);
-  } else if (addr == 0x4006) {
-    mPulseChannelTwo.mSequencer.mDivider.SetLowerPeriodBits(data);
-  } else if (addr == 0x4007) {
-    mPulseChannelTwo.mLengthCounter.SetCounter(data >> 3);
-    mPulseChannelTwo.mSequencer.mDivider.SetUpperPeriodBits(data);
-    mPulseChannelTwo.mEnvelope.startFlag = true;
-    mPulseChannelTwo.mSequencer.Reload();
-  } else if (addr == 0x4015) {
-    mPulseChannelOne.mLengthCounter.SetEnabled(data & 0x01);
-    mPulseChannelTwo.mLengthCounter.SetEnabled(data & 0x02);
-    mTriangleChannel.mLengthCounter.SetEnabled(data & 0x04);
-    mNoiseChannel.mLengthCounter.SetEnabled(data & 0x08);
-  }
-  mNoiseChannel.UpdateState(addr, data);
-  mTriangleChannel.UpdateState(addr, data);
+  mPulseChannelOne.Write(addr, data);
+  mPulseChannelTwo.Write(addr, data);
+  mNoiseChannel.Write(addr, data);
+  mTriangleChannel.Write(addr, data);
+  mDmcChannel.Write(addr, data);
 }
 
 uint8_t Apu::CpuRead(uint16_t addr) {

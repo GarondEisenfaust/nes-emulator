@@ -6,7 +6,7 @@
 
 class PulseChannel {
  public:
-  PulseChannel(bool firstChannel);
+  PulseChannel(bool isSecondChannel);
   Envelope mEnvelope;
   Sequencer mSequencer;
   Sweeper mSweeper;
@@ -14,7 +14,9 @@ class PulseChannel {
   uint8_t output = 0;
 
   void Clock(bool quarter, bool half);
+  void Write(uint16_t addr, uint8_t data);
 
  private:
+  bool mIsSecondChannel;
   int mClock = 0;
 };

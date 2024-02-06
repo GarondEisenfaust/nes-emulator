@@ -14,7 +14,7 @@ class Sweeper {
   bool mReload;
 
   uint16_t Clock(uint16_t timerPeriod);
-  void UpdateState(uint8_t data);
+  void Write(uint8_t data);
   bool ShouldMute();
   bool ShouldSetPeriod();
 };

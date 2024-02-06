@@ -29,7 +29,7 @@ uint16_t Sweeper::Clock(uint16_t timerPeriod) {
   return timerPeriod;
 }
 
-void Sweeper::UpdateState(uint8_t data) {
+void Sweeper::Write(uint8_t data) {
   enable = data & 0x80;
   mDivider.SetPeriod((data & 0x70) >> 4);
   negate = data & 0x08;
