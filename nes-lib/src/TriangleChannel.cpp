@@ -12,8 +12,8 @@ TriangleChannel::~TriangleChannel() {}
 void TriangleChannel::Write(uint16_t addr, uint8_t data) {
   if (addr == 0x4008) {
     mCounterControlFlag = data & 0x80;
-    mCounterReloadValue = data & 0x7F;
     mLengthCounter.SetHalt(data & 0x80);
+    mCounterReloadValue = data & 0x7F;
   } else if (addr == 0x400A) {
     mDivider.SetPeriod((mDivider.mPeriod & 0x0700) | data);
   } else if (addr == 0x400B) {
@@ -26,12 +26,12 @@ void TriangleChannel::Write(uint16_t addr, uint8_t data) {
 }
 
 void TriangleChannel::Clock(bool quarter, bool half) {
-  if (!(quarter || half)) {
+  mDivider.Clock();
+  if (!mDivider.Notify()) {
     return;
   }
 
-  mDivider.Clock();
-  if (!mDivider.Notify()) {
+  if (!(quarter || half)) {
     return;
   }
 

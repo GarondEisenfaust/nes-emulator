@@ -8,6 +8,12 @@ class RingBuffer {
  public:
   RingBuffer(int size);
   ~RingBuffer();
+
+  RingBuffer(const RingBuffer&) = delete;
+  RingBuffer(const RingBuffer&&) = delete;
+  RingBuffer& operator=(const RingBuffer&) = delete;
+  RingBuffer& operator=(RingBuffer&&) = delete;
+
   void Write(float data);
   float Read();
 

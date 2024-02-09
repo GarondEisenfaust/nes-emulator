@@ -14,7 +14,7 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
     mRam.Write(addr, data);
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     mPpu->CpuWrite(addr, data);
-  } else if ((APU_RAM_START <= addr && addr <= APU_RAM_END) || (addr == 0x4015)) {
+  } else if ((APU_RAM_START <= addr && addr <= APU_RAM_END) || (addr == APU_STATUS)) {
     mApu->CpuWrite(addr, data);
   } else if (addr == DMA_ADDRESS) {
     Dma(data);
@@ -32,7 +32,7 @@ uint8_t Bus::CpuRead(uint16_t addr) {
     data = mRam.Read(addr);
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
     data = mPpu->CpuRead(addr);
-  } else if ((APU_RAM_START <= addr && addr <= APU_RAM_END) || (addr == 0x4015)) {
+  } else if ((APU_RAM_START <= addr && addr <= APU_RAM_END) || (addr == APU_STATUS)) {
     data = mApu->CpuRead(addr);
   } else if (CONTROLLER_START <= addr && addr <= CONTROLLER_END) {
     data = mController->Read(addr);

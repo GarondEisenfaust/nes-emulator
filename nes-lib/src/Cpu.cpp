@@ -11,6 +11,11 @@ void Cpu::ConnectBus(Bus* bus) {
   mBus->mCpu = this;
 }
 
+uint8_t Cpu::ApuRead(uint16_t addr) {
+  cycles += 4;
+  return Read(addr);
+}
+
 uint8_t Cpu::Read(uint16_t addr) { return mBus->CpuRead(addr); }
 uint16_t Cpu::ReadTwoBytes(uint16_t addr) {
   uint16_t low = Read(addr);

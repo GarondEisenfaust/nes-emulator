@@ -47,8 +47,8 @@ bool NoiseChannel::ShiftRegister() {
       otherBit = shiftRegister & 0x40;
     }
 
-    auto feedBack = bitZero ^ otherBit;
-    auto shiftedByOne = shiftRegister >> 1;
+    bool feedBack = bitZero ^ otherBit;
+    uint16_t shiftedByOne = shiftRegister >> 1;
     shiftRegister = (shiftedByOne & ~(1 << 14)) | (feedBack << 14);
   }
   return shiftRegister & 0x01;

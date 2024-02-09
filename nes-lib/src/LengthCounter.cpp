@@ -14,6 +14,8 @@ void LengthCounter::SetCounter(uint8_t counter) {
 
 void LengthCounter::SetHalt(bool halt) { mHalt = halt; }
 
+bool LengthCounter::IsHalted() { return mHalt; }
+
 bool LengthCounter::ShouldMute() { return mCounter == 0; }
 
 void LengthCounter::SetEnabled(bool enable) {

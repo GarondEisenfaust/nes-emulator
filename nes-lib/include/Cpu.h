@@ -33,6 +33,7 @@ class Cpu {
   void Reset();
 
   void ConnectBus(Bus* bus);
+  uint8_t ApuRead(uint16_t addr);
 
   uint8_t fetched = 0x00;
   uint8_t a = 0x00;
