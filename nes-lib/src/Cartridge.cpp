@@ -1,5 +1,6 @@
 #include "Cartridge.h"
 #include "Definitions.h"
+#include "mapper/Mapper002.h"
 #include "mapper/Mappers.h"
 #include <fstream>
 
@@ -19,6 +20,16 @@ uint8_t DetermineMapperId(const Header& header) { return ((header.mapper2 >> 4) 
 
 MirrorMode DetermineMirror(const Header& header) {
   return (header.mapper1 & 0x01) ? MirrorMode::Vertical : MirrorMode::Horizontal;
+}
+
+std::unique_ptr<IMapper> MakeMapper(int mapperId, int programBanks, int characterBanks) {
+  if (mapperId == 0) {
+    return std::make_unique<Mapper000>(programBanks, characterBanks);
+  }
+  if (mapperId == 2) {
+    return std::make_unique<Mapper002>(programBanks, characterBanks);
+  }
+  return std::unique_ptr<IMapper>();
 }
 
 Cartridge::Cartridge(const std::string& path) {
@@ -50,7 +61,8 @@ Cartridge::Cartridge(const std::string& path) {
   mCharacterMemory.resize(banksToAllocate * 8192);
   romStream.read(reinterpret_cast<char*>(mCharacterMemory.data()), mCharacterMemory.size());
 
-  mMapper = std::make_unique<Mapper000>(mProgramBanks, mCharacterBanks);
+  mMapper = MakeMapper(mMapperId, mProgramBanks, mCharacterBanks);
+  mMapper->Reset();
   mImageValid = true;
   romStream.close();
 }
@@ -61,7 +73,7 @@ uint8_t Cartridge::CpuRead(uint16_t address) {
 }
 
 void Cartridge::CpuWrite(uint16_t address, uint8_t data) {
-  auto mappedAddr = mMapper->CpuMapWrite(address);
+  auto mappedAddr = mMapper->CpuMapWrite(address, data);
   mProgramMemory[mappedAddr] = data;
 }
 
