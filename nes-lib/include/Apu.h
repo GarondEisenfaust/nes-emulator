@@ -25,7 +25,8 @@ class Apu {
   void Reset();
 
   void ConnectBus(Bus* bus);
-  void NonMaskableInterrupt();
+  bool mInterrupt;
+  double mGlobalTime = 0;
 
  private:
   IAudioOutputDevice& mOutputDevice;
@@ -40,13 +41,13 @@ class Apu {
   std::array<float, 31> mPulseTable;
   std::array<float, 203> mTndTable;
   float output;
-  const int halfFrameClocks[2] = {7456, 14914};
+  const int onePeriod = 14914;
+  const int halfFrameClocks[2] = {7456, onePeriod};
   const int quarterFrameClocks[4] = {3728, halfFrameClocks[0], 11185, halfFrameClocks[1]};
-  const int onePeriod = 14833;
 
   inline bool IsHalfFrameClock(int clock);
   inline bool IsQuarterFrameClock(int clock);
-  inline float Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
+  inline float Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
                    uint8_t dmcOutput);
 
   constexpr std::array<float, 31> PrecalculatePulseTable();

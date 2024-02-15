@@ -107,7 +107,7 @@ void Cpu::Interrupt(uint16_t address, uint8_t numCycles) {
   cycles = numCycles;
 }
 
-void Cpu::Interrupt() {
+void Cpu::ExecuteInterrupt() {
   if (status.i != 0) {
     return;
   }
@@ -115,4 +115,4 @@ void Cpu::Interrupt() {
   Interrupt(0xFFFE, 7);
 }
 
-void Cpu::NonMaskableInterrupt() { Interrupt(0xFFFA, 8); }
+void Cpu::ExecuteNonMaskableInterrupt() { Interrupt(0xFFFA, 8); }

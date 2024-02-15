@@ -102,8 +102,6 @@ uint8_t Ppu::GetColorFromPalette(uint8_t palette, uint8_t pixel) {
   return PpuRead(address);
 }
 
-void Ppu::NonMaskableInterrupt() { mBus->NonMaskableInterrupt(); }
-
 void Ppu::SetSpriteOverflowFlag(bool overflow) { mBackgroundRenderer->SetSpriteOverflowFlag(overflow); }
 
 bool Ppu::GetSpriteSizeFlag() { return mBackgroundRenderer->GetSpriteSizeFlag(); }

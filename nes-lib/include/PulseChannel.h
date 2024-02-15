@@ -1,6 +1,7 @@
 #pragma once
 #include "Envelope.h"
 #include "LengthCounter.h"
+#include "Oscilator.h"
 #include "Sequencer.h"
 #include "Sweeper.h"
 
@@ -11,9 +12,10 @@ class PulseChannel {
   Sequencer mSequencer;
   Sweeper mSweeper;
   LengthCounter mLengthCounter;
-  uint8_t output = 0;
+  Oscilator mOscilator;
+  double output = 0;
 
-  void Clock(bool quarter, bool half);
+  void Clock(bool quarter, bool half, double globalTime);
   void Write(uint16_t addr, uint8_t data);
 
  private:

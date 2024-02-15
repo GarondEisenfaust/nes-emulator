@@ -26,6 +26,9 @@ class Cartridge {
   uint8_t PpuRead(uint16_t address);
   void PpuWrite(uint16_t address, uint8_t data);
 
+  bool Interrupt();
+  void ClearInterrupt();
+
   void Reset();
   MirrorMode mMirror;
 

@@ -24,8 +24,8 @@ class Cpu {
   uint8_t PopFromStack();
   virtual void PushToStack(uint8_t data);
 
-  void Interrupt();
-  void NonMaskableInterrupt();
+  void ExecuteInterrupt();
+  void ExecuteNonMaskableInterrupt();
 
   uint8_t Fetch();
 

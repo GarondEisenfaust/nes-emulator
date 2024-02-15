@@ -1,6 +1,5 @@
 #include "Cartridge.h"
 #include "Definitions.h"
-#include "mapper/Mapper002.h"
 #include "mapper/Mappers.h"
 #include <fstream>
 
@@ -86,6 +85,10 @@ void Cartridge::PpuWrite(uint16_t address, uint8_t data) {
   uint32_t mappedAddr = mMapper->PpuMapWrite(address);
   mCharacterMemory[mappedAddr] = data;
 }
+
+bool Cartridge::Interrupt() { return mMapper->Interrupt(); }
+
+void Cartridge::ClearInterrupt() { mMapper->ClearInterrupt(); }
 
 void Cartridge::Reset() {
   if (mMapper) {

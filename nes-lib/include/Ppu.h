@@ -46,7 +46,6 @@ class Ppu {
   void UpdateShifters();
   void WriteOamData(int index, uint8_t data);
 
-  void NonMaskableInterrupt();
   void SetSpriteOverflowFlag(bool overflow);
   bool GetSpriteSizeFlag();
   bool GetPatternSpriteFlag();
@@ -56,6 +55,7 @@ class Ppu {
 
   int16_t mCycle;
   int16_t mScanline;
+  bool mNonMaskableInterrupt;
 
  private:
   uint8_t CalculatePixelColor();

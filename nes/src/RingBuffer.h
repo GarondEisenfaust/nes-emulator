@@ -1,6 +1,5 @@
 #pragma once
 #include "IAudioOutputDevice.h"
-#include <atomic>
 #include <condition_variable>
 #include <mutex>
 

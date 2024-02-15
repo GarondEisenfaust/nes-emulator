@@ -23,6 +23,9 @@ class IMapper {
 
   virtual void Reset() = 0;
 
+  virtual bool Interrupt() { return false; }
+  virtual void ClearInterrupt() {}
+
  protected:
   uint8_t mProgramBanks;
   uint8_t mCharacterBanks;

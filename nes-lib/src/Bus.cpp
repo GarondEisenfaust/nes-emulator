@@ -44,7 +44,13 @@ uint8_t Bus::CpuRead(uint16_t addr) {
 
 void Bus::ConnectController(IController* controller) { mController = controller; }
 
-void Bus::NonMaskableInterrupt() { mCpu->NonMaskableInterrupt(); }
+bool Bus::NonMaskableInterrupt() { return mPpu->mNonMaskableInterrupt; }
+
+void Bus::ClearNonMaskableInterrupt() { mPpu->mNonMaskableInterrupt = false; }
+
+bool Bus::Interrupt() { return mApu->mInterrupt || mCartridge->Interrupt(); }
+
+void Bus::ClearInterrupt() { mCartridge->ClearInterrupt(); }
 
 void Bus::InsertCartridge(Cartridge* cartridge) {
   mCartridge = cartridge;
@@ -67,6 +73,16 @@ void Bus::Clock() {
   }
   if (mClockCounter % 6 == 0) {
     mApu->Clock();
+  }
+
+  if (NonMaskableInterrupt()) {
+    mCpu->ExecuteNonMaskableInterrupt();
+    ClearNonMaskableInterrupt();
+  }
+
+  if (Interrupt()) {
+    mCpu->ExecuteInterrupt();
+    ClearInterrupt();
   }
 
   mClockCounter++;

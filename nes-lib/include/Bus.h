@@ -21,7 +21,10 @@ class Bus {
   uint8_t CpuRead(uint16_t addr);
 
   void ConnectController(IController* controller);
-  void NonMaskableInterrupt();
+  bool NonMaskableInterrupt();
+  void ClearNonMaskableInterrupt();
+  bool Interrupt();
+  void ClearInterrupt();
 
   Cpu* mCpu;
   Ppu* mPpu;

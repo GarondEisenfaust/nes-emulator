@@ -13,11 +13,9 @@ class DmcChannel {
   uint8_t ReadSample(uint16_t addr);
   void Restart();
   void IncrementCurrentSampleAddress();
-  void Interrupt();
 
   Apu* mApu;
-  bool mInteruptEnabled = false;
-  bool mInterupt;
+  bool mInterruptEnabled = false;
   bool mLoop;
   bool mSilence;
   uint8_t output = 0;

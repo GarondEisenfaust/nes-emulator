@@ -9,9 +9,9 @@ DmcChannel::~DmcChannel() {}
 
 void DmcChannel::Write(uint16_t addr, uint8_t data) {
   if (addr == 0x4010) {
-    mInteruptEnabled = data & (1 << 7);
-    if (mInteruptEnabled) {
-      mInterupt = false;
+    mInterruptEnabled = data & (1 << 7);
+    if (mInterruptEnabled) {
+      mApu->mInterrupt = false;
     }
     mLoop = data & (1 << 6);
     mDivider.SetPeriod(mRateTable[0x0F & data] - 1);
@@ -28,21 +28,18 @@ void DmcChannel::Write(uint16_t addr, uint8_t data) {
     } else if (!status) {
       mBytesRemaining = 0;
     }
-    mInterupt = false;
+    mApu->mInterrupt = false;
   }
 }
 
 void DmcChannel::Clock() {
   if (mShiftRegisterRemaining == 0 && mBytesRemaining > 0) {
     mSampleBuffer = ReadSample(mCurrentSampleAddress);
-    IncrementCurrentSampleAddress();
-    mBytesRemaining--;
     if (mBytesRemaining == 0) {
       if (mLoop) {
         Restart();
-      } else if (mInteruptEnabled) {
-        mInterupt = true;
-        Interrupt();
+      } else if (mInterruptEnabled) {
+        mApu->mInterrupt = true;
       }
     }
   }
@@ -87,6 +84,9 @@ void DmcChannel::IncrementCurrentSampleAddress() {
   mCurrentSampleAddress++;
 }
 
-void DmcChannel::Interrupt() { mApu->NonMaskableInterrupt(); }
-
-uint8_t DmcChannel::ReadSample(uint16_t addr) { return mApu->ApuRead(addr); }
+uint8_t DmcChannel::ReadSample(uint16_t addr) {
+  const uint8_t sample = mApu->ApuRead(addr);
+  IncrementCurrentSampleAddress();
+  mBytesRemaining--;
+  return sample;
+}

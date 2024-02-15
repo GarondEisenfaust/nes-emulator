@@ -246,7 +246,7 @@ void BackgroundRenderer::VerticalBlankState() {
   }
   mStatusRegister.verticalBlank = true;
   if (mControlRegister.enableNmi) {
-    mPpu->NonMaskableInterrupt();
+    mPpu->mNonMaskableInterrupt = true;
   }
 }
 

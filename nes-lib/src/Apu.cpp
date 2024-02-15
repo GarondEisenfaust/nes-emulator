@@ -24,7 +24,7 @@ uint8_t Apu::CpuRead(uint16_t addr) {
     uint8_t triangleNotHalted = (!mTriangleChannel.mLengthCounter.IsHalted()) << 2;
     uint8_t noiseNotHalted = (!mNoiseChannel.mLengthCounter.IsHalted()) << 3;
     uint8_t dmcNotHalted = (mDmcChannel.mBytesRemaining > 0) << 4;
-    uint8_t interrupt = (mDmcChannel.mInterupt) << 7;
+    uint8_t interrupt = mInterrupt << 7;
     return interrupt | dmcNotHalted | noiseNotHalted | triangleNotHalted | pulseTimerTwoNotHalted |
            pulseTimerOneNotHalted;
   }
@@ -34,11 +34,12 @@ uint8_t Apu::CpuRead(uint16_t addr) {
 uint8_t Apu::ApuRead(uint16_t addr) { return mBus->mCpu->ApuRead(addr); }
 
 void Apu::Clock() {
+  mGlobalTime += 6 * (0.3333333333 / 1789773);
   auto quarter = IsQuarterFrameClock(mFrameClockCounter);
   auto half = IsHalfFrameClock(mFrameClockCounter);
 
-  mPulseChannelOne.Clock(quarter, half);
-  mPulseChannelTwo.Clock(quarter, half);
+  mPulseChannelOne.Clock(quarter, half, mGlobalTime);
+  mPulseChannelTwo.Clock(quarter, half, mGlobalTime);
   mNoiseChannel.Clock(quarter, half);
   mDmcChannel.Clock();
 
@@ -51,7 +52,7 @@ void Apu::Clock() {
                  mDmcChannel.output);
     mOutputDevice.Write(output);
   }
-  mFrameClockCounter = (mFrameClockCounter + 1) % onePeriod;
+  mFrameClockCounter = ++mFrameClockCounter % onePeriod;
 }
 
 void Apu::Reset() {}
@@ -60,8 +61,6 @@ void Apu::ConnectBus(Bus* bus) {
   mBus = bus;
   mBus->mApu = this;
 }
-
-void Apu::NonMaskableInterrupt() { mBus->mCpu->NonMaskableInterrupt(); }
 
 template <typename T, typename... Opts>
 inline bool IsAnyOf(T val, Opts... opts) {
@@ -73,11 +72,11 @@ bool Apu::IsHalfFrameClock(int clock) { return IsAnyOf(clock, halfFrameClocks[0]
 bool Apu::IsQuarterFrameClock(int clock) {
   return IsAnyOf(clock, quarterFrameClocks[0], quarterFrameClocks[1], quarterFrameClocks[2], quarterFrameClocks[3]);
 }
-auto i = 0;
-inline float Apu::Mix(uint8_t pulseOneOutput, uint8_t pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
+
+inline float Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
                       uint8_t dmcOutput) {
-  auto pulseOut = mPulseTable[pulseOneOutput + pulseTwoOutput];
-  auto tndOut = mTndTable[3 * triangleOutput + 2 * noiseOutput + dmcOutput];
+  auto pulseOut = 0.00752 * (pulseOneOutput + pulseTwoOutput);
+  auto tndOut = 0.00851 * triangleOutput + 0.00494 * noiseOutput + 0.00335 * dmcOutput;
   return pulseOut + tndOut;
 }
 
