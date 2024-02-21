@@ -23,9 +23,9 @@ void DmcChannel::Write(uint16_t addr, uint8_t data) {
     mSampleLength = (data * 16) + 0b0001;
   } else if (addr == 0x4015) {
     bool status = data & 0x10;
-    if (status && mBytesRemaining == 0) {
-      Restart();
-    } else if (!status) {
+    if (status) {
+      mStart = true;
+    } else {
       mBytesRemaining = 0;
     }
     mApu->mInterrupt = false;
@@ -33,32 +33,19 @@ void DmcChannel::Write(uint16_t addr, uint8_t data) {
 }
 
 void DmcChannel::Clock() {
-  if (mShiftRegisterRemaining == 0 && mBytesRemaining > 0) {
-    mSampleBuffer = ReadSample(mCurrentSampleAddress);
-    if (mBytesRemaining == 0) {
-      if (mLoop) {
-        Restart();
-      } else if (mInterruptEnabled) {
-        mApu->mInterrupt = true;
-      }
-    }
+  if (mStart && mBytesRemaining == 0) {
+    Restart();
   }
 
-  if (mShiftRegisterRemaining == 0) {
-    mShiftRegisterRemaining = 8;
-    if (mSampleBuffer == 0) {
-      mSilence = true;
-    } else {
-      mSilence = false;
-      mShiftRegister = mSampleBuffer;
-      mSampleBuffer = 0;
-    }
+  if (mSampleBufferEmpty && mBytesRemaining > 0) {
+    mSampleBuffer = ReadSample();
+    mSampleBufferEmpty = false;
+    mStart = false;
   }
 
   mDivider.Clock();
   if (mDivider.Notify()) {
     mDivider.Reset();
-
     if (!mSilence) {
       bool mShiftRegisterOutput = mShiftRegister & 0x01;
       if (mShiftRegisterOutput && (output <= 125)) {
@@ -68,7 +55,19 @@ void DmcChannel::Clock() {
       }
     }
     mShiftRegister >>= 1;
-    mShiftRegisterRemaining--;
+    mBitsRemaining--;
+
+    if (mBitsRemaining == 0) {
+      mBitsRemaining = 8;
+
+      if (mSampleBufferEmpty) {
+        mSilence = true;
+      } else {
+        mShiftRegister = mSampleBuffer;
+        mSampleBufferEmpty = true;
+        mSilence = false;
+      }
+    }
   }
 }
 
@@ -84,9 +83,17 @@ void DmcChannel::IncrementCurrentSampleAddress() {
   mCurrentSampleAddress++;
 }
 
-uint8_t DmcChannel::ReadSample(uint16_t addr) {
-  const uint8_t sample = mApu->ApuRead(addr);
+uint8_t DmcChannel::ReadSample() {
+  const uint8_t sample = mApu->ApuRead(mCurrentSampleAddress);
   IncrementCurrentSampleAddress();
   mBytesRemaining--;
+
+  if (mBytesRemaining == 0) {
+    if (mLoop) {
+      Restart();
+    } else if (mInterruptEnabled) {
+      mApu->mInterrupt = true;
+    }
+  }
   return sample;
 }
