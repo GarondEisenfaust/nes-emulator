@@ -15,10 +15,10 @@ void TriangleChannel::Write(uint16_t addr, uint8_t data) {
     mLengthCounter.SetHalt(data & 0x80);
     mCounterReloadValue = data & 0x7F;
   } else if (addr == 0x400A) {
-    mDivider.SetPeriod((mDivider.mPeriod & 0x0700) | data);
+    mDivider.SetLowerPeriodBits(data);
   } else if (addr == 0x400B) {
     mLengthCounter.SetCounter(data >> 3);
-    mDivider.SetPeriod((mDivider.mPeriod & 0x00FF) | ((data & 0x07) << 7));
+    mDivider.SetUpperPeriodBits(data);
     mCounterReload = true;
   } else if (addr == 0x4015) {
     mLengthCounter.SetEnabled(data & 0x04);
@@ -26,33 +26,34 @@ void TriangleChannel::Write(uint16_t addr, uint8_t data) {
 }
 
 void TriangleChannel::Clock(bool quarter, bool half) {
+  if (quarter || half) {
+    if (mCounterReload) {
+      mCounter = mCounterReloadValue;
+    } else if (mCounter > 0) {
+      mCounter--;
+    }
+    if (!mCounterControlFlag) {
+      mCounterReload = false;
+    }
+  }
+
+  if (half) {
+    mLengthCounter.Clock();
+  }
+
   mDivider.Clock();
   if (!mDivider.Notify()) {
     return;
   }
 
-  if (!(quarter || half)) {
-    return;
-  }
-
-  if (!mCounterControlFlag) {
-    mCounterReload = false;
-  }
-  if (mCounterReload) {
-    mCounter = mCounterReloadValue;
-  } else if (mCounter > 0) {
-    mCounter--;
-  }
-
-  output = 0;
-  mLengthCounter.Clock();
-
   if (mLengthCounter.ShouldMute()) {
+    output = 0;
     return;
   }
 
-  output = mSequence[mSequenceIndex];
-  if (mCounter > 0) {
-    mSequenceIndex = (mSequenceIndex + 1) % mSequence.size();
+  if (mCounter <= 0) {
+    return;
   }
+  output = mSequence[mSequenceIndex];
+  mSequenceIndex = (mSequenceIndex + 1) % mSequence.size();
 }
