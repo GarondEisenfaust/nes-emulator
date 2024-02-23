@@ -43,9 +43,8 @@ void Apu::Clock() {
   mNoiseChannel.Clock(quarter, half);
   mDmcChannel.Clock();
 
-  for (int i = 0; i < 2; i++) {
-    mTriangleChannel.Clock(quarter, half);
-  }
+  mTriangleChannel.Clock(quarter, half);
+  mTriangleChannel.Clock(false, false);
 
   if (mFrameClockCounter % 20 == 0) {
     output = Mix(mPulseChannelOne.output, mPulseChannelTwo.output, mTriangleChannel.output, mNoiseChannel.output,
