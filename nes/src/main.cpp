@@ -7,6 +7,7 @@
 #include "Cpu.h"
 #include "ForegroundRenderer.h"
 #include "IRenderer.h"
+#include "LoadRomWindow.h"
 #include "NesConfig.h"
 #include "Ppu.h"
 #include "rendering/IFrameDecoder.h"
@@ -16,6 +17,16 @@
 #include "rendering/RenderContext.h"
 #include <chrono>
 #include <thread>
+
+inline void LoadNewRomIfNecessary(LoadRomWindow& romWindow, std::string& romToLoad,
+                                  std::unique_ptr<Cartridge>& cartridge, Bus& bus) {
+  if (romWindow.mCurrentRomPath != romToLoad) {
+    romToLoad = romWindow.mCurrentRomPath;
+    cartridge = std::make_unique<Cartridge>(romToLoad);
+    bus.InsertCartridge(cartridge.get());
+    bus.Reset();
+  }
+}
 
 void RenderCompleteFrame(Bus& bus, IRenderer& renderer) {
   while (!renderer.FrameComplete()) {
@@ -83,10 +94,10 @@ int main(int argc, char* argv[]) {
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
   apu.ConnectBus(&bus);
+  std::unique_ptr<Cartridge> cartridge;
 
-  Cartridge cartridge(config.mRomPath);
-  bus.InsertCartridge(&cartridge);
-  bus.Reset();
+  LoadRomWindow romWindow("roms", config.mRomPath.c_str());
+  std::string romToLoad = "";
 
   using namespace std::chrono_literals;
   const auto diff = (1000ms / 60);
@@ -94,7 +105,14 @@ int main(int argc, char* argv[]) {
   renderContext.GameLoop([&]() {
     controller.SetControllerBitBasedOnInput(0);
     controller.SetControllerBitBasedOnInput(1);
-    RenderCompleteFrame(bus, renderContext);
+
+    romWindow.Draw();
+
+    LoadNewRomIfNecessary(romWindow, romToLoad, cartridge, bus);
+    if (cartridge) {
+      RenderCompleteFrame(bus, renderContext);
+    }
+
     std::this_thread::sleep_until(next);
     next += diff;
   });
