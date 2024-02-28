@@ -81,7 +81,8 @@
     "shared_mutex": "cpp",
     "format": "cpp",
     "span": "cpp",
-    "stdfloat": "cpp"
+    "stdfloat": "cpp",
+    "ranges": "cpp"
   },
   "cmake.configureOnOpen": false,
   "cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",

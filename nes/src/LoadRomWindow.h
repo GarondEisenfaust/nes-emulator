@@ -5,10 +5,10 @@
 
 class LoadRomWindow : public ImGuiWindow {
  public:
-  LoadRomWindow(const char* windowName, const char* romDirectory);
+  LoadRomWindow(const std::string& windowName, const std::string& romDirectory);
   std::string mCurrentRomPath = "";
 
  private:
-  const char* mRomDirectory;
+  const std::string mRomDirectory;
   std::vector<std::string> mRomPaths;
 };

@@ -20,7 +20,7 @@
 
 inline void LoadNewRomIfNecessary(LoadRomWindow& romWindow, std::string& romToLoad,
                                   std::unique_ptr<Cartridge>& cartridge, Bus& bus) {
-  if (romWindow.mCurrentRomPath != romToLoad) {
+  if (!romWindow.mCurrentRomPath.empty() && romWindow.mCurrentRomPath != romToLoad) {
     romToLoad = romWindow.mCurrentRomPath;
     cartridge = std::make_unique<Cartridge>(romToLoad);
     bus.InsertCartridge(cartridge.get());
@@ -94,10 +94,16 @@ int main(int argc, char* argv[]) {
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
   apu.ConnectBus(&bus);
+
+  LoadRomWindow romWindow("roms", config.mRomDirPath.c_str());
+  std::string romToLoad = config.mRomPath;
   std::unique_ptr<Cartridge> cartridge;
 
-  LoadRomWindow romWindow("roms", config.mRomPath.c_str());
-  std::string romToLoad = "";
+  if (!romToLoad.empty()) {
+    cartridge = std::make_unique<Cartridge>(romToLoad);
+    bus.InsertCartridge(cartridge.get());
+    bus.Reset();
+  }
 
   using namespace std::chrono_literals;
   const auto diff = (1000ms / 60);

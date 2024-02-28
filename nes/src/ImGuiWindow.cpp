@@ -5,6 +5,8 @@ ImGuiWindow::ImGuiWindow(const char* windowName) : mWindowName(windowName) {}
 
 void ImGuiWindow::Draw() {
   ImGui::Begin(mWindowName, &mShow);
-  mDrawingFunction();
+  if (mDrawingFunction) {
+    mDrawingFunction();
+  }
   ImGui::End();
 }

@@ -23,6 +23,8 @@ NesConfig ArgumentParser::Parse(int argc, char* argv[]) {
     const char* value = argv[i];
     if (strcmp(value, "--rom") == 0) {
       config.mRomPath = argv[++i];
+    } else if (strcmp(value, "--rom-dir") == 0) {
+      config.mRomDirPath = argv[++i];
     } else if (strcmp(value, "--decoder") == 0) {
       config.mDecoder = ResolveDecoder(argv[++i]);
     }
