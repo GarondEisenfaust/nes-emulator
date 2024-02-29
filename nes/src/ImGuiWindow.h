@@ -1,13 +1,14 @@
 #pragma once
 #include <functional>
+#include <string>
 
 class ImGuiWindow {
  public:
-  ImGuiWindow(const char* windowName);
+  ImGuiWindow(const std::string& windowName);
   virtual void Draw();
 
  protected:
-  const char* mWindowName;
+  const std::string mWindowName;
   bool mShow;
   std::function<void()> mDrawingFunction;
 };
