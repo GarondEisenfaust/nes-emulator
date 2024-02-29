@@ -19,7 +19,7 @@ jobs:
         run: sudo apt-get update
 
       - name: Installs dependencies
-        run: xargs -a .github/workflows/packages.txt sudo apt-get install -y
+        run: xargs -a packages.txt sudo apt-get install -y
 
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.type }}
