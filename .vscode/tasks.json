@@ -12,6 +12,13 @@
       },
       "problemMatcher": [],
       "detail": "CMake build task"
+    },
+    {
+      "label": "Docker: build",
+      "detail": "Mounts the workspace root and build the emulator inside a docker container",
+      "type": "shell",
+      "command": "python ${workspaceRoot}/scripts/build-in-docker-container.py ${workspaceRoot} ./build/${command:cmake.buildType}Docker ${command:cmake.buildType}",
+      "problemMatcher": ["$gcc"]
     }
   ]
 }
