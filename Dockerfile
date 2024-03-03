@@ -1,8 +1,15 @@
 FROM ubuntu:22.04
 
+ARG UID=0
+ARG GID=0
+
 COPY packages.txt .
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive xargs -a packages.txt apt-get install -y
-RUN mkdir -p /root/build/
 RUN ln -s /usr/bin/python3 /usr/bin/python
-WORKDIR /root/build/
 ENV CXX=/usr/bin/clang++-15
+
+RUN groupadd --gid ${GID} buildergroup
+RUN useradd --uid ${UID} --gid ${GID} --create-home builder
+USER builder
+RUN mkdir -p /home/builder/build/
+WORKDIR /home/builder/build/

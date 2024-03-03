@@ -12,6 +12,7 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
+set(ENV{CONAN_USER_HOME} ${CMAKE_BINARY_DIR})
 conan_cmake_autodetect(settings)
 conan_cmake_run(
   CONAN_COMMAND

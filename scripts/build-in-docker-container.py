@@ -10,30 +10,39 @@ def main():
   parser = argparse.ArgumentParser("build-in-docker-container.py")
   parser.add_argument(
       "source_directory", help="the source directory.", type=str)
+  parser.add_argument("build_directory", help="the build directory", type=str)
   parser.add_argument("build_type", help="the build type", type=str)
   args = parser.parse_args()
 
   source_dir = str(args.source_directory)
+  build_dir = str(args.build_directory)
   build_type = str(args.build_type)
 
-  id = build_container(source_dir)
+  gid = os.getegid()
+  uid = os.geteuid()
 
+  id = build_container(uid, gid, source_dir)
   run_command_in_build_container(
-      source_dir, id,
-      "cmake -B build/{build_type}Docker -G Ninja -DCMAKE_BUILD_TYPE={build_type} && cmake --build ./build/{build_type}Docker/ --config {build_type}"
-      .format(build_type=build_type))
+      uid, gid, source_dir, id,
+      "cmake -B {build_dir} -G Ninja -DCMAKE_BUILD_TYPE={build_type} && cmake --build {build_dir} --config {build_type}"
+      .format(build_type=build_type, build_dir=build_dir))
 
 
-def run_command_in_build_container(source_dir: str, container_id: str,
-                                   command: str):
+def run_command_in_build_container(uid: int, gid: int, source_dir: str,
+                                   container_id: str, command: str):
+  volume_mapping = "{source_dir}:/home/builder/build/".format(
+      source_dir=source_dir)
+  user_and_group = "{uid}:{gid}".format(uid=uid, gid=gid)
   subprocess.run([
-      "docker", "run", "-it", "-v", "{}:/root/build".format(source_dir),
-      container_id, "sh", "-c", command
+      "docker", "run", "--rm", "-it", "-v", volume_mapping, container_id, "sh",
+      "-c", command
   ])
 
 
-def build_container(source_dir: str):
-  return subprocess.run(["docker", "build", "-q", source_dir],
+def build_container(uid: int, gid: int, source_dir: str):
+  uid_arg = "--build-arg=UID={uid}".format(uid=uid)
+  gid_arg = "--build-arg=GID={gid}".format(gid=gid)
+  return subprocess.run(["docker", "build", "-q", uid_arg, gid_arg, source_dir],
                         check=True,
                         capture_output=True,
                         text=True).stdout.strip()

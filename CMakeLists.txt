@@ -12,7 +12,6 @@ set(VENV_PATH ${CMAKE_BINARY_DIR}/venv)
 
 # Include cmake utilities
 include(cmake/python.cmake)
-include(cmake/docker_build.cmake)
 include(cmake/macros.cmake)
 include(cmake/conan.cmake)
 include(cmake/download_roms.cmake)
