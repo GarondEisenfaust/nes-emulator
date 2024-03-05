@@ -27,6 +27,7 @@ RenderContext::RenderContext() {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
 
+  DisableImguiFiles();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
   ImGui_ImplOpenGL3_Init();
@@ -35,6 +36,11 @@ RenderContext::RenderContext() {
 
   glfwGetFramebufferSize(mWindow, &mWidth, &mHeight);
   glViewport(0, 0, mWidth, mHeight);
+}
+
+void RenderContext::DisableImguiFiles() {
+  ImGui::GetIO().IniFilename = nullptr;
+  ImGui::GetIO().LogFilename = nullptr;
 }
 
 RenderContext::~RenderContext() {

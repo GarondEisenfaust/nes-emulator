@@ -18,17 +18,10 @@
 #include <chrono>
 #include <thread>
 
-inline void LoadNewRomIfNecessary(LoadRomWindow& romWindow, std::string& romToLoad,
-                                  std::unique_ptr<Cartridge>& cartridge, Bus& bus) {
-  if (!romWindow.mCurrentRomPath.empty() && romWindow.mCurrentRomPath != romToLoad) {
-    romToLoad = romWindow.mCurrentRomPath;
-    cartridge = std::make_unique<Cartridge>(romToLoad);
-    bus.InsertCartridge(cartridge.get());
-    bus.Reset();
-  }
-}
-
 void RenderCompleteFrame(Bus& bus, IRenderer& renderer) {
+  if (!bus.CartridgeInserted()) {
+    return;
+  }
   while (!renderer.FrameComplete()) {
     bus.Clock();
   }
@@ -95,15 +88,11 @@ int main(int argc, char* argv[]) {
   ppu.ConnectBus(&bus);
   apu.ConnectBus(&bus);
 
-  LoadRomWindow romWindow("roms", config.mRomDirPath.c_str());
-  std::string romToLoad = config.mRomPath;
-  std::unique_ptr<Cartridge> cartridge;
-
-  if (!romToLoad.empty()) {
-    cartridge = std::make_unique<Cartridge>(romToLoad);
-    bus.InsertCartridge(cartridge.get());
+  if (!config.mRomPath.empty()) {
+    bus.InsertCartridge(std::make_shared<Cartridge>(config.mRomPath));
     bus.Reset();
   }
+  LoadRomWindow romWindow("roms", config.mRomDirPath.c_str(), &bus);
 
   using namespace std::chrono_literals;
   const auto diff = (1000ms / 60);
@@ -113,11 +102,7 @@ int main(int argc, char* argv[]) {
     controller.SetControllerBitBasedOnInput(1);
 
     romWindow.Draw();
-
-    LoadNewRomIfNecessary(romWindow, romToLoad, cartridge, bus);
-    if (cartridge) {
-      RenderCompleteFrame(bus, renderContext);
-    }
+    RenderCompleteFrame(bus, renderContext);
 
     std::this_thread::sleep_until(next);
     next += diff;

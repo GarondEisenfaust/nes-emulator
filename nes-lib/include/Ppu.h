@@ -40,7 +40,7 @@ class Ppu {
   void PpuWrite(uint16_t addr, uint8_t data);
 
   void ConnectBus(Bus* bus);
-  void InsertCartridge(Cartridge* cartridge);
+  void InsertCartridge(std::shared_ptr<Cartridge> cartridge);
   void Clock();
   void Reset();
   void UpdateShifters();
@@ -68,7 +68,7 @@ class Ppu {
 
   ForegroundRenderer* mForegroundRenderer;
   BackgroundRenderer* mBackgroundRenderer;
-  Cartridge* mCartridge;
+  std::shared_ptr<Cartridge> mCartridge;
 
   Bus* mBus;
   IRenderer& mRenderer;

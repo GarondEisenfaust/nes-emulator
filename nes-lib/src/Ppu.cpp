@@ -66,7 +66,7 @@ uint8_t Ppu::PpuRead(uint16_t addr) {
   return data;
 }
 
-void Ppu::InsertCartridge(Cartridge* cartridge) { mCartridge = cartridge; }
+void Ppu::InsertCartridge(std::shared_ptr<Cartridge> cartridge) { mCartridge = cartridge; }
 
 void Ppu::Clock() {
   mBackgroundRenderer->Clock();

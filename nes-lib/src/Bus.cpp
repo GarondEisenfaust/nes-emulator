@@ -52,10 +52,12 @@ bool Bus::Interrupt() { return mApu->mInterrupt || mCartridge->Interrupt(); }
 
 void Bus::ClearInterrupt() { mCartridge->ClearInterrupt(); }
 
-void Bus::InsertCartridge(Cartridge* cartridge) {
+void Bus::InsertCartridge(std::shared_ptr<Cartridge> cartridge) {
   mCartridge = cartridge;
   mPpu->InsertCartridge(cartridge);
 }
+
+bool Bus::CartridgeInserted() { return mCartridge.get(); }
 
 void Bus::Reset() {
   mCartridge->Reset();

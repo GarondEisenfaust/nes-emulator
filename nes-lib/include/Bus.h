@@ -13,7 +13,8 @@ class Bus {
   Bus(Ram& ram);
   ~Bus();
 
-  void InsertCartridge(Cartridge* cartridge);
+  void InsertCartridge(std::shared_ptr<Cartridge> cartridge);
+  bool CartridgeInserted();
   void Reset();
   void Clock();
 
@@ -31,7 +32,7 @@ class Bus {
   Apu* mApu;
 
  private:
-  Cartridge* mCartridge;
+  std::shared_ptr<Cartridge> mCartridge;
   uint32_t mClockCounter;
   Ram& mRam;
   IController* mController;
