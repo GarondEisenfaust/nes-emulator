@@ -15,7 +15,23 @@
         "--decoder",
         "ntsc-gpu"
       ],
-      "preLaunchTask": "${defaultBuildTask}"
+      "preLaunchTask": "CMake: build"
+    },
+    {
+      "name": "nes-docker",
+      "type": "cppdbg",
+      "cwd": "${command:cmake.buildDirectory}Docker/bin",
+      "request": "launch",
+      "program": "${command:cmake.buildDirectory}Docker/bin/nes",
+      "args": [
+        "--rom-dir",
+        "roms/",
+        "--rom",
+        "roms/smb.nes",
+        "--decoder",
+        "ntsc-gpu"
+      ],
+      "preLaunchTask": "Docker: build"
     }
   ]
 }
