@@ -7,7 +7,7 @@ class LoadRomWindow {
  public:
   LoadRomWindow(const std::string& windowName, const std::string& romDirectory, Bus* bus);
   void SetBus(Bus* bus);
-  void Draw();
+  bool Draw();
 
  private:
   Bus* mBus;

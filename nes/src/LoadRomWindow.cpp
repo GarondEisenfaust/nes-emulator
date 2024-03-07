@@ -24,17 +24,18 @@ void LoadRomWindow::DrawButtons() {
     if (ImGui::Button(romPath.c_str())) {
       mBus->InsertCartridge(std::make_shared<Cartridge>(romPath));
       mBus->Reset();
+      mShow = false;
       break;
     }
   }
 }
 
-void LoadRomWindow::Draw() {
+bool LoadRomWindow::Draw() {
   if (ImGui::IsKeyReleased(ImGuiKey_Escape) || ImGui::IsKeyReleased(ImGuiKey_GamepadStart)) {
     mShow = !mShow;
   }
   if (!mShow) {
-    return;
+    return false;
   }
   ImGui::SetNextWindowPos({xPos, yPos});
   ImGui::SetNextWindowSize({400, 600});
@@ -42,4 +43,5 @@ void LoadRomWindow::Draw() {
     DrawButtons();
   }
   ImGui::End();
+  return true;
 }

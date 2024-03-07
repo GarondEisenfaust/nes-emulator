@@ -101,8 +101,9 @@ int main(int argc, char* argv[]) {
     controller.SetControllerBitBasedOnInput(0);
     controller.SetControllerBitBasedOnInput(1);
 
-    romWindow.Draw();
-    RenderCompleteFrame(bus, renderContext);
+    if (!romWindow.Draw()) {
+      RenderCompleteFrame(bus, renderContext);
+    }
 
     std::this_thread::sleep_until(next);
     next += diff;
