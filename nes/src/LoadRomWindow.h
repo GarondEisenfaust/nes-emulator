@@ -12,10 +12,10 @@ class LoadRomWindow {
  private:
   Bus* mBus;
   bool mShow;
-  bool mStartCollapsed;
   const std::string mRomDirectory;
   const std::string mWindowName;
   std::vector<std::string> mRomPaths;
+  int mFlags = 0;
   float xPos = 0;
   float yPos = 0;
   void DrawButtons();

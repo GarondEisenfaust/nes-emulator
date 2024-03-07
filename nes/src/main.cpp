@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     bus.InsertCartridge(std::make_shared<Cartridge>(config.mRomPath));
     bus.Reset();
   }
-  LoadRomWindow romWindow("roms", config.mRomDirPath.c_str(), &bus);
+  LoadRomWindow romWindow("rom selection", config.mRomDirPath.c_str(), &bus);
 
   using namespace std::chrono_literals;
   const auto diff = (1000ms / 60);

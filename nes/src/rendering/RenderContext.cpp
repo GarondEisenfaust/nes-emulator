@@ -39,8 +39,10 @@ RenderContext::RenderContext() {
 }
 
 void RenderContext::DisableImguiFiles() {
-  ImGui::GetIO().IniFilename = nullptr;
-  ImGui::GetIO().LogFilename = nullptr;
+  auto& io = ImGui::GetIO();
+  io.IniFilename = nullptr;
+  io.LogFilename = nullptr;
+  io.ConfigFlags = ImGuiConfigFlags_NavEnableGamepad | ImGuiConfigFlags_NavEnableKeyboard;
 }
 
 RenderContext::~RenderContext() {

@@ -6,17 +6,15 @@
 #include <iostream>
 
 LoadRomWindow::LoadRomWindow(const std::string& windowName, const std::string& romDirectory, Bus* bus)
-    : mWindowName(windowName), mRomDirectory(romDirectory), mBus(bus), mStartCollapsed(bus->CartridgeInserted()) {
-  mShow = !mRomDirectory.empty();
-  if (!mShow) {
-    return;
+    : mWindowName(windowName), mRomDirectory(romDirectory), mBus(bus) {
+  if (!mRomDirectory.empty()) {
+    namespace fs = std::filesystem;
+    fs ::directory_iterator romDirectoryEntries(mRomDirectory);
+    std::transform(fs::begin(romDirectoryEntries), fs::end(romDirectoryEntries), std::back_inserter(mRomPaths),
+                   [](auto romName) { return romName.path(); });
   }
-
-  namespace fs = std::filesystem;
-  fs ::directory_iterator romDirectoryEntries(mRomDirectory);
-  std::transform(fs::begin(romDirectoryEntries), fs::end(romDirectoryEntries), std::back_inserter(mRomPaths),
-                 [](auto romName) { return romName.path(); });
-  mShow = !mRomPaths.empty();
+  mShow = !mRomPaths.empty() && !bus->CartridgeInserted();
+  mFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
 }
 
 void LoadRomWindow::SetBus(Bus* bus) { mBus = bus; }
@@ -32,13 +30,15 @@ void LoadRomWindow::DrawButtons() {
 }
 
 void LoadRomWindow::Draw() {
+  if (ImGui::IsKeyReleased(ImGuiKey_Escape) || ImGui::IsKeyReleased(ImGuiKey_GamepadStart)) {
+    mShow = !mShow;
+  }
   if (!mShow) {
     return;
   }
   ImGui::SetNextWindowPos({xPos, yPos});
-  ImGui::SetNextWindowSizeConstraints({400, 600}, {400, 600});
-  ImGui::SetNextWindowCollapsed(mStartCollapsed, ImGuiCond_Appearing);
-  if (ImGui::Begin(mWindowName.c_str())) {
+  ImGui::SetNextWindowSize({400, 600});
+  if (ImGui::Begin(mWindowName.c_str(), nullptr, mFlags)) {
     DrawButtons();
   }
   ImGui::End();
