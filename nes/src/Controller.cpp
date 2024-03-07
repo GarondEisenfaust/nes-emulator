@@ -33,9 +33,9 @@ void Controller::SetControllerBitBasedOnInput(int gamepadIndex) {
                                             PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_DPAD_RIGHT) ||
                                             JoystickPositionBetween(gamepadIndex, GLFW_GAMEPAD_AXIS_LEFT_X, 0.4, 1);
   mControllerRegister[gamepadIndex].select =
-      PressedKeyboard(GLFW_KEY_F) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_BACK);
+      PressedKeyboard(GLFW_KEY_F) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_Y);
   mControllerRegister[gamepadIndex].start =
-      PressedKeyboard(GLFW_KEY_G) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_START);
+      PressedKeyboard(GLFW_KEY_G) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_B);
   mControllerRegister[gamepadIndex].b =
       PressedKeyboard(GLFW_KEY_H) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_X);
   mControllerRegister[gamepadIndex].a =
