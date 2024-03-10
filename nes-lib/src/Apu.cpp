@@ -57,7 +57,12 @@ void Apu::Clock() {
   mFrameClockCounter = ++mFrameClockCounter % onePeriod;
 }
 
-void Apu::Reset() {}
+void Apu::Reset() {
+  for (uint16_t address = APU_RAM_START; address <= APU_RAM_END; address++) {
+    CpuWrite(address, 0x00);
+  }
+  CpuWrite(APU_STATUS, 0x00);
+}
 
 void Apu::Start() {
   mRunning = true;
