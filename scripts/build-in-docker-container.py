@@ -45,7 +45,9 @@ def run_command_in_build_container(docker_executable: str, uid: int, gid: int,
   subprocess.run([
       docker_executable, "run", "--rm", "-it", "-v", volume_mapping,
       container_id, "sh", "-c", command
-  ])
+  ],
+                 check=True,
+                 text=True)
 
 
 def build_container(docker_executable: str, uid: int, gid: int,
