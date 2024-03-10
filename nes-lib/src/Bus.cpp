@@ -73,9 +73,6 @@ void Bus::Clock() {
   if (mClockCounter % 3 == 0) {
     mCpu->Clock();
   }
-  if (mClockCounter % 6 == 0) {
-    mApu->Clock();
-  }
 
   if (NonMaskableInterrupt()) {
     mCpu->ExecuteNonMaskableInterrupt();

@@ -39,7 +39,7 @@ void AudioDevice::Impl::AudioCallback(ma_device* pDevice, void* pOutput, const v
   }
 };
 
-AudioDevice::Impl::Impl() : mRingBuffer(10000) {
+AudioDevice::Impl::Impl() : mRingBuffer(5000) {
   ma_device_config deviceConfig;
 
   deviceConfig = ma_device_config_init(ma_device_type_playback);

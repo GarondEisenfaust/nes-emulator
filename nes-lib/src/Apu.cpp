@@ -7,7 +7,10 @@ Apu::Apu(IAudioOutputDevice& outputDevice)
       mPulseChannelTwo(true),
       mDmcChannel(this),
       mPulseTable(PrecalculatePulseTable()),
-      mTndTable(PrecalculateTndTable()) {}
+      mTndTable(PrecalculateTndTable()),
+      mRunning(false) {}
+
+Apu::~Apu() { Stop(); }
 
 void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   mPulseChannelOne.Write(addr, data);
@@ -55,6 +58,20 @@ void Apu::Clock() {
 }
 
 void Apu::Reset() {}
+
+void Apu::Start() {
+  mRunning = true;
+  mApuThread = std::thread([this]() {
+    while (mRunning) {
+      Clock();
+    }
+  });
+}
+
+void Apu::Stop() {
+  mRunning = false;
+  mApuThread.join();
+}
 
 void Apu::ConnectBus(Bus* bus) {
   mBus = bus;

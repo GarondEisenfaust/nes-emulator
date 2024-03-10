@@ -94,6 +94,8 @@ int main(int argc, char* argv[]) {
   }
   LoadRomWindow romWindow("rom selection", config.mRomDirPath.c_str(), &bus);
 
+  apu.Start();
+
   using namespace std::chrono_literals;
   const auto diff = (1000ms / 60);
   auto next = std::chrono::system_clock::now();
