@@ -8,6 +8,8 @@ class AudioDevice : public IAudioOutputDevice {
   ~AudioDevice();
   void Write(float data) override;
   float Read() override;
+  void Mute();
+  void UnMute();
 
  private:
   class Impl;

@@ -9,6 +9,9 @@ class AudioDevice::Impl {
   ~Impl();
   void Write(float data);
   float Read();
+  void Mute();
+  void UnMute();
+
   void UpdateMinSample(float value);
   void UpdateMaxSample(float value);
 
@@ -17,6 +20,7 @@ class AudioDevice::Impl {
   ma_device mDevice;
   float mMinReceivedSample = 0;
   float mMaxReceivedSample = 0.1;
+  bool mMuted;
   static void AudioCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount);
 };
 
@@ -32,17 +36,18 @@ void AudioDevice::Impl::AudioCallback(ma_device* pDevice, void* pOutput, const v
   RingBuffer* ringBuffer = &audioDeviceImpl->mRingBuffer;
   for (int i = 0; i < frameCount; i++) {
     auto value = ringBuffer->Read();
-
-    audioDeviceImpl->UpdateMinSample(value);
-    audioDeviceImpl->UpdateMaxSample(value);
-    asFloatPointer[i] = Normalize(value, audioDeviceImpl->mMinReceivedSample, audioDeviceImpl->mMaxReceivedSample);
+    if (audioDeviceImpl->mMuted) {
+      asFloatPointer[i] = 0;
+    } else {
+      audioDeviceImpl->UpdateMinSample(value);
+      audioDeviceImpl->UpdateMaxSample(value);
+      asFloatPointer[i] = Normalize(value, audioDeviceImpl->mMinReceivedSample, audioDeviceImpl->mMaxReceivedSample);
+    }
   }
 };
 
-AudioDevice::Impl::Impl() : mRingBuffer(5000) {
-  ma_device_config deviceConfig;
-
-  deviceConfig = ma_device_config_init(ma_device_type_playback);
+AudioDevice::Impl::Impl() : mRingBuffer(5000), mMuted(false) {
+  ma_device_config deviceConfig = ma_device_config_init(ma_device_type_playback);
   deviceConfig.playback.format = DEVICE_FORMAT;
   deviceConfig.playback.channels = DEVICE_CHANNELS;
   deviceConfig.sampleRate = DEVICE_SAMPLE_RATE;
@@ -69,6 +74,10 @@ void AudioDevice::Impl::Write(float data) { mRingBuffer.Write(data); }
 
 float AudioDevice::Impl::Read() { return mRingBuffer.Read(); }
 
+void AudioDevice::Impl::UnMute() { mMuted = false; }
+
+void AudioDevice::Impl::Mute() { mMuted = true; }
+
 void AudioDevice::Impl::UpdateMinSample(float value) { mMinReceivedSample = std::min(value, mMinReceivedSample); }
 
 void AudioDevice::Impl::UpdateMaxSample(float value) { mMaxReceivedSample = std::max(value, mMaxReceivedSample); }
@@ -80,3 +89,7 @@ AudioDevice::~AudioDevice() = default;
 void AudioDevice::Write(float data) { mImpl->Write(data); }
 
 float AudioDevice::Read() { return mImpl->Read(); }
+
+void AudioDevice::Mute() { mImpl->Mute(); }
+
+void AudioDevice::UnMute() { mImpl->UnMute(); }

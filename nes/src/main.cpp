@@ -104,7 +104,10 @@ int main(int argc, char* argv[]) {
     controller.SetControllerBitBasedOnInput(1);
 
     if (!romWindow.Draw()) {
+      audioDevice.UnMute();
       RenderCompleteFrame(bus, renderContext);
+    } else {
+      audioDevice.Mute();
     }
 
     std::this_thread::sleep_until(next);
