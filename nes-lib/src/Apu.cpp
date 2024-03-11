@@ -1,16 +1,12 @@
 #include "Apu.h"
 #include "Bus.h"
 
-Apu::Apu(IAudioOutputDevice& outputDevice)
-    : mOutputDevice(outputDevice),
-      mPulseChannelOne(false),
+Apu::Apu()
+    : mPulseChannelOne(false),
       mPulseChannelTwo(true),
       mDmcChannel(this),
       mPulseTable(PrecalculatePulseTable()),
-      mTndTable(PrecalculateTndTable()),
-      mRunning(false) {}
-
-Apu::~Apu() { Stop(); }
+      mTndTable(PrecalculateTndTable()) {}
 
 void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   mPulseChannelOne.Write(addr, data);
@@ -48,13 +44,15 @@ void Apu::Clock() {
 
   mTriangleChannel.Clock(quarter, half);
   mTriangleChannel.Clock(false, false);
+  mFrameClockCounter = (mFrameClockCounter + 1) % onePeriod;
+}
 
-  if (mFrameClockCounter % 20 == 0) {
-    output = Mix(mPulseChannelOne.output, mPulseChannelTwo.output, mTriangleChannel.output, mNoiseChannel.output,
-                 mDmcChannel.output);
-    mOutputDevice.Write(output);
+float Apu::GenerateNextSample() {
+  for (int i = 0; i < 20; i++) {
+    Clock();
   }
-  mFrameClockCounter = ++mFrameClockCounter % onePeriod;
+  return Mix(mPulseChannelOne.output, mPulseChannelTwo.output, mTriangleChannel.output, mNoiseChannel.output,
+             mDmcChannel.output);
 }
 
 void Apu::Reset() {
@@ -62,20 +60,6 @@ void Apu::Reset() {
     CpuWrite(address, 0x00);
   }
   CpuWrite(APU_STATUS, 0x00);
-}
-
-void Apu::Start() {
-  mRunning = true;
-  mApuThread = std::thread([this]() {
-    while (mRunning) {
-      Clock();
-    }
-  });
-}
-
-void Apu::Stop() {
-  mRunning = false;
-  mApuThread.join();
 }
 
 void Apu::ConnectBus(Bus* bus) {

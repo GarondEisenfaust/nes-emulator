@@ -1,6 +1,6 @@
 #include "RingBuffer.h"
 
-RingBuffer::RingBuffer(int size) : mSize(size) {
+RingBuffer::RingBuffer(int size) : mSize(size), mUnreadCount(0) {
   mStart = new float[mSize]{0};
   mEnd = mStart + size;
   readPointer = mStart;

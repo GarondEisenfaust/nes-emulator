@@ -17,7 +17,6 @@ class RingBuffer {
   float Read();
 
  private:
-  int mSize;
   float* mStart;
   float* mEnd;
 
@@ -27,6 +26,7 @@ class RingBuffer {
   float mLastRead;
   std::mutex mGuard;
   std::condition_variable condition;
-  unsigned long mUnreadCount;
+  size_t mUnreadCount;
+  size_t mSize;
   float* Advance(float* current);
 };

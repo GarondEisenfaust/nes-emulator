@@ -9,11 +9,9 @@ class AudioDevice::Impl {
   ~Impl();
   void Write(float data);
   float Read();
+  void Start();
   void Mute();
   void UnMute();
-
-  void UpdateMinSample(float value);
-  void UpdateMaxSample(float value);
 
  private:
   RingBuffer mRingBuffer;
@@ -21,6 +19,9 @@ class AudioDevice::Impl {
   float mMinReceivedSample = 0;
   float mMaxReceivedSample = 0.1;
   bool mMuted;
+
+  void UpdateMinSample(float value);
+  void UpdateMaxSample(float value);
   static void AudioCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount);
 };
 
@@ -30,9 +31,9 @@ float Normalize(float value, float min, float max, float minDesired = -1, float 
   return firstPart * range + minDesired;
 }
 
-void AudioDevice::Impl::AudioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
-  auto* asFloatPointer = reinterpret_cast<float*>(pOutput);
-  auto* audioDeviceImpl = reinterpret_cast<AudioDevice::Impl*>(pDevice->pUserData);
+void AudioDevice::Impl::AudioCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount) {
+  auto* asFloatPointer = reinterpret_cast<float*>(output);
+  auto* audioDeviceImpl = reinterpret_cast<AudioDevice::Impl*>(device->pUserData);
   RingBuffer* ringBuffer = &audioDeviceImpl->mRingBuffer;
   for (int i = 0; i < frameCount; i++) {
     auto value = ringBuffer->Read();
@@ -59,10 +60,6 @@ AudioDevice::Impl::Impl() : mRingBuffer(5000), mMuted(false) {
   }
 
   std::cout << "Device Name: " << mDevice.playback.name << "\n";
-
-  if (ma_device_start(&mDevice) != MA_SUCCESS) {
-    std::cout << "Failed to start playback device.\n";
-  }
 }
 
 AudioDevice::Impl::~Impl() {
@@ -73,6 +70,12 @@ AudioDevice::Impl::~Impl() {
 void AudioDevice::Impl::Write(float data) { mRingBuffer.Write(data); }
 
 float AudioDevice::Impl::Read() { return mRingBuffer.Read(); }
+
+void AudioDevice::Impl::Start() {
+  if (ma_device_start(&mDevice) != MA_SUCCESS) {
+    std::cout << "Failed to start playback device.\n";
+  }
+}
 
 void AudioDevice::Impl::UnMute() { mMuted = false; }
 
@@ -89,6 +92,8 @@ AudioDevice::~AudioDevice() = default;
 void AudioDevice::Write(float data) { mImpl->Write(data); }
 
 float AudioDevice::Read() { return mImpl->Read(); }
+
+void AudioDevice::Start() { mImpl->Start(); }
 
 void AudioDevice::Mute() { mImpl->Mute(); }
 

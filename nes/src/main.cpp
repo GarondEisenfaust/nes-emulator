@@ -1,4 +1,5 @@
 #include "Apu.h"
+#include "ApuClockContext.h"
 #include "ArgumentParser.h"
 #include "AudioDevice.h"
 #include "BackgroundRenderer.h"
@@ -70,8 +71,7 @@ int main(int argc, char* argv[]) {
   Bus bus(*ram);
   Cpu cpu;
   Ppu ppu(renderContext);
-  AudioDevice audioDevice;
-  Apu apu(audioDevice);
+  Apu apu;
 
   ForegroundRenderer foregroundRenderer;
   foregroundRenderer.SetPpu(&ppu);
@@ -94,7 +94,9 @@ int main(int argc, char* argv[]) {
   }
   LoadRomWindow romWindow("rom selection", config.mRomDirPath.c_str(), &bus);
 
-  apu.Start();
+  AudioDevice audioDevice;
+  ApuClockContext apuClockContext(apu, audioDevice);
+  audioDevice.Start();
 
   using namespace std::chrono_literals;
   const auto diff = (1000ms / 60);
