@@ -1,8 +1,10 @@
 #include "Apu.h"
 #include "Bus.h"
+#include <cmath>
 
 Apu::Apu()
-    : mPulseChannelOne(false),
+    : mApuFrameCounter(*this),
+      mPulseChannelOne(false),
       mPulseChannelTwo(true),
       mDmcChannel(this),
       mPulseTable(PrecalculatePulseTable()),
@@ -24,6 +26,7 @@ uint8_t Apu::CpuRead(uint16_t addr) {
     uint8_t noiseNotHalted = (!mNoiseChannel.mLengthCounter.IsHalted()) << 3;
     uint8_t dmcNotHalted = (mDmcChannel.mBytesRemaining > 0) << 4;
     uint8_t interrupt = mInterrupt << 7;
+    mInterrupt = 0;
     return interrupt | dmcNotHalted | noiseNotHalted | triangleNotHalted | pulseTimerTwoNotHalted |
            pulseTimerOneNotHalted;
   }
@@ -33,21 +36,20 @@ uint8_t Apu::CpuRead(uint16_t addr) {
 uint8_t Apu::ApuRead(uint16_t addr) { return mBus->mCpu->ApuRead(addr); }
 
 void Apu::Clock() {
-  mGlobalTime += 6 * (0.3333333333 / 1789773);
-  auto quarter = IsQuarterFrameClock(mFrameClockCounter);
-  auto half = IsHalfFrameClock(mFrameClockCounter);
+  mApuFrameCounter.Clock();
 
-  mPulseChannelOne.Clock(quarter, half, mGlobalTime);
-  mPulseChannelTwo.Clock(quarter, half, mGlobalTime);
-  mNoiseChannel.Clock(quarter, half);
+  mPulseChannelOne.Clock(mApuFrameCounter.mQuarterFrameClock, mApuFrameCounter.mHalfFrameClock, mGlobalTime);
+  mPulseChannelTwo.Clock(mApuFrameCounter.mQuarterFrameClock, mApuFrameCounter.mHalfFrameClock, mGlobalTime);
+  mNoiseChannel.Clock(mApuFrameCounter.mQuarterFrameClock, mApuFrameCounter.mHalfFrameClock);
   mDmcChannel.Clock();
 
-  mTriangleChannel.Clock(quarter, half);
+  mTriangleChannel.Clock(mApuFrameCounter.mQuarterFrameClock, mApuFrameCounter.mHalfFrameClock);
   mTriangleChannel.Clock(false, false);
-  mFrameClockCounter = (mFrameClockCounter + 1) % onePeriod;
+
+  UpdateGlobalTime();
 }
 
-float Apu::GenerateNextSample() {
+double Apu::GenerateNextSample() {
   for (int i = 0; i < 20; i++) {
     Clock();
   }
@@ -78,11 +80,19 @@ bool Apu::IsQuarterFrameClock(int clock) {
   return IsAnyOf(clock, quarterFrameClocks[0], quarterFrameClocks[1], quarterFrameClocks[2], quarterFrameClocks[3]);
 }
 
-inline float Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
-                      uint8_t dmcOutput) {
+inline double Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
+                       uint8_t dmcOutput) {
   auto pulseOut = 0.00752 * (pulseOneOutput + pulseTwoOutput);
   auto tndOut = 0.00851 * triangleOutput + 0.00494 * noiseOutput + 0.00335 * dmcOutput;
   return pulseOut + tndOut;
+}
+
+void Apu::UpdateGlobalTime() {
+  mGlobalTime += 6.0 * ((1.0 / 3.0) / 1789773.0);
+
+  if (mGlobalTime >= (2 * M_PI)) {
+    mGlobalTime = 0;
+  }
 }
 
 constexpr std::array<float, 31> Apu::PrecalculatePulseTable() {

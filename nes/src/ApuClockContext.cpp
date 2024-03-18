@@ -11,7 +11,7 @@ void ApuClockContext::Start() {
   mRunning = true;
   mApuClockThread = std::thread([this]() {
     while (mRunning) {
-      float sample = mApu.GenerateNextSample();
+      double sample = mApu.GenerateNextSample();
       mOutputDevice.Write(sample);
     }
   });

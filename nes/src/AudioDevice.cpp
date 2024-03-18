@@ -7,8 +7,8 @@ class AudioDevice::Impl {
  public:
   Impl();
   ~Impl();
-  void Write(float data);
-  float Read();
+  void Write(double data);
+  double Read();
   void Start();
   void Mute();
   void UnMute();
@@ -67,9 +67,9 @@ AudioDevice::Impl::~Impl() {
   ma_device_uninit(&mDevice);
 }
 
-void AudioDevice::Impl::Write(float data) { mRingBuffer.Write(data); }
+void AudioDevice::Impl::Write(double data) { mRingBuffer.Write(data); }
 
-float AudioDevice::Impl::Read() { return mRingBuffer.Read(); }
+double AudioDevice::Impl::Read() { return mRingBuffer.Read(); }
 
 void AudioDevice::Impl::Start() {
   if (ma_device_start(&mDevice) != MA_SUCCESS) {
@@ -89,9 +89,9 @@ AudioDevice::AudioDevice() : mImpl(std::make_unique<Impl>()) {}
 
 AudioDevice::~AudioDevice() = default;
 
-void AudioDevice::Write(float data) { mImpl->Write(data); }
+void AudioDevice::Write(double data) { mImpl->Write(data); }
 
-float AudioDevice::Read() { return mImpl->Read(); }
+double AudioDevice::Read() { return mImpl->Read(); }
 
 void AudioDevice::Start() { mImpl->Start(); }
 

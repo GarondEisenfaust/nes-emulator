@@ -13,20 +13,20 @@ class RingBuffer {
   RingBuffer& operator=(const RingBuffer&) = delete;
   RingBuffer& operator=(RingBuffer&&) = delete;
 
-  void Write(float data);
-  float Read();
+  void Write(double data);
+  double Read();
 
  private:
-  float* mStart;
-  float* mEnd;
+  double* mStart;
+  double* mEnd;
 
-  float* writePointer;
-  float* readPointer;
+  double* writePointer;
+  double* readPointer;
 
-  float mLastRead;
+  double mLastRead;
   std::mutex mGuard;
   std::condition_variable condition;
   size_t mUnreadCount;
   size_t mSize;
-  float* Advance(float* current);
+  double* Advance(double* current);
 };

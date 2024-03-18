@@ -8,8 +8,13 @@
 Bus::Bus(Ram& ram) : mRam(ram), mClockCounter(0) {}
 
 Bus::~Bus() {}
+int readCount = 0;
+int writeCount = 0;
 
 void Bus::CpuWrite(uint16_t addr, uint8_t data) {
+  if (addr == 0x4017) {
+    writeCount++;
+  }
   if (RAM_START <= addr && addr <= RAM_END) {
     mRam.Write(addr, data);
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
@@ -27,7 +32,9 @@ void Bus::CpuWrite(uint16_t addr, uint8_t data) {
 
 uint8_t Bus::CpuRead(uint16_t addr) {
   uint8_t data = 0x00;
-
+  if (addr == 0x4017) {
+    readCount++;
+  }
   if (RAM_START <= addr && addr <= RAM_END) {
     data = mRam.Read(addr);
   } else if (PPU_RAM_START <= addr && addr <= PPU_RAM_END) {
@@ -50,7 +57,10 @@ void Bus::ClearNonMaskableInterrupt() { mPpu->mNonMaskableInterrupt = false; }
 
 bool Bus::Interrupt() { return mApu->mInterrupt || mCartridge->Interrupt(); }
 
-void Bus::ClearInterrupt() { mCartridge->ClearInterrupt(); }
+void Bus::ClearInterrupt() {
+  mApu->mInterrupt = false;
+  mCartridge->ClearInterrupt();
+}
 
 void Bus::InsertCartridge(std::shared_ptr<Cartridge> cartridge) {
   mCartridge = cartridge;

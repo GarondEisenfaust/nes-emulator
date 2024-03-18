@@ -1,4 +1,5 @@
 #pragma once
+#include "ApuFrameCounter.h"
 #include "DmcChannel.h"
 #include "IAudioOutputDevice.h"
 #include "NoiseChannel.h"
@@ -22,7 +23,7 @@ class Apu {
 
   void Reset();
   void Clock();
-  float GenerateNextSample();
+  double GenerateNextSample();
 
   void ConnectBus(Bus* bus);
   bool mInterrupt;
@@ -30,7 +31,7 @@ class Apu {
 
  private:
   Bus* mBus;
-  int mFrameClockCounter;
+  ApuFrameCounter mApuFrameCounter;
   PulseChannel mPulseChannelOne;
   PulseChannel mPulseChannelTwo;
   NoiseChannel mNoiseChannel;
@@ -46,8 +47,9 @@ class Apu {
 
   inline bool IsHalfFrameClock(int clock);
   inline bool IsQuarterFrameClock(int clock);
-  inline float Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
-                   uint8_t dmcOutput);
+  inline double Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
+                    uint8_t dmcOutput);
+  void UpdateGlobalTime();
 
   constexpr std::array<float, 31> PrecalculatePulseTable();
   constexpr std::array<float, 203> PrecalculateTndTable();

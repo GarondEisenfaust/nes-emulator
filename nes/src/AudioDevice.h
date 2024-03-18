@@ -6,8 +6,8 @@ class AudioDevice : public IAudioOutputDevice {
  public:
   AudioDevice();
   ~AudioDevice();
-  void Write(float data) override;
-  float Read() override;
+  void Write(double data) override;
+  double Read() override;
   void Start();
   void Mute();
   void UnMute();

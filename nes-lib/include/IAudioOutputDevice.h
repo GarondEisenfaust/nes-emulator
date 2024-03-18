@@ -2,6 +2,6 @@
 
 class IAudioOutputDevice {
  public:
-  void virtual Write(float data) = 0;
-  float virtual Read() = 0;
+  void virtual Write(double data) = 0;
+  double virtual Read() = 0;
 };

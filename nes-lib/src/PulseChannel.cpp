@@ -81,9 +81,12 @@ void PulseChannel::Clock(bool quarter, bool half, double globalTime) {
     return;
   }
 
-  mOscilator.frequency = 1789773 / (16.0 * static_cast<double>(mSequencer.mDivider.mPeriod + 1));
+  mOscilator.frequency = 1789773.0 / (16.0 * static_cast<double>(mSequencer.mDivider.mPeriod + 1));
   mOscilator.amplitude = static_cast<double>(mEnvelope.output - 1);
   double sample = mOscilator.Sample(globalTime);
 
-  output += (sample - output) * 0.5;
+  output = sample;
+  // if (!mIsSecondChannel) {
+  //   std::cout << std::to_string(output) << "\n";
+  // }
 }
