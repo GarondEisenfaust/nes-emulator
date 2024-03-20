@@ -2,14 +2,13 @@
 #include "Envelope.h"
 #include "LengthCounter.h"
 #include "Oscilator.h"
-#include "Sequencer.h"
 #include "Sweeper.h"
 
 class PulseChannel {
  public:
   PulseChannel(bool isSecondChannel);
   Envelope mEnvelope;
-  Sequencer mSequencer;
+  Divider mDivider;
   Sweeper mSweeper;
   LengthCounter mLengthCounter;
   Oscilator mOscilator;
