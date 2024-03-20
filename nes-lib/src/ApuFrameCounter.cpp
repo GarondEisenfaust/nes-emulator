@@ -26,14 +26,14 @@ inline bool IsAnyOf(T val, Opts... opts) {
   return (... || (val == opts));
 }
 
-bool ApuFrameCounter::IsHalfFrameClock(int clock) {
+bool ApuFrameCounter::IsHalfFrameClock(uint32_t clock) {
   if (mFiveStepMode) {
     return IsAnyOf(clock, mFiveStepHalfFrameClocks[0], mFiveStepHalfFrameClocks[1]);
   }
   return IsAnyOf(clock, mFourStepHalfFrameClocks[0], mFourStepHalfFrameClocks[1]);
 }
 
-bool ApuFrameCounter::IsQuarterFrameClock(int clock) {
+bool ApuFrameCounter::IsQuarterFrameClock(uint32_t clock) {
   if (mFiveStepMode) {
     return IsAnyOf(clock, mFiveStepQuarterFrameClocks[0], mFiveStepQuarterFrameClocks[1],
                    mFiveStepQuarterFrameClocks[2], mFiveStepQuarterFrameClocks[3]);

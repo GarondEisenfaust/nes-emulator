@@ -74,14 +74,15 @@ inline bool IsAnyOf(T val, Opts... opts) {
   return (... || (val == opts));
 }
 
-bool Apu::IsHalfFrameClock(int clock) { return IsAnyOf(clock, halfFrameClocks[0], halfFrameClocks[1]); }
+bool Apu::IsHalfFrameClock(uint32_t clock) { return IsAnyOf(clock, halfFrameClocks[0], halfFrameClocks[1]); }
 
-bool Apu::IsQuarterFrameClock(int clock) {
+bool Apu::IsQuarterFrameClock(uint32_t clock) {
   return IsAnyOf(clock, quarterFrameClocks[0], quarterFrameClocks[1], quarterFrameClocks[2], quarterFrameClocks[3]);
 }
 
 inline double Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
                        uint8_t dmcOutput) {
+  // return pulseTwoOutput;
   auto pulseOut = 0.00752 * (pulseOneOutput + pulseTwoOutput);
   auto tndOut = 0.00851 * triangleOutput + 0.00494 * noiseOutput + 0.00335 * dmcOutput;
   return pulseOut + tndOut;

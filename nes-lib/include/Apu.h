@@ -41,12 +41,12 @@ class Apu {
   std::array<float, 31> mPulseTable;
   std::array<float, 203> mTndTable;
   float output;
-  const int onePeriod = 14914;
-  const int halfFrameClocks[2] = {7456, onePeriod};
-  const int quarterFrameClocks[4] = {3728, halfFrameClocks[0], 11185, halfFrameClocks[1]};
+  const uint32_t onePeriod = 14914;
+  const uint32_t halfFrameClocks[2] = {7456, onePeriod};
+  const uint32_t quarterFrameClocks[4] = {3728, halfFrameClocks[0], 11185, halfFrameClocks[1]};
 
-  inline bool IsHalfFrameClock(int clock);
-  inline bool IsQuarterFrameClock(int clock);
+  inline bool IsHalfFrameClock(uint32_t clock);
+  inline bool IsQuarterFrameClock(uint32_t clock);
   inline double Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
                     uint8_t dmcOutput);
   void UpdateGlobalTime();

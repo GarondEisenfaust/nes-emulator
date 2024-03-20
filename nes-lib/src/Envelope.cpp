@@ -9,7 +9,7 @@ void Envelope::Clock() {
   } else {
     divider.Clock();
     if (divider.Notify()) {
-      divider.SetPeriod(volume);
+      divider.Reset(volume);
       if (decayLevelCounter > 0) {
         decayLevelCounter--;
       } else if (loop) {

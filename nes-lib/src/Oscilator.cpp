@@ -12,7 +12,7 @@ double ApproximateSine(double t) {
   return 20.785 * j * (j - 0.5) * (j - 1.0);
 }
 
-double Oscilator::Sample(double t) {
+double Oscilator::Sample(double t, double frequency, double amplitude) {
   double a = 0;
   double b = 0;
   double p = dutycycle * 2.0 * M_PI;

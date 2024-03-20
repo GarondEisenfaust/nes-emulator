@@ -19,6 +19,7 @@ class PulseChannel {
   void Write(uint16_t addr, uint8_t data);
 
  private:
-  bool mIsSecondChannel;
+  const bool mIsSecondChannel;
+  const int mAddressOffset;
   int mClock = 0;
 };

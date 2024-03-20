@@ -1,10 +1,11 @@
 #include "PulseChannel.h"
 #include <iostream>
 
-PulseChannel::PulseChannel(bool isSecondChannel) : mSweeper(!isSecondChannel), mIsSecondChannel(isSecondChannel) {}
+PulseChannel::PulseChannel(bool isSecondChannel)
+    : mSweeper(!isSecondChannel), mIsSecondChannel(isSecondChannel), mAddressOffset(mIsSecondChannel * 4) {}
 
 void PulseChannel::Write(uint16_t addr, uint8_t data) {
-  if (addr == (0x4000 + (mIsSecondChannel * 4))) {
+  if (addr == (0x4000 + mAddressOffset)) {
     switch ((data & 0xC0) >> 6) {
       case 0x00: {
         mSequencer.reloadSequence = 0b01000000;
@@ -32,11 +33,11 @@ void PulseChannel::Write(uint16_t addr, uint8_t data) {
     mEnvelope.loop = data & 0x20;
     mEnvelope.constantVolume = data & 0x10;
     mEnvelope.volume = data & 0x0F;
-  } else if (addr == (0x4001 + (mIsSecondChannel * 4))) {
+  } else if (addr == (0x4001 + mAddressOffset)) {
     mSweeper.Write(data);
-  } else if (addr == (0x4002 + (mIsSecondChannel * 4))) {
+  } else if (addr == (0x4002 + mAddressOffset)) {
     mSequencer.mDivider.SetLowerPeriodBits(data);
-  } else if (addr == (0x4003 + (mIsSecondChannel * 4))) {
+  } else if (addr == (0x4003 + mAddressOffset)) {
     mLengthCounter.SetCounter(data >> 3);
     mSequencer.mDivider.SetUpperPeriodBits(data);
     mEnvelope.startFlag = true;
@@ -48,7 +49,7 @@ void PulseChannel::Write(uint16_t addr, uint8_t data) {
 
 void PulseChannel::Clock(bool quarter, bool half, double globalTime) {
   mSequencer.Clock();
-  auto newTimer = mSweeper.Clock(mSequencer.mDivider.mPeriod);
+  const uint16_t newTimer = mSweeper.Clock(mSequencer.mDivider.mPeriod);
 
   if (quarter) {
     mEnvelope.Clock();
@@ -61,32 +62,16 @@ void PulseChannel::Clock(bool quarter, bool half, double globalTime) {
     }
   }
 
-  // if (!mSequencer.output) {
-  //   output = 0;
-  //   return;
-  // }
-
-  if (mSweeper.ShouldMute()) {
+  if (mSweeper.ShouldMute() || mLengthCounter.ShouldMute()) {
     output = 0;
     return;
   }
 
-  if (mLengthCounter.ShouldMute()) {
-    output = 0;
+  if (mEnvelope.output <= 2 || !mSequencer.mDivider.Notify()) {
     return;
   }
 
-  if (mEnvelope.output <= 2) {
-    // output = 0;
-    return;
-  }
-
-  mOscilator.frequency = 1789773.0 / (16.0 * static_cast<double>(mSequencer.mDivider.mPeriod + 1));
-  mOscilator.amplitude = static_cast<double>(mEnvelope.output - 1);
-  double sample = mOscilator.Sample(globalTime);
-
-  output = sample;
-  // if (!mIsSecondChannel) {
-  //   std::cout << std::to_string(output) << "\n";
-  // }
+  const double frequency = 1789773.0 / (16.0 * (mSequencer.mDivider.mPeriod + 1.0));
+  const double amplitude = mEnvelope.output - 1;
+  output = mOscilator.Sample(globalTime, frequency, amplitude);
 }
