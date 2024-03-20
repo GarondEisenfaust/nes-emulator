@@ -15,4 +15,5 @@ class ApuClockContext {
   Apu& mApu;
   IAudioOutputDevice& mOutputDevice;
   bool mRunning;
+  void Work();
 };
