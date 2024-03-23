@@ -48,7 +48,7 @@ void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
     mCartridge->PpuWrite(addr, data);
   } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
-    Mirror(mNameTable, mCartridge->mMirror, addr) = data;
+    Mirror(mNameTable, mCartridge->GetMirrorMode(), addr) = data;
   } else if (FRAME_PALETTE_START <= addr && addr <= FRAME_PALETTE_END) {
     mFramePalette.Write(addr, data);
   }
@@ -59,7 +59,7 @@ uint8_t Ppu::PpuRead(uint16_t addr) {
   if (PPU_CARTRIDGE_START <= addr && addr <= PPU_CARTRIDGE_END) {
     data = mCartridge->PpuRead(addr);
   } else if (PPU_NAMETABLE_START <= addr && addr <= PPU_NAMETABLE_END) {
-    data = Mirror(mNameTable, mCartridge->mMirror, addr);
+    data = Mirror(mNameTable, mCartridge->GetMirrorMode(), addr);
   } else if (FRAME_PALETTE_START <= addr && addr <= FRAME_PALETTE_END) {
     data = mBackgroundRenderer->GetGrayscale() ? mFramePalette.ReadGrayscale(addr) : mFramePalette.Read(addr);
   }

@@ -30,7 +30,7 @@ class Cartridge {
   void ClearInterrupt();
 
   void Reset();
-  MirrorMode mMirror;
+  MirrorMode GetMirrorMode();
 
  private:
   std::vector<uint8_t> mProgramMemory;

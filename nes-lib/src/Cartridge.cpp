@@ -21,12 +21,12 @@ MirrorMode DetermineMirror(const Header& header) {
   return (header.mapper1 & 0x01) ? MirrorMode::Vertical : MirrorMode::Horizontal;
 }
 
-std::unique_ptr<IMapper> MakeMapper(int mapperId, int programBanks, int characterBanks) {
+std::unique_ptr<IMapper> MakeMapper(int mapperId, MirrorMode mirrorMode, int programBanks, int characterBanks) {
   if (mapperId == 0) {
-    return std::make_unique<Mapper000>(programBanks, characterBanks);
+    return std::make_unique<Mapper000>(programBanks, characterBanks, mirrorMode);
   }
   if (mapperId == 2) {
-    return std::make_unique<Mapper002>(programBanks, characterBanks);
+    return std::make_unique<Mapper002>(programBanks, characterBanks, mirrorMode);
   }
   return std::unique_ptr<IMapper>();
 }
@@ -49,7 +49,7 @@ Cartridge::Cartridge(const std::string& path) {
   }
 
   mMapperId = DetermineMapperId(header);
-  mMirror = DetermineMirror(header);
+  auto mirrorMode = DetermineMirror(header);
 
   mProgramBanks = header.programRomChunks;
   mProgramMemory.resize(mProgramBanks * 16384);
@@ -60,30 +60,46 @@ Cartridge::Cartridge(const std::string& path) {
   mCharacterMemory.resize(banksToAllocate * 8192);
   romStream.read(reinterpret_cast<char*>(mCharacterMemory.data()), mCharacterMemory.size());
 
-  mMapper = MakeMapper(mMapperId, mProgramBanks, mCharacterBanks);
+  mMapper = MakeMapper(mMapperId, mirrorMode, mProgramBanks, mCharacterBanks);
   mMapper->Reset();
   mImageValid = true;
   romStream.close();
 }
 
 uint8_t Cartridge::CpuRead(uint16_t address) {
-  auto mappedAddr = mMapper->CpuMapRead(address);
-  return mProgramMemory[mappedAddr];
+  auto mappingResult = mMapper->CpuMapRead(address);
+  if (mappingResult.data) {
+    return *mappingResult.data;
+  }
+  if (mappingResult.mappedAddress) {
+    return mProgramMemory[*mappingResult.mappedAddress];
+  }
+  return 0;
 }
 
 void Cartridge::CpuWrite(uint16_t address, uint8_t data) {
-  auto mappedAddr = mMapper->CpuMapWrite(address, data);
-  mProgramMemory[mappedAddr] = data;
+  auto mappingResult = mMapper->CpuMapWrite(address, data);
+  if (mappingResult.mappedAddress) {
+    mProgramMemory[*mappingResult.mappedAddress] = data;
+  }
 }
 
 uint8_t Cartridge::PpuRead(uint16_t address) {
-  auto mappedAddr = mMapper->PpuMapRead(address);
-  return mCharacterMemory[mappedAddr];
+  auto mappingResult = mMapper->PpuMapRead(address);
+  if (mappingResult.data) {
+    return *mappingResult.data;
+  }
+  if (mappingResult.mappedAddress) {
+    return mCharacterMemory[*mappingResult.mappedAddress];
+  }
+  return 0;
 }
 
 void Cartridge::PpuWrite(uint16_t address, uint8_t data) {
-  uint32_t mappedAddr = mMapper->PpuMapWrite(address);
-  mCharacterMemory[mappedAddr] = data;
+  auto mappingResult = mMapper->PpuMapWrite(address);
+  if (mappingResult.mappedAddress) {
+    mCharacterMemory[*mappingResult.mappedAddress] = data;
+  }
 }
 
 bool Cartridge::Interrupt() { return mMapper->Interrupt(); }
@@ -95,3 +111,5 @@ void Cartridge::Reset() {
     mMapper->Reset();
   }
 }
+
+MirrorMode Cartridge::GetMirrorMode() { return mMapper->GetMirrorMode(); }
