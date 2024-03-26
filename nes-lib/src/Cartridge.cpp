@@ -25,6 +25,9 @@ std::unique_ptr<IMapper> MakeMapper(int mapperId, MirrorMode mirrorMode, int pro
   if (mapperId == 0) {
     return std::make_unique<Mapper000>(programBanks, characterBanks, mirrorMode);
   }
+  if (mapperId == 1 || mapperId == 4) {
+    return std::make_unique<Mapper001>(programBanks, characterBanks, mirrorMode);
+  }
   if (mapperId == 2) {
     return std::make_unique<Mapper002>(programBanks, characterBanks, mirrorMode);
   }

@@ -1,6 +1,11 @@
 #include "Mirror.h"
 #include <stdexcept>
 
+uint8_t& MirrorSingleScreen(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr, MirrorMode mirror) {
+  auto truncated = addr & 0x0FFF;
+  return nameTable[mirror][truncated & 0x03FF];
+}
+
 uint8_t& MirrorHorizontal(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr) {
   auto truncated = addr & 0x0FFF;
   bool nameTableIndex;
@@ -36,7 +41,11 @@ uint8_t& MirrorVertical(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uin
 }
 
 uint8_t& Mirror(std::array<std::array<uint8_t, 1024>, 2>& nameTable, MirrorMode mirror, uint16_t addr) {
-  if (mirror == MirrorMode::Vertical) {
+  if (mirror == MirrorMode::OneScreenLow) {
+    return MirrorSingleScreen(nameTable, addr, mirror);
+  } else if (mirror == MirrorMode::OneScreenHigh) {
+    return MirrorSingleScreen(nameTable, addr, mirror);
+  } else if (mirror == MirrorMode::Vertical) {
     return MirrorVertical(nameTable, addr);
   } else if (mirror == MirrorMode::Horizontal) {
     return MirrorHorizontal(nameTable, addr);

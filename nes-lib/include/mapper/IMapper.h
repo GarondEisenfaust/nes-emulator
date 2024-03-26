@@ -1,6 +1,7 @@
 #pragma once
 #include "MirrorMode.h"
 #include <cstdint>
+#include <iostream>
 #include <optional>
 
 #define MAPPER_START 0x8000
