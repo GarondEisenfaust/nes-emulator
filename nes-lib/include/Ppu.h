@@ -11,10 +11,7 @@
 #include "PpuRegisterDefinitions.h"
 #include "Shifter.h"
 #include <cstdint>
-#include <functional>
-#include <map>
 #include <memory>
-#include <utility>
 
 #define PPU_RAM_START 0x2000
 #define PPU_RAM_END 0x3FFF
@@ -73,9 +70,6 @@ class Ppu {
   Bus* mBus;
   IRenderer& mRenderer;
   std::unique_ptr<ColorPalette> mColorPalette;
-
-  std::map<PpuPort, std::function<void(uint16_t, uint8_t)>> mCpuWriteCases;
-  std::map<PpuPort, std::function<uint8_t(uint16_t)>> mCpuReadCases;
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
   FramePalette mFramePalette;

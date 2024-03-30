@@ -13,35 +13,63 @@
 #include <vector>
 
 Ppu::Ppu(IRenderer& renderer)
-    : mCycle(0), mScanline(0), mColorPalette(std::move(MakePixelColors())), mRenderer(renderer) {
-  mCpuWriteCases.emplace(PpuPort::Control,
-                         [&](uint16_t addr, uint8_t data) { mBackgroundRenderer->WriteControl(addr, data); });
-  mCpuWriteCases.emplace(PpuPort::Mask,
-                         [&](uint16_t addr, uint8_t data) { mBackgroundRenderer->WriteMask(addr, data); });
-  mCpuWriteCases.emplace(PpuPort::OamAddress,
-                         [&](uint16_t addr, uint8_t data) { mForegroundRenderer->WriteOamAddress(addr, data); });
-  mCpuWriteCases.emplace(PpuPort::OamData,
-                         [&](uint16_t addr, uint8_t data) { mForegroundRenderer->WriteOamData(addr, data); });
-  mCpuWriteCases.emplace(PpuPort::Scroll,
-                         [&](uint16_t addr, uint8_t data) { mBackgroundRenderer->WriteScroll(addr, data); });
-  mCpuWriteCases.emplace(PpuPort::PpuAddress,
-                         [&](uint16_t addr, uint8_t data) { mBackgroundRenderer->WritePpuAddress(addr, data); });
-  mCpuWriteCases.emplace(PpuPort::PpuData,
-                         [&](uint16_t addr, uint8_t data) { mBackgroundRenderer->WritePpuData(addr, data); });
-
-  mCpuReadCases.emplace(PpuPort::Status, [&](uint16_t addr) { return mBackgroundRenderer->ReadStatus(addr); });
-  mCpuReadCases.emplace(PpuPort::OamData, [&](uint16_t addr) { return mForegroundRenderer->ReadOamData(addr); });
-  mCpuReadCases.emplace(PpuPort::PpuData, [&](uint16_t addr) { return mBackgroundRenderer->ReadPpuData(addr); });
-}
+    : mCycle(0), mScanline(0), mColorPalette(std::move(MakePixelColors())), mRenderer(renderer) {}
 
 void Ppu::CpuWrite(uint16_t addr, uint8_t data) {
   auto addressedPort = static_cast<PpuPort>(addr % PPU_NUM_PORTS);
-  mCpuWriteCases.at(addressedPort)(addr, data);
+
+  switch (addressedPort) {
+    case Control: {
+      mBackgroundRenderer->WriteControl(addr, data);
+      return;
+    }
+    case Mask: {
+      mBackgroundRenderer->WriteMask(addr, data);
+      return;
+    }
+    case OamAddress: {
+      mForegroundRenderer->WriteOamAddress(addr, data);
+      return;
+    }
+    case OamData: {
+      mForegroundRenderer->WriteOamData(addr, data);
+      return;
+    }
+    case Scroll: {
+      mBackgroundRenderer->WriteScroll(addr, data);
+      return;
+    }
+    case PpuAddress: {
+      mBackgroundRenderer->WritePpuAddress(addr, data);
+      return;
+    }
+    case PpuData: {
+      mBackgroundRenderer->WritePpuData(addr, data);
+      return;
+    }
+    default: {
+      return;
+    }
+  }
 }
 
 uint8_t Ppu::CpuRead(uint16_t addr) {
   auto addressedPort = static_cast<PpuPort>(addr % PPU_NUM_PORTS);
-  return mCpuReadCases.at(addressedPort)(addr);
+
+  switch (addressedPort) {
+    case Status: {
+      return mBackgroundRenderer->ReadStatus(addr);
+    }
+    case OamData: {
+      return mForegroundRenderer->ReadOamData(addr);
+    }
+    case PpuData: {
+      return mBackgroundRenderer->ReadPpuData(addr);
+    }
+    default: {
+      return 0;
+    }
+  }
 }
 
 void Ppu::PpuWrite(uint16_t addr, uint8_t data) {
