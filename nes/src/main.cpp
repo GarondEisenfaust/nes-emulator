@@ -1,3 +1,4 @@
+#include <glad/glad.h>
 #include "Apu.h"
 #include "ApuClockContext.h"
 #include "ArgumentParser.h"

@@ -6,7 +6,6 @@
 #include "imgui_impl_opengl3.h"
 #include "rendering/Shader.h"
 #include "rendering/Texture.h"
-#include <GL/glew.h>
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>
@@ -24,6 +23,11 @@ RenderContext::RenderContext() {
   mWindow = glfwCreateWindow(WIDTH, HEIGHT, APPLICATION_NAME, nullptr, nullptr);
   glfwMakeContextCurrent(mWindow);
 
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    std::cout << "Failed to initialize GLAD" << std::endl;
+    return;
+  }
+
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
 
@@ -31,8 +35,6 @@ RenderContext::RenderContext() {
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
   ImGui_ImplOpenGL3_Init();
-
-  glewInit();
 
   glfwGetFramebufferSize(mWindow, &mWidth, &mHeight);
   glViewport(0, 0, mWidth, mHeight);

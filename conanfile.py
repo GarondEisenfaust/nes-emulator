@@ -11,7 +11,7 @@ class CMakeTemplateConan(ConanFile):
     self.requires("gtest/1.8.1", private=True, override=False)
     self.requires("imgui/1.87", private=True, override=False)
     self.requires("glfw/3.4", private=True, override=False)
-    self.requires("glew/2.2.0", private=True, override=False) 
+    self.requires("glad/0.1.36", private=True, override=False) 
     self.requires("miniaudio/0.11.11", private=True, override=False)
 
   def build_requirements(self):

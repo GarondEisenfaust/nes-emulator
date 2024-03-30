@@ -24,5 +24,5 @@ target_link_libraries(
   PRIVATE nes-lib
   PRIVATE CONAN_PKG::miniaudio
   PRIVATE CONAN_PKG::glfw
-  PRIVATE CONAN_PKG::glew
+  PRIVATE CONAN_PKG::glad
   PRIVATE CONAN_PKG::imgui)

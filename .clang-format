@@ -14,7 +14,7 @@ QualifierAlignment: Left
 IncludeBlocks: Merge
 IncludeCategories:
   # Matches common headers first, but sorts them after project includes
-  - Regex: '^"GL/.*"'
+  - Regex: '^<glad/.*>'
     Priority: -1000
   - Regex: '^\"google/cloud/internal/disable_deprecation_warnings.inc\"$'
     Priority: -1

@@ -1,4 +1,4 @@
-#include "GL/glew.h"
+#include <glad/glad.h>
 #include "NtscSignalFrameDecoderGpu.h"
 #include "NtscDecoderShader.h"
 #include "VertexShader.h"
