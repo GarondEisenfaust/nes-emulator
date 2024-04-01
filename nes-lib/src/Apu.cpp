@@ -16,6 +16,7 @@ void Apu::CpuWrite(uint16_t addr, uint8_t data) {
   mNoiseChannel.Write(addr, data);
   mTriangleChannel.Write(addr, data);
   mDmcChannel.Write(addr, data);
+  mApuFrameCounter.Write(addr, data);
 }
 
 uint8_t Apu::CpuRead(uint16_t addr) {
@@ -62,6 +63,7 @@ void Apu::Reset() {
     CpuWrite(address, 0x00);
   }
   CpuWrite(APU_STATUS, 0x00);
+  CpuWrite(APU_FRAME_COUNTER, 0x00);
 }
 
 void Apu::ConnectBus(Bus* bus) {
@@ -82,7 +84,6 @@ bool Apu::IsQuarterFrameClock(uint32_t clock) {
 
 inline double Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
                        uint8_t dmcOutput) {
-  // return pulseTwoOutput;
   auto pulseOut = 0.00752 * (pulseOneOutput + pulseTwoOutput);
   auto tndOut = 0.00851 * triangleOutput + 0.00494 * noiseOutput + 0.00335 * dmcOutput;
   return pulseOut + tndOut;
