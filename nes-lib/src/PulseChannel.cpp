@@ -1,4 +1,5 @@
 #include "PulseChannel.h"
+#include <Definitions.h>
 #include <iostream>
 
 PulseChannel::PulseChannel(bool isSecondChannel)
@@ -32,10 +33,12 @@ void PulseChannel::Write(uint16_t addr, uint8_t data) {
     mSweeper.Write(data);
   } else if (addr == (0x4002 + mAddressOffset)) {
     mDivider.SetLowerPeriodBits(data);
+    UpdateFrequency(mDivider.mPeriod);
   } else if (addr == (0x4003 + mAddressOffset)) {
     mLengthCounter.SetCounter(data >> 3);
     mDivider.SetUpperPeriodBits(data);
     mEnvelope.startFlag = true;
+    UpdateFrequency(mDivider.mPeriod);
   } else if (addr == 0x4015) {
     mLengthCounter.SetEnabled(data & (0x01 + mIsSecondChannel));
   }
@@ -53,6 +56,7 @@ void PulseChannel::Clock(bool quarter, bool half, double globalTime) {
     mLengthCounter.Clock();
     if (mSweeper.ShouldSetPeriod()) {
       mDivider.SetPeriod(newTimer);
+      UpdateFrequency(mDivider.mPeriod);
     }
   }
 
@@ -65,7 +69,7 @@ void PulseChannel::Clock(bool quarter, bool half, double globalTime) {
     return;
   }
 
-  const double frequency = 1789773.0 / (16.0 * (mDivider.mPeriod + 1.0));
-  const double amplitude = mEnvelope.output - 1;
-  output = mOscilator.Sample(globalTime, frequency, amplitude);
+  output = mOscilator.Sample(globalTime, mFrequency, mEnvelope.output - 1);
 }
+
+void PulseChannel::UpdateFrequency(uint16_t period) { mFrequency = CPU_CLOCK_SPEED / (16.0 * (period + 1.0)); }

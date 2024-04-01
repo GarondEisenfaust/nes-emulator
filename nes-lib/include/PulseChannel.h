@@ -21,4 +21,6 @@ class PulseChannel {
   const bool mIsSecondChannel;
   const int mAddressOffset;
   int mClock = 0;
+  double mFrequency = 0;
+  void UpdateFrequency(uint16_t period);
 };

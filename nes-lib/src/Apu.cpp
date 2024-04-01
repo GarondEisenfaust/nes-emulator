@@ -1,5 +1,6 @@
 #include "Apu.h"
 #include "Bus.h"
+#include <Definitions.h>
 #include <cmath>
 
 Apu::Apu()
@@ -90,7 +91,7 @@ inline double Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t tri
 }
 
 void Apu::UpdateGlobalTime() {
-  mGlobalTime += 6.0 * ((1.0 / 3.0) / 1789773.0);
+  mGlobalTime += 6.0 * ((1.0 / 3.0) / CPU_CLOCK_SPEED);
 
   if (mGlobalTime >= (2 * M_PI)) {
     mGlobalTime = 0;

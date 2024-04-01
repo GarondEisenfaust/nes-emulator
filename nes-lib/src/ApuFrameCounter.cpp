@@ -53,5 +53,5 @@ void ApuFrameCounter::Clock() {
 }
 
 bool ApuFrameCounter::HasToSetInterrupt() {
-  return !mInterruptInhibit && !mFiveStepMode && mFrameCounter == mFourStepHalfFrameClocks[1];
+  return !mInterruptInhibit && !mFiveStepMode && mFrameCounter >= mFourStepHalfFrameClocks[1];
 }
