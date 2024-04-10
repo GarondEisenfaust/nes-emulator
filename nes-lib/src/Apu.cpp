@@ -72,17 +72,6 @@ void Apu::ConnectBus(Bus* bus) {
   mBus->mApu = this;
 }
 
-template <typename T, typename... Opts>
-inline bool IsAnyOf(T val, Opts... opts) {
-  return (... || (val == opts));
-}
-
-bool Apu::IsHalfFrameClock(uint32_t clock) { return IsAnyOf(clock, halfFrameClocks[0], halfFrameClocks[1]); }
-
-bool Apu::IsQuarterFrameClock(uint32_t clock) {
-  return IsAnyOf(clock, quarterFrameClocks[0], quarterFrameClocks[1], quarterFrameClocks[2], quarterFrameClocks[3]);
-}
-
 inline double Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
                        uint8_t dmcOutput) {
   auto pulseOut = 0.00752 * (pulseOneOutput + pulseTwoOutput);
@@ -91,7 +80,7 @@ inline double Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t tri
 }
 
 void Apu::UpdateGlobalTime() {
-  mGlobalTime += 6.0 * ((1.0 / 3.0) / CPU_CLOCK_SPEED);
+  mGlobalTime += 2.0 / CPU_CLOCK_SPEED;
 
   if (mGlobalTime >= (2 * M_PI)) {
     mGlobalTime = 0;
