@@ -2,21 +2,25 @@
 #include <cstdint>
 #include <functional>
 
+template <typename T>
 struct PixelColor {
-  uint8_t r;
-  uint8_t g;
-  uint8_t b;
-  uint8_t a;
+  T r;
+  T g;
+  T b;
+  T a;
 
   bool operator==(const PixelColor& other) const {
     return r == other.r && g == other.g && b == other.b && a == other.a;
   }
 };
 
-template <>
-struct std::hash<PixelColor> {
-  std::size_t operator()(const PixelColor& k) const {
-    return ((std::hash<uint8_t>()(k.r) ^ (std::hash<uint8_t>()(k.g) << 1)) >> 1) ^ (std::hash<uint8_t>()(k.b) << 1) ^
-           (std::hash<uint8_t>()(k.a) << 2);
+using PixelColorU8 = PixelColor<uint8_t>;
+using PixelColorF = PixelColor<float>;
+
+template <typename T>
+struct std::hash<PixelColor<T>> {
+  std::size_t operator()(const PixelColor<T>& k) const {
+    return ((std::hash<T>()(k.r) ^ (std::hash<T>()(k.g) << 1)) >> 1) ^ (std::hash<T>()(k.b) << 1) ^
+           (std::hash<T>()(k.a) << 2);
   }
 };

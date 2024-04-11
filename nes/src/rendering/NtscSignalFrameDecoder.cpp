@@ -1,13 +1,13 @@
 #include <glad/glad.h>
 #include "NtscSignalFrameDecoder.h"
-#include "FragmentShader.h"
+#include "DisplayTextureShader.h"
 #include "VertexShader.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 
 NtscSignalFrameDecoder::NtscSignalFrameDecoder() : mTexture(mWidth, mHeight, GL_NEAREST) {
-  Shader fragmentShader(FragmentShader().source, GL_FRAGMENT_SHADER);
+  Shader fragmentShader(DisplayTextureShader().source, GL_FRAGMENT_SHADER);
   Shader vertexShader(VertexShader().source, GL_VERTEX_SHADER);
 
   mShaderProgram.AttachShader(fragmentShader);
@@ -52,11 +52,11 @@ float NtscSignalFrameDecoder::NtscSignal(int pixel, int phase) {
   return (signal - black) / (white - black);
 }
 
-PixelColor NtscSignalFrameDecoder::ConvertToRgb(YiqData yiqValue) {
+PixelColorU8 NtscSignalFrameDecoder::ConvertToRgb(YiqData yiqValue) {
   float gamma = 2;
   auto gammafix = [=](float f) -> double { return f <= 0.f ? 0.f : std::pow(f, 2.2f / gamma); };
 
-  PixelColor rgb;
+  PixelColorU8 rgb;
   rgb.r = static_cast<uint8_t>(
       std::clamp(255.0 * (yiqValue.y + 0.946882f * yiqValue.i + 0.623557f * yiqValue.q), 0.0, 255.0));
   rgb.g = static_cast<uint8_t>(

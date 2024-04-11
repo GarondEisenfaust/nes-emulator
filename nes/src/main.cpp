@@ -14,6 +14,7 @@
 #include "Ppu.h"
 #include "rendering/IFrameDecoder.h"
 #include "rendering/LookupTableFrameDecoder.h"
+#include "rendering/LookupTableFrameDecoderGpu.h"
 #include "rendering/NtscSignalFrameDecoder.h"
 #include "rendering/NtscSignalFrameDecoderGpu.h"
 #include "rendering/RenderContext.h"
@@ -49,6 +50,9 @@ std::unique_ptr<IFrameDecoder> CreateDecoder(NesConfig::SignalDecoder decoder) {
     }
     case NesConfig::SignalDecoder::NtscGpu: {
       return std::make_unique<NtscSignalFrameDecoderGpu>();
+    }
+    case NesConfig::SignalDecoder::LookupTableGpu: {
+      return std::make_unique<LookupTableFrameDecoderGpu>();
     }
     case NesConfig::SignalDecoder::LookupTable:
     default: {

@@ -69,7 +69,7 @@ class Ppu {
 
   Bus* mBus;
   IRenderer& mRenderer;
-  std::unique_ptr<ColorPalette> mColorPalette;
+  std::unique_ptr<ColorPaletteU8> mColorPalette;
 
   std::array<std::array<uint8_t, 1024>, 2> mNameTable;
   FramePalette mFramePalette;

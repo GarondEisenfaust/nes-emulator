@@ -1,12 +1,12 @@
 #include <glad/glad.h>
 #include "LookupTableFrameDecoder.h"
-#include "FragmentShader.h"
+#include "DisplayTextureShader.h"
 #include "VertexShader.h"
 #include <algorithm>
 
 LookupTableFrameDecoder::LookupTableFrameDecoder()
     : mColorPalette(MakePixelColors()), mTexture(mTextureWidth, mTextureHeight, GL_NEAREST) {
-  Shader fragmentShader(FragmentShader().source, GL_FRAGMENT_SHADER);
+  Shader fragmentShader(DisplayTextureShader().source, GL_FRAGMENT_SHADER);
   Shader vertexShader(VertexShader().source, GL_VERTEX_SHADER);
 
   mShaderProgram.AttachShader(fragmentShader);

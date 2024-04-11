@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include "rendering/ShaderProgram.h"
+#include <ColorPalette.h>
 
 ShaderProgram::ShaderProgram() { mHandle = glCreateProgram(); }
 
@@ -13,6 +14,11 @@ void ShaderProgram::AttachShader(const Shader& shader) { glAttachShader(mHandle,
 void ShaderProgram::Link() { glLinkProgram(mHandle); }
 
 void ShaderProgram::Use() { glUseProgram(mHandle); }
+
+void ShaderProgram::SetUniform(const char* name, ColorPaletteF& colorPalette) {
+  const auto uniformLocation = glGetUniformLocation(mHandle, name);
+  glUniform4fv(uniformLocation, colorPalette.size(), reinterpret_cast<float*>(colorPalette.data()));
+}
 
 void ShaderProgram::SetUniform(const char* name, float value) {
   const auto uniformLocation = glGetUniformLocation(mHandle, name);

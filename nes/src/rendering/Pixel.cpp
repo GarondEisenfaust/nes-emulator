@@ -3,14 +3,14 @@
 #include <cstring>
 #include <tuple>
 
-Pixel::Pixel(float xPos, float yPos, float width, float height) : Pixel(xPos, yPos, width, height, PixelColor{0}) {}
+Pixel::Pixel(float xPos, float yPos, float width, float height) : Pixel(xPos, yPos, width, height, PixelColorU8{0}) {}
 
-Pixel::Pixel(float xPos, float yPos, float width, float height, PixelColor color)
+Pixel::Pixel(float xPos, float yPos, float width, float height, PixelColorU8 color)
     : mXPos(xPos), mYPos(yPos), mWidth(width), mHeight(height), mColor(color) {}
 
-void Pixel::SetColor(PixelColor color) { mColor = color; }
+void Pixel::SetColor(PixelColorU8 color) { mColor = color; }
 
-PixelColor Pixel::GetColor() { return mColor; }
+PixelColorU8 Pixel::GetColor() { return mColor; }
 
 std::tuple<float, float, float, float> CalculateScreenSpace(float x, float y, float width, float height) {
   float screenX = (2 * x / WIDTH) - 1;

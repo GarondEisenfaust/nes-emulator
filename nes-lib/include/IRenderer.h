@@ -2,8 +2,6 @@
 #include "PixelColor.h"
 #include <cstdint>
 
-class PixelColor;
-
 class IRenderer {
  public:
   virtual void SetNesPixel(int x, int y, uint8_t pixel) = 0;

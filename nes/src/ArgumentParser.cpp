@@ -12,6 +12,9 @@ NesConfig::SignalDecoder ResolveDecoder(const char* value) {
   if (strcmp(value, "lookup") == 0) {
     return NesConfig::SignalDecoder::LookupTable;
   }
+  if (strcmp(value, "lookup-gpu") == 0) {
+    return NesConfig::SignalDecoder::LookupTableGpu;
+  }
   std::string error = std::string(value) + " is not a valid signal decoder type!";
   throw std::runtime_error(error);
 }

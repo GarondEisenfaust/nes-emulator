@@ -33,7 +33,7 @@ class NtscSignalFrameDecoder : public IFrameDecoder {
   constexpr static const float mHueFix = 0;
 
   std::array<float, mWidth * mHeight * mSamplesToGeneratePerPixel> mNtscSignals;
-  std::array<PixelColor, mWidth * mHeight> mTextureData;
+  std::array<PixelColorU8, mWidth * mHeight> mTextureData;
   SineTable<50000> mSineTable;
 
   void Draw();
@@ -41,5 +41,5 @@ class NtscSignalFrameDecoder : public IFrameDecoder {
   void GenerateNtscSignal(uint16_t* nesFrameData, unsigned int ppuCycle);
   void GenerateTexture(unsigned int ppuCycle);
   float NtscSignal(int pixel, int phase);
-  PixelColor ConvertToRgb(YiqData yiqValue);
+  PixelColorU8 ConvertToRgb(YiqData yiqValue);
 };

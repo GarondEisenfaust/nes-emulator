@@ -32,7 +32,7 @@ class RenderContext : public IRenderer {
   static const int mGridWidth = 256;
   static const int mGridHeight = 240;
   std::array<uint16_t, mGridWidth * mGridHeight> mNesFrameData;
-  std::array<PixelColor, mGridWidth * mGridHeight> mTextureData;
+  std::array<PixelColorU8, mGridWidth * mGridHeight> mTextureData;
   bool mFrameComplete = false;
   int mCurrentPixel = 0;
   GLFWwindow* mWindow;

@@ -3,7 +3,7 @@
 
 class NesConfig {
  public:
-  enum SignalDecoder { LookupTable = 0, Ntsc = 1, NtscGpu = 2 };
+  enum SignalDecoder { LookupTable = 0, LookupTableGpu = 1, Ntsc = 2, NtscGpu = 3 };
 
   std::string mRomPath = "";
   std::string mRomDirPath = "";

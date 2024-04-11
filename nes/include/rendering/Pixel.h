@@ -5,9 +5,9 @@
 class Pixel {
  public:
   Pixel(float xPos, float yPos, float width, float height);
-  Pixel(float xPos, float yPos, float width, float height, PixelColor color);
-  void SetColor(PixelColor color);
-  PixelColor GetColor();
+  Pixel(float xPos, float yPos, float width, float height, PixelColorU8 color);
+  void SetColor(PixelColorU8 color);
+  PixelColorU8 GetColor();
   std::array<float, 18> CalculateVertexCoordinates();
 
  private:
@@ -15,5 +15,5 @@ class Pixel {
   float mYPos;
   float mWidth;
   float mHeight;
-  PixelColor mColor;
+  PixelColorU8 mColor;
 };
