@@ -109,6 +109,10 @@ void Ppu::Clock() {
   mCycle++;
   mPpuCycle++;
 
+  if (IsRendering() && IsRenderingVisibleScanlines() && mCycle == 260) {
+    mCartridge->ScanlineCounter();
+  }
+
   if (mCycle >= 341) {
     mCycle = 0;
     mScanline++;
@@ -139,6 +143,8 @@ bool Ppu::GetPatternSpriteFlag() { return mBackgroundRenderer->GetPatternSpriteF
 void Ppu::SetForegroundRenderer(ForegroundRenderer* foregroundRenderer) { mForegroundRenderer = foregroundRenderer; }
 
 void Ppu::SetBackgroundRenderer(BackgroundRenderer* backgroundRenderer) { mBackgroundRenderer = backgroundRenderer; }
+
+void Ppu::ScanlineCounter() { mCartridge->ScanlineCounter(); }
 
 void Ppu::Reset() {
   mScanline = 0;
@@ -186,6 +192,12 @@ void Ppu::DetectSpriteZeroHit() {
     }
   }
 }
+
+bool Ppu::IsRendering() {
+  return mBackgroundRenderer->GetRenderBackgroundFlag() || mBackgroundRenderer->GetRenderSpritesFlag();
+}
+
+bool Ppu::IsRenderingVisibleScanlines() { return 0 <= mScanline && mScanline < 240; }
 
 uint8_t Ppu::CalculatePixelColor() {
   auto backgroundInfo = mBackgroundRenderer->CalculateBackgroundPixelInfo();

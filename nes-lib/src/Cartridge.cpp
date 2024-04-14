@@ -25,11 +25,14 @@ std::unique_ptr<IMapper> MakeMapper(int mapperId, MirrorMode mirrorMode, int pro
   if (mapperId == 0) {
     return std::make_unique<Mapper000>(programBanks, characterBanks, mirrorMode);
   }
-  if (mapperId == 1 || mapperId == 4) {
+  if (mapperId == 1) {
     return std::make_unique<Mapper001>(programBanks, characterBanks, mirrorMode);
   }
   if (mapperId == 2) {
     return std::make_unique<Mapper002>(programBanks, characterBanks, mirrorMode);
+  }
+  if (mapperId == 4) {
+    return std::make_unique<Mapper004>(programBanks, characterBanks, mirrorMode);
   }
   return std::unique_ptr<IMapper>();
 }
@@ -108,6 +111,8 @@ void Cartridge::PpuWrite(uint16_t address, uint8_t data) {
 bool Cartridge::Interrupt() { return mMapper->Interrupt(); }
 
 void Cartridge::ClearInterrupt() { mMapper->ClearInterrupt(); }
+
+void Cartridge::ScanlineCounter() { mMapper->ScanlineCounter(); }
 
 void Cartridge::Reset() {
   if (mMapper) {

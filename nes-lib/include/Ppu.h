@@ -49,6 +49,7 @@ class Ppu {
 
   void SetForegroundRenderer(ForegroundRenderer* foregroundRenderer);
   void SetBackgroundRenderer(BackgroundRenderer* backgroundRenderer);
+  void ScanlineCounter();
 
   int16_t mCycle;
   int16_t mScanline;
@@ -62,6 +63,8 @@ class Ppu {
                                      const ForegroundPixelInfo& foregroundPixelInfo);
 
   void DetectSpriteZeroHit();
+  bool IsRendering();
+  bool IsRenderingVisibleScanlines();
 
   ForegroundRenderer* mForegroundRenderer;
   BackgroundRenderer* mBackgroundRenderer;

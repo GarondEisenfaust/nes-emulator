@@ -108,7 +108,7 @@ void Cpu::Interrupt(uint16_t address, uint8_t numCycles) {
 }
 
 void Cpu::ExecuteInterrupt() {
-  if (status.i != 0) {
+  if (status.i) {
     return;
   }
 

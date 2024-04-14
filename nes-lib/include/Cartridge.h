@@ -28,6 +28,7 @@ class Cartridge {
 
   bool Interrupt();
   void ClearInterrupt();
+  void ScanlineCounter();
 
   void Reset();
   MirrorMode GetMirrorMode();

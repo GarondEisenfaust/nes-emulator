@@ -14,8 +14,8 @@ struct MappingResult {
 
 class IMapper {
  public:
-  IMapper(uint8_t programBanks, uint8_t characterBanks, MirrorMode mirrorMode)
-      : mProgramBanks(programBanks), mCharacterBanks(characterBanks), mMirrorMode(mirrorMode) {}
+  IMapper(uint8_t programBankCount, uint8_t characterBankCount, MirrorMode mirrorMode)
+      : mProgramBankCount(programBankCount), mCharacterBankCount(characterBankCount), mMirrorMode(mirrorMode) {}
   virtual ~IMapper() = default;
 
   virtual MappingResult CpuMapRead(uint16_t address) = 0;
@@ -28,9 +28,10 @@ class IMapper {
   virtual bool Interrupt() { return false; }
   virtual void ClearInterrupt() {}
   virtual MirrorMode GetMirrorMode() { return mMirrorMode; }
+  virtual void ScanlineCounter() {}
 
  protected:
-  uint8_t mProgramBanks;
-  uint8_t mCharacterBanks;
+  uint8_t mProgramBankCount;
+  uint8_t mCharacterBankCount;
   MirrorMode mMirrorMode;
 };

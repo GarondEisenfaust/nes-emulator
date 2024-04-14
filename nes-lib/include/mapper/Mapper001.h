@@ -6,7 +6,7 @@
 
 class Mapper001 : public IMapper {
  public:
-  Mapper001(uint8_t programBanks, uint8_t characterBanks, MirrorMode mirrorMode);
+  Mapper001(uint8_t programBankCount, uint8_t characterBankCount, MirrorMode mirrorMode);
   virtual ~Mapper001() = default;
 
   virtual MappingResult CpuMapRead(uint16_t address);

@@ -24,5 +24,5 @@ MappingResult Mapper002::PpuMapWrite(uint16_t address) { return {address}; }
 
 void Mapper002::Reset() {
   mLowerSelectedProgramBank = 0;
-  mUpperSelectedProgramBank = mProgramBanks - 1;
+  mUpperSelectedProgramBank = mProgramBankCount - 1;
 }

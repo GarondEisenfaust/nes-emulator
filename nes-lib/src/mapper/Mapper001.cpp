@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 
-Mapper001::Mapper001(uint8_t programBanks, uint8_t characterBanks, MirrorMode mirrorMode)
-    : IMapper(programBanks, characterBanks, mirrorMode) {}
+Mapper001::Mapper001(uint8_t programBankCount, uint8_t characterBankCount, MirrorMode mirrorMode)
+    : IMapper(programBankCount, characterBankCount, mirrorMode) {}
 
 MappingResult Mapper001::CpuMapRead(uint16_t address) {
   if (address < 0x6000) {
@@ -72,7 +72,7 @@ MappingResult Mapper001::PpuMapRead(uint16_t address) {
     return {};
   }
 
-  if (mCharacterBanks == 0) {
+  if (mCharacterBankCount == 0) {
     return {address, {}};
   }
 
@@ -91,7 +91,7 @@ MappingResult Mapper001::PpuMapRead(uint16_t address) {
 }
 
 MappingResult Mapper001::PpuMapWrite(uint16_t address) {
-  if (address < 0x2000 && mCharacterBanks == 0) {
+  if (address < 0x2000 && mCharacterBankCount == 0) {
     return {address, {}};
   }
   return {};
@@ -107,7 +107,7 @@ void Mapper001::Reset() {
 
   mProgramBankSelect = 0;
   mProgramBankSelectLower = 0;
-  mProgramBankSelectHigher = mProgramBanks - 1;
+  mProgramBankSelectHigher = mProgramBankCount - 1;
 }
 
 void Mapper001::TargetRegisterZero() {
@@ -144,7 +144,7 @@ void Mapper001::TargetRegisterThree() {
   }
   if (programMode == 3) {
     mProgramBankSelectLower = mLoadRegister & 0x0F;
-    mProgramBankSelectHigher = mProgramBanks - 1;
+    mProgramBankSelectHigher = mProgramBankCount - 1;
     return;
   }
 }

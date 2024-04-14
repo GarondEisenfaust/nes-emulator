@@ -28,7 +28,7 @@ uint8_t Apu::CpuRead(uint16_t addr) {
     uint8_t noiseNotHalted = (!mNoiseChannel.mLengthCounter.IsHalted()) << 3;
     uint8_t dmcNotHalted = (mDmcChannel.mBytesRemaining > 0) << 4;
     uint8_t interrupt = mInterrupt << 7;
-    mInterrupt = 0;
+    mInterrupt = false;
     return interrupt | dmcNotHalted | noiseNotHalted | triangleNotHalted | pulseTimerTwoNotHalted |
            pulseTimerOneNotHalted;
   }
