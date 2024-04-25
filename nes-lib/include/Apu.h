@@ -41,7 +41,7 @@ class Apu {
   std::array<float, 31> mPulseTable;
   std::array<float, 203> mTndTable;
 
-  inline double Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
+  inline double Mix(double pulseOneOutput, double pulseTwoOutput, double triangleOutput, uint8_t noiseOutput,
                     uint8_t dmcOutput);
   void UpdateGlobalTime();
 

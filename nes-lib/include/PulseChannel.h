@@ -1,7 +1,7 @@
 #pragma once
 #include "Envelope.h"
 #include "LengthCounter.h"
-#include "Oscilator.h"
+#include "PulseWaveGenerator.h"
 #include "Sweeper.h"
 
 class PulseChannel {
@@ -11,7 +11,7 @@ class PulseChannel {
   Divider mDivider;
   Sweeper mSweeper;
   LengthCounter mLengthCounter;
-  Oscilator mOscilator;
+  PulseWaveGenerator mPulseWaveGenerator;
   double output = 0;
 
   void Clock(bool quarter, bool half, double globalTime);

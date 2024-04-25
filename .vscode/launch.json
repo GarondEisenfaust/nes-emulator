@@ -11,7 +11,7 @@
         "--rom-dir",
         "roms/",
         "--rom",
-        "roms/smb.nes",
+        "roms/kung-fu.nes",
         "--decoder",
         "ntsc-gpu"
       ],

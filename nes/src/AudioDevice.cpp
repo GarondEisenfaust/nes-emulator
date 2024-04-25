@@ -25,25 +25,24 @@ class AudioDevice::Impl {
   static void AudioCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount);
 };
 
-double Normalize(double value, double min, double max, double minDesired = 0, double maxDesired = 255) {
-  auto firstPart = (value - min) / (max - min);
-  auto range = maxDesired - minDesired;
+double Normalize(double value, double min, double max, double minDesired = -1.0, double maxDesired = 1.0) {
+  const auto firstPart = (value - min) / (max - min);
+  const auto range = maxDesired - minDesired;
   return firstPart * range + minDesired;
 }
 
 void AudioDevice::Impl::AudioCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount) {
-  auto* asBytePointer = reinterpret_cast<uint8_t*>(output);
+  auto* asFloatPointer = reinterpret_cast<float*>(output);
   auto* audioDeviceImpl = reinterpret_cast<AudioDevice::Impl*>(device->pUserData);
   RingBuffer* ringBuffer = &audioDeviceImpl->mRingBuffer;
   for (int i = 0; i < frameCount; i++) {
     auto value = ringBuffer->Read();
     if (audioDeviceImpl->mMuted) {
-      asBytePointer[i] = 0;
+      asFloatPointer[i] = 0.0;
     } else {
       audioDeviceImpl->UpdateMinSample(value);
       audioDeviceImpl->UpdateMaxSample(value);
-      asBytePointer[i] = static_cast<uint8_t>(
-          Normalize(value, audioDeviceImpl->mMinReceivedSample, audioDeviceImpl->mMaxReceivedSample));
+      asFloatPointer[i] = Normalize(value, audioDeviceImpl->mMinReceivedSample, audioDeviceImpl->mMaxReceivedSample);
     }
   }
 };

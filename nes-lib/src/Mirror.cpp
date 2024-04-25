@@ -7,7 +7,7 @@ uint8_t& MirrorSingleScreen(std::array<std::array<uint8_t, 1024>, 2>& nameTable,
 }
 
 uint8_t& MirrorHorizontal(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr) {
-  auto truncated = addr & 0x0FFF;
+  const auto truncated = addr & 0x0FFF;
   bool nameTableIndex;
   if (0x0000 <= truncated && truncated <= 0x03FF) {
     nameTableIndex = 0;
@@ -24,7 +24,7 @@ uint8_t& MirrorHorizontal(std::array<std::array<uint8_t, 1024>, 2>& nameTable, u
 }
 
 uint8_t& MirrorVertical(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr) {
-  auto truncated = addr & 0x0FFF;
+  const auto truncated = addr & 0x0FFF;
   bool nameTableIndex;
   if (0x0000 <= truncated && truncated <= 0x03FF) {
     nameTableIndex = 0;
@@ -41,9 +41,7 @@ uint8_t& MirrorVertical(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uin
 }
 
 uint8_t& Mirror(std::array<std::array<uint8_t, 1024>, 2>& nameTable, MirrorMode mirror, uint16_t addr) {
-  if (mirror == MirrorMode::OneScreenLow) {
-    return MirrorSingleScreen(nameTable, addr, mirror);
-  } else if (mirror == MirrorMode::OneScreenHigh) {
+  if ((mirror == MirrorMode::OneScreenLow) || (mirror == MirrorMode::OneScreenHigh)) {
     return MirrorSingleScreen(nameTable, addr, mirror);
   } else if (mirror == MirrorMode::Vertical) {
     return MirrorVertical(nameTable, addr);

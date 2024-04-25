@@ -13,7 +13,7 @@ uint16_t Sweeper::Clock(uint16_t timerPeriod) {
     }
   }
 
-  auto targetPeriod = std::clamp(static_cast<int32_t>(timerPeriod) + changeAmount, 0, UINT16_MAX);
+  const auto targetPeriod = std::clamp(static_cast<int32_t>(timerPeriod) + changeAmount, 0, UINT16_MAX);
   mMute = (timerPeriod < 8) || (targetPeriod > 0x07FF);
 
   if (mDivider.Notify() || mReload) {

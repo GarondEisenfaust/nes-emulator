@@ -10,8 +10,8 @@ ForegroundPixelInfo ForegroundRenderer::CalculateForegroundPixelInfo() {
     if (mSpriteOnScanline[i].x != 0) {
       continue;
     }
-    bool foregroudPixelPixelLow = (mSpriteShifterPattern.low[i] & (1 << 7));
-    bool foregroudPixelPixelHigh = (mSpriteShifterPattern.high[i] & (1 << 7));
+    const bool foregroudPixelPixelLow = (mSpriteShifterPattern.low[i] & (1 << 7));
+    const bool foregroudPixelPixelHigh = (mSpriteShifterPattern.high[i] & (1 << 7));
     result.pixel = (foregroudPixelPixelHigh << 1) | foregroudPixelPixelLow;
 
     result.palette = (mSpriteOnScanline[i].attribute & 0b11) + 0x04;

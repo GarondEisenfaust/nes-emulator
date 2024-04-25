@@ -45,8 +45,8 @@ void Apu::Clock() {
   mNoiseChannel.Clock(mApuFrameCounter.mQuarterFrameClock, mApuFrameCounter.mHalfFrameClock);
   mDmcChannel.Clock();
 
-  mTriangleChannel.Clock(mApuFrameCounter.mQuarterFrameClock, mApuFrameCounter.mHalfFrameClock);
-  mTriangleChannel.Clock(false, false);
+  mTriangleChannel.Clock(mApuFrameCounter.mQuarterFrameClock, mApuFrameCounter.mHalfFrameClock, mGlobalTime);
+  mTriangleChannel.Clock(false, false, mGlobalTime);
 
   UpdateGlobalTime();
 }
@@ -72,7 +72,7 @@ void Apu::ConnectBus(Bus* bus) {
   mBus->mApu = this;
 }
 
-inline double Apu::Mix(double pulseOneOutput, double pulseTwoOutput, uint8_t triangleOutput, uint8_t noiseOutput,
+inline double Apu::Mix(double pulseOneOutput, double pulseTwoOutput, double triangleOutput, uint8_t noiseOutput,
                        uint8_t dmcOutput) {
   auto pulseOut = 0.00752 * (pulseOneOutput + pulseTwoOutput);
   auto tndOut = 0.00851 * triangleOutput + 0.00494 * noiseOutput + 0.00335 * dmcOutput;

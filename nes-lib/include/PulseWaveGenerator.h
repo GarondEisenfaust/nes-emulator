@@ -1,12 +1,10 @@
 #pragma once
 
-class Oscilator {
+class PulseWaveGenerator {
  public:
-  Oscilator();
-  ~Oscilator();
-
   double dutycycle = 0;
-  const int harmonics = 20;
-
   double Sample(double t, double frequency, double amplitude);
+
+ private:
+  const int harmonics = 20;
 };

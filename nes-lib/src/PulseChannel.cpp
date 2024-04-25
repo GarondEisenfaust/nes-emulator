@@ -9,19 +9,19 @@ void PulseChannel::Write(uint16_t addr, uint8_t data) {
   if (addr == (0x4000 + mAddressOffset)) {
     switch ((data & 0xC0) >> 6) {
       case 0x00: {
-        mOscilator.dutycycle = 0.125;
+        mPulseWaveGenerator.dutycycle = 0.125;
         break;
       }
       case 0x01: {
-        mOscilator.dutycycle = 0.250;
+        mPulseWaveGenerator.dutycycle = 0.250;
         break;
       }
       case 0x02: {
-        mOscilator.dutycycle = 0.500;
+        mPulseWaveGenerator.dutycycle = 0.500;
         break;
       }
       case 0x03: {
-        mOscilator.dutycycle = 0.750;
+        mPulseWaveGenerator.dutycycle = 0.750;
         break;
       }
     }
@@ -69,7 +69,7 @@ void PulseChannel::Clock(bool quarter, bool half, double globalTime) {
     return;
   }
 
-  output = mOscilator.Sample(globalTime, mFrequency, mEnvelope.output - 1);
+  output = mPulseWaveGenerator.Sample(globalTime, mFrequency, mEnvelope.output - 1);
 }
 
 void PulseChannel::UpdateFrequency(uint16_t period) { mFrequency = CPU_CLOCK_SPEED / (16.0 * (period + 1.0)); }

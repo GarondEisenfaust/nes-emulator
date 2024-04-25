@@ -6,8 +6,8 @@ void Shifter::Shift() {
 }
 
 uint8_t Shifter::ReadFrom(unsigned int index) {
-  bool lowBit = mLower & index;
-  bool highBit = mUpper & index;
+  const bool lowBit = mLower & index;
+  const bool highBit = mUpper & index;
   return (highBit << 1) | lowBit;
 }
 
