@@ -105,5 +105,5 @@ void Bus::Dma(uint8_t page) {
     address++;
   }
 
-  mCpu->cycles += 513 + (mClockCounter % 2);
+  mCpu->cycles += 513 + (mClockCounter & 0x01);
 }
