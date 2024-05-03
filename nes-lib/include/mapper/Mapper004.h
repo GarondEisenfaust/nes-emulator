@@ -26,7 +26,6 @@ class Mapper004 : public IMapper {
 
   bool mInteruptActive = false;
   bool mInteruptEnable = false;
-  bool mInteruptReload = false;
   uint16_t mInteruptCounter = 0x0000;
   uint16_t mInteruptReloadValue = 0x0000;
   std::array<uint8_t, 32 * 1024> mMapperRam;

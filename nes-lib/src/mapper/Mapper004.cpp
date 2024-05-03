@@ -12,7 +12,7 @@ MappingResult Mapper004::CpuMapRead(uint16_t address) {
     int bank = (address - 0x8000) / PROGRAM_BANK_SIZE;
     return {{mProgramBanks[bank] + (address & 0x1FFF)}, {}};
   }
-  return {{address}, {}};
+  return {};
 }
 
 MappingResult Mapper004::CpuMapWrite(uint16_t address, uint8_t data) {
@@ -38,20 +38,19 @@ MappingResult Mapper004::PpuMapRead(uint16_t address) {
     return {mCharacterBanks[bank] + (address & 0x03FF), {}};
   }
 
-  return {{address}, {}};
+  return {};
 }
 
 MappingResult Mapper004::PpuMapWrite(uint16_t address) { return {}; }
 
 void Mapper004::Reset() {
-  mTargetRegister = 0x00;
+  mTargetRegister = 0;
   mProgramBankMode = false;
   mCharacterInversion = false;
   mMirrorMode = Horizontal;
 
   mInteruptActive = false;
   mInteruptEnable = false;
-  mInteruptReload = false;
   mInteruptCounter = 0;
   mInteruptReloadValue = 0;
 
@@ -59,27 +58,28 @@ void Mapper004::Reset() {
   mCharacterBanks = {0};
   mRegister = {0};
 
-  mProgramBanks[0] = 0 * PROGRAM_BANK_SIZE;
-  mProgramBanks[1] = 1 * PROGRAM_BANK_SIZE;
+  mProgramBanks[0] = 0;
+  mProgramBanks[1] = PROGRAM_BANK_SIZE;
   mProgramBanks[2] = (mProgramBankCount * 2 - 2) * PROGRAM_BANK_SIZE;
   mProgramBanks[3] = (mProgramBankCount * 2 - 1) * PROGRAM_BANK_SIZE;
 }
 
 bool Mapper004::Interrupt() { return mInteruptActive; }
 
-void Mapper004::ClearInterrupt() { mInteruptActive = false; }
+void Mapper004::ClearInterrupt() {
+  mInteruptEnable = false;
+  mInteruptActive = false;
+}
 
 void Mapper004::ScanlineCounter() {
-  if (mInteruptReload) {
-    mInteruptCounter = mInteruptReloadValue;
-    mInteruptReload = false;
-  } else if (mInteruptCounter == 0) {
+  if (mInteruptCounter == 0) {
     mInteruptCounter = mInteruptReloadValue;
   } else {
     mInteruptCounter--;
   }
   if (mInteruptCounter == 0 && mInteruptEnable) {
     mInteruptActive = true;
+    printf("Interupt\n");
   }
 }
 
@@ -96,8 +96,8 @@ void Mapper004::DetermineMirrorMode(bool evenAddress, uint8_t data) {
 void Mapper004::ReloadInterruptCounter(bool evenAddress, uint8_t data) {
   if (evenAddress) {
     mInteruptReloadValue = data;
+    printf("data %i\n", data);
   } else {
-    mInteruptReload = true;
     mInteruptCounter = 0;
   }
 }
@@ -151,7 +151,9 @@ void Mapper004::DetermineInterruptEnable(bool evenAddress) {
   if (evenAddress) {
     mInteruptEnable = false;
     mInteruptActive = false;
+    printf("Disable\n");
   } else {
     mInteruptEnable = true;
+    printf("Enable\n");
   }
 }

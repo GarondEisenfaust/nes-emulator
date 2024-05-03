@@ -34,6 +34,9 @@ std::unique_ptr<IMapper> MakeMapper(int mapperId, MirrorMode mirrorMode, int pro
   if (mapperId == 4) {
     return std::make_unique<Mapper004>(programBanks, characterBanks, mirrorMode);
   }
+  if (mapperId == 7) {
+    return std::make_unique<Mapper007>(programBanks, characterBanks, mirrorMode);
+  }
   return std::unique_ptr<IMapper>();
 }
 

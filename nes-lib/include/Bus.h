@@ -33,7 +33,7 @@ class Bus {
 
  private:
   std::shared_ptr<Cartridge> mCartridge;
-  uint32_t mClockCounter;
+  uint64_t mClockCounter;
   Ram& mRam;
   IController* mController;
   void Dma(uint8_t page);

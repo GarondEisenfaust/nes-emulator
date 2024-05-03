@@ -14,10 +14,9 @@ class ForegroundRenderer {
   void WriteOamData(uint16_t addr, uint8_t data);
   uint8_t ReadOamData(uint16_t addr);
   void HorizontalBlankState();
-  void LoadSpriteShifters(uint8_t& spritePatternBitsLow, uint16_t spritePatternAddrLow, uint8_t& spritePatternBitsHigh,
-                          uint16_t spritePatternAddrHigh, uint8_t i);
-  void GetLowAddressOfBigSprite(uint8_t i, uint16_t& spritePatternAddrLow);
-  void GetLowAddressOfSmallSprite(uint8_t i, uint16_t& spritePatternAddrLow);
+  void LoadSpriteShifters(uint16_t spritePatternAddrLow, uint16_t spritePatternAddrHigh, uint8_t i);
+  uint16_t GetLowAddressOfBigSprite(uint8_t i);
+  uint16_t GetLowAddressOfSmallSprite(uint8_t i);
   void FlipSpriteIfNecessary(uint8_t attribute, uint8_t& spritePatternBitsLow, uint8_t& spritePatternBitsHigh);
   void DetectSpritesOnScanline();
   void RenderingState();

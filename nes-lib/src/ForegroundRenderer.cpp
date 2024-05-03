@@ -79,27 +79,16 @@ void ForegroundRenderer::HorizontalBlankState() {
 
   if (mPpu->mCycle == 340) {
     for (uint8_t i = 0; i < mSpriteCount; i++) {
-      uint8_t spritePatternBitsLow;
-      uint8_t spritePatternBitsHigh;
-      uint16_t spritePatternAddrLow;
-      uint16_t spritePatternAddrHigh;
-
-      if (!mPpu->GetSpriteSizeFlag()) {
-        GetLowAddressOfSmallSprite(i, spritePatternAddrLow);
-      } else {
-        GetLowAddressOfBigSprite(i, spritePatternAddrLow);
-      }
-
-      spritePatternAddrHigh = spritePatternAddrLow + 8;
-      LoadSpriteShifters(spritePatternBitsLow, spritePatternAddrLow, spritePatternBitsHigh, spritePatternAddrHigh, i);
+      uint16_t spritePatternAddrLow =
+          mPpu->GetSpriteSizeFlag() ? GetLowAddressOfBigSprite(i) : GetLowAddressOfSmallSprite(i);
+      LoadSpriteShifters(spritePatternAddrLow, spritePatternAddrLow + 8, i);
     }
   }
 }
 
-void ForegroundRenderer::LoadSpriteShifters(uint8_t& spritePatternBitsLow, uint16_t spritePatternAddrLow,
-                                            uint8_t& spritePatternBitsHigh, uint16_t spritePatternAddrHigh, uint8_t i) {
-  spritePatternBitsLow = mPpu->PpuRead(spritePatternAddrLow);
-  spritePatternBitsHigh = mPpu->PpuRead(spritePatternAddrHigh);
+void ForegroundRenderer::LoadSpriteShifters(uint16_t spritePatternAddrLow, uint16_t spritePatternAddrHigh, uint8_t i) {
+  uint8_t spritePatternBitsLow = mPpu->PpuRead(spritePatternAddrLow);
+  uint8_t spritePatternBitsHigh = mPpu->PpuRead(spritePatternAddrHigh);
 
   FlipSpriteIfNecessary(mSpriteOnScanline[i].attribute, spritePatternBitsLow, spritePatternBitsHigh);
 
@@ -107,34 +96,36 @@ void ForegroundRenderer::LoadSpriteShifters(uint8_t& spritePatternBitsLow, uint1
   mSpriteShifterPattern.high[i] = spritePatternBitsHigh;
 }
 
-void ForegroundRenderer::GetLowAddressOfBigSprite(uint8_t i, uint16_t& spritePatternAddrLow) {
+uint16_t ForegroundRenderer::GetLowAddressOfBigSprite(uint8_t i) {
+  printf("big\n");
   if (!(mSpriteOnScanline[i].attribute & (1 << 7))) {
     if (mPpu->mScanline - mSpriteOnScanline[i].y < 8) {
-      spritePatternAddrLow = ((mSpriteOnScanline[i].id & 0b01) << 12) | ((mSpriteOnScanline[i].id & ~0b01) << 4) |
-                             ((mPpu->mScanline - mSpriteOnScanline[i].y) % 8);
+      return ((mSpriteOnScanline[i].id & 0x01) << 12) | ((mSpriteOnScanline[i].id & 0xFE) << 4) |
+             ((mPpu->mScanline - mSpriteOnScanline[i].y) & 0x07);
     } else {
-      spritePatternAddrLow = ((mSpriteOnScanline[i].id & 0b01) << 12) | (((mSpriteOnScanline[i].id & ~0b01) + 1) << 4) |
-                             ((mPpu->mScanline - mSpriteOnScanline[i].y) % 8);
+      return ((mSpriteOnScanline[i].id & 0x01) << 12) | (((mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
+             ((mPpu->mScanline - mSpriteOnScanline[i].y) & 0x07);
     }
   } else {
     if (mPpu->mScanline - mSpriteOnScanline[i].y < 8) {
-      spritePatternAddrLow = ((mSpriteOnScanline[i].id & 0b01) << 12) | (((mSpriteOnScanline[i].id & ~0b01) + 1) << 4) |
-                             (7 - (mPpu->mScanline - mSpriteOnScanline[i].y) % 8);
+      return ((mSpriteOnScanline[i].id & 0x01) << 12) | (((mSpriteOnScanline[i].id & 0xFE) + 1) << 4) |
+             (7 - (mPpu->mScanline - mSpriteOnScanline[i].y) & 0x07);
     } else {
-      spritePatternAddrLow = ((mSpriteOnScanline[i].id & 0b01) << 12) | ((mSpriteOnScanline[i].id & ~0b01) << 4) |
-                             (7 - (mPpu->mScanline - mSpriteOnScanline[i].y) % 8);
+      return ((mSpriteOnScanline[i].id & 0x01) << 12) | ((mSpriteOnScanline[i].id & 0xFE) << 4) |
+             (7 - (mPpu->mScanline - mSpriteOnScanline[i].y) & 0x07);
     }
   }
 }
 
-void ForegroundRenderer::GetLowAddressOfSmallSprite(uint8_t i, uint16_t& spritePatternAddrLow) {
+uint16_t ForegroundRenderer::GetLowAddressOfSmallSprite(uint8_t i) {
+  // printf("small\n");
   if (!(mSpriteOnScanline[i].attribute & (1 << 7))) {
-    spritePatternAddrLow = (mPpu->GetPatternSpriteFlag() << 12) | (mSpriteOnScanline[i].id << 4) |
-                           (mPpu->mScanline - mSpriteOnScanline[i].y);
+    return (mPpu->GetPatternSpriteFlag() << 12) | (mSpriteOnScanline[i].id << 4) |
+           (mPpu->mScanline - mSpriteOnScanline[i].y);
 
   } else {
-    spritePatternAddrLow = (mPpu->GetPatternSpriteFlag() << 12) | (mSpriteOnScanline[i].id << 4) |
-                           (7 - (mPpu->mScanline - mSpriteOnScanline[i].y));
+    return (mPpu->GetPatternSpriteFlag() << 12) | (mSpriteOnScanline[i].id << 4) |
+           (7 - (mPpu->mScanline - mSpriteOnScanline[i].y));
   }
 }
 
@@ -152,11 +143,14 @@ void ForegroundRenderer::DetectSpritesOnScanline() {
       break;
     }
     int16_t diff = mPpu->mScanline - mOam[i].y;
+    // printf("biggggg %i\n", mPpu->GetSpriteSizeFlag());
+    // printf("thingy %i\n", mPpu->GetSpriteSizeFlag());
 
     if (!(0 <= diff && diff < (mPpu->GetSpriteSizeFlag() ? 16 : 8))) {
       continue;
     }
     if (mSpriteCount >= mSpriteOnScanline.size()) {
+      // printf("too many\n");
       continue;
     }
     if (i == 0) {

@@ -2,8 +2,7 @@
 #include <stdexcept>
 
 uint8_t& MirrorSingleScreen(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr, MirrorMode mirror) {
-  auto truncated = addr & 0x0FFF;
-  return nameTable[mirror][truncated & 0x03FF];
+  return nameTable[mirror][addr & 0x03FF];
 }
 
 uint8_t& MirrorHorizontal(std::array<std::array<uint8_t, 1024>, 2>& nameTable, uint16_t addr) {

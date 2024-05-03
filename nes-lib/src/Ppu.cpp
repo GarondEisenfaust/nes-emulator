@@ -109,7 +109,7 @@ void Ppu::Clock() {
   mCycle++;
   mPpuCycle++;
 
-  if (IsRendering() && IsRenderingVisibleScanlines() && mCycle == 260) {
+  if (IsRenderingVisibleScanlines() && mCycle == 260) {
     mCartridge->ScanlineCounter();
   }
 
@@ -197,7 +197,7 @@ bool Ppu::IsRendering() {
   return mBackgroundRenderer->GetRenderBackgroundFlag() || mBackgroundRenderer->GetRenderSpritesFlag();
 }
 
-bool Ppu::IsRenderingVisibleScanlines() { return 0 <= mScanline && mScanline < 240; }
+bool Ppu::IsRenderingVisibleScanlines() { return IsRendering() && 0 <= mScanline && mScanline < 240; }
 
 uint8_t Ppu::CalculatePixelColor() {
   auto backgroundInfo = mBackgroundRenderer->CalculateBackgroundPixelInfo();

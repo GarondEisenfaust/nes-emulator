@@ -150,6 +150,10 @@ void BackgroundRenderer::LoadBackgroundShifters() {
 };
 
 uint8_t BackgroundRenderer::ReadStatus(uint16_t addr) {
+  if (mStatusRegister.spriteZeroHit) {
+    printf("sprite zero\n");
+  }
+
   auto data = (mStatusRegister.reg & 0xE0) | (mPpuDataBuffer & 0x1F);
   mStatusRegister.verticalBlank = false;
   mAddressLatch = false;
