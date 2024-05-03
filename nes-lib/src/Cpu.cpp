@@ -98,8 +98,8 @@ void Cpu::Interrupt(uint16_t address, uint8_t numCycles) {
 
   status.b = false;
   status.u = true;
-  status.i = true;
   PushToStack(status.reg);
+  status.i = true;
 
   addrAbs = address;
   pc = ReadTwoBytes(addrAbs);
