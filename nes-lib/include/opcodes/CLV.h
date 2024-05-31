@@ -5,4 +5,5 @@ class CLV : public IOpcode {
  public:
   CLV(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

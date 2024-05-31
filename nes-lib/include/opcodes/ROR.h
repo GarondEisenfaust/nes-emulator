@@ -5,4 +5,5 @@ class ROR : public IOpcode {
  public:
   ROR(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

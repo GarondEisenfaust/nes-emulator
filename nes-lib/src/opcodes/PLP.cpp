@@ -7,3 +7,7 @@ void PLP::operator()() {
   mCpu->status.reg = mCpu->PopFromStack();
   mCpu->status.u = true;
 }
+
+const char* PLP::Name() {
+  return "PLP";
+}

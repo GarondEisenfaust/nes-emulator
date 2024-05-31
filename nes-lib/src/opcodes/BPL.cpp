@@ -4,3 +4,7 @@
 BPL::BPL(Cpu* cpu) : IOpcode(cpu) {}
 
 void BPL::operator()() { mCpu->BranchIf(mCpu->status.n == false); }
+
+const char* BPL::Name() {
+  return "BPL";
+}

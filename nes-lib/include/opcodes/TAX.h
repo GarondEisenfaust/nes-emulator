@@ -5,4 +5,5 @@ class TAX : public IOpcode {
  public:
   TAX(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

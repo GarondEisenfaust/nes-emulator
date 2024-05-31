@@ -8,3 +8,7 @@ void RTS::operator()() {
   mCpu->pc |= mCpu->PopFromStack() << 8;
   mCpu->pc++;
 }
+
+const char* RTS::Name() {
+  return "RTS";
+}

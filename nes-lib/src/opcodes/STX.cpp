@@ -4,3 +4,7 @@
 STX::STX(Cpu* cpu) : IOpcode(cpu) {}
 
 void STX::operator()() { mCpu->Write(mCpu->addrAbs, mCpu->x); }
+
+const char* STX::Name() {
+  return "STX";
+}

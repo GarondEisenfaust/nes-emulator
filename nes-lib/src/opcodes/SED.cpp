@@ -4,3 +4,7 @@
 SED::SED(Cpu* cpu) : IOpcode(cpu) {}
 
 void SED::operator()() { mCpu->status.d = true; }
+
+const char* SED::Name() {
+  return "SED";
+}

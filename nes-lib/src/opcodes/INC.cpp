@@ -10,3 +10,7 @@ void INC::operator()() {
   mCpu->status.z = (temp & 0x00FF) == 0x0000;
   mCpu->status.n = temp & 0x0080;
 }
+
+const char* INC::Name() {
+  return "INC";
+}

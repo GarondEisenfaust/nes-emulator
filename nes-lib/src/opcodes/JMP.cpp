@@ -4,3 +4,7 @@
 JMP::JMP(Cpu* cpu) : IOpcode(cpu) {}
 
 void JMP::operator()() { mCpu->pc = mCpu->addrAbs; }
+
+const char* JMP::Name() {
+  return "JMP";
+}

@@ -5,4 +5,5 @@ class ROL : public IOpcode {
  public:
   ROL(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

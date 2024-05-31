@@ -4,3 +4,7 @@
 PHA::PHA(Cpu* cpu) : IOpcode(cpu) {}
 
 void PHA::operator()() { mCpu->PushToStack(mCpu->a); }
+
+const char* PHA::Name() {
+  return "PHA";
+}

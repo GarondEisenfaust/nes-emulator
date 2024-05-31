@@ -9,3 +9,7 @@ void JSR::operator()() {
   mCpu->PushToStack(mCpu->pc & 0x00FF);
   mCpu->pc = mCpu->addrAbs;
 }
+
+const char* JSR::Name() {
+  return "JSR";
+}

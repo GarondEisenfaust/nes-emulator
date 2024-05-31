@@ -4,3 +4,7 @@
 STY::STY(Cpu* cpu) : IOpcode(cpu) {}
 
 void STY::operator()() { mCpu->Write(mCpu->addrAbs, mCpu->y); }
+
+const char* STY::Name() {
+  return "STY";
+}

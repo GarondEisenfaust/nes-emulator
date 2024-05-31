@@ -12,3 +12,7 @@ void PHP::operator()() {
   mCpu->status.b = false;
   mCpu->status.u = false;
 }
+
+const char* PHP::Name() {
+  return "PHP";
+}

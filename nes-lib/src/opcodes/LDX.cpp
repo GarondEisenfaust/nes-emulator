@@ -9,3 +9,7 @@ void LDX::operator()() {
   mCpu->status.z = mCpu->x == 0;
   mCpu->status.n = mCpu->x & (1 << 7);
 }
+
+const char* LDX::Name() {
+  return "LDX";
+}

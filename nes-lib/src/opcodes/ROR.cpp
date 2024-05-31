@@ -17,3 +17,7 @@ void ROR::operator()() {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
   }
 }
+
+const char* ROR::Name() {
+  return "ROR";
+}

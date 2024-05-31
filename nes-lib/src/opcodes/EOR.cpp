@@ -9,3 +9,7 @@ void EOR::operator()() {
   mCpu->status.z = mCpu->a == 0;
   mCpu->status.n = mCpu->a & (1 << 7);
 }
+
+const char* EOR::Name() {
+  return "EOR";
+}

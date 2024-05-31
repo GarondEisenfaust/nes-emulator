@@ -5,4 +5,5 @@ class EOR : public IOpcode {
  public:
   EOR(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

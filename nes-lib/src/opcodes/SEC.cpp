@@ -4,3 +4,7 @@
 SEC::SEC(Cpu* cpu) : IOpcode(cpu) {}
 
 void SEC::operator()() { mCpu->status.c = true; }
+
+const char* SEC::Name() {
+  return "SEC";
+}

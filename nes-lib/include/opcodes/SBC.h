@@ -5,4 +5,5 @@ class SBC : public IOpcode {
  public:
   SBC(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

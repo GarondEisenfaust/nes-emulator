@@ -5,4 +5,5 @@ class LDY : public IOpcode {
  public:
   LDY(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

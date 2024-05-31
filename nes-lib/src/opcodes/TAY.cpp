@@ -8,3 +8,7 @@ void TAY::operator()() {
   mCpu->status.z = mCpu->y == 0;
   mCpu->status.n = mCpu->y & (1 << 7);
 }
+
+const char* TAY::Name() {
+  return "TAY";
+}

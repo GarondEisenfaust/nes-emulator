@@ -16,3 +16,7 @@ void ASL::operator()() {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
   }
 }
+
+const char* ASL::Name() {
+  return "ASL";
+}

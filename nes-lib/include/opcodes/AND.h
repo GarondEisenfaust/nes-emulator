@@ -5,4 +5,5 @@ class AND : public IOpcode {
  public:
   AND(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

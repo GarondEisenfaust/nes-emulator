@@ -16,3 +16,7 @@ void LSR::operator()() {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
   }
 }
+
+const char* LSR::Name() {
+  return "LSR";
+}

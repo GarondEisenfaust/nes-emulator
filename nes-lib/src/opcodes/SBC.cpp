@@ -15,3 +15,7 @@ void SBC::operator()() {
   mCpu->status.n = temp & 0x0080;
   mCpu->a = temp & 0x00FF;
 }
+
+const char* SBC::Name() {
+  return "SBC";
+}

@@ -5,4 +5,5 @@ class TXA : public IOpcode {
  public:
   TXA(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

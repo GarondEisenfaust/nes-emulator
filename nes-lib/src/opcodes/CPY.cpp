@@ -10,3 +10,7 @@ void CPY::operator()() {
   mCpu->status.z = (temp & 0x00FF) == 0x0000;
   mCpu->status.n = temp & 0x0080;
 }
+
+const char* CPY::Name() {
+  return "CPY";
+}

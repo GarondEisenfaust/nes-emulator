@@ -4,3 +4,7 @@
 CLI::CLI(Cpu* cpu) : IOpcode(cpu) {}
 
 void CLI::operator()() { mCpu->status.i = false; }
+
+const char* CLI::Name() {
+  return "CLI";
+}

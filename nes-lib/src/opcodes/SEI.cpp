@@ -4,3 +4,7 @@
 SEI::SEI(Cpu* cpu) : IOpcode(cpu) {}
 
 void SEI::operator()() { mCpu->status.i = true; }
+
+const char* SEI::Name() {
+  return "SEI";
+}

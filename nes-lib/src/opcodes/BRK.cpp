@@ -16,3 +16,7 @@ void BRK::operator()() {
 
   mCpu->pc = mCpu->Read(0xFFFE) | (mCpu->Read(0xFFFF) << 8);
 }
+
+const char* BRK::Name() {
+  return "BRK";
+}

@@ -5,4 +5,5 @@ class PLP : public IOpcode {
  public:
   PLP(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

@@ -13,3 +13,7 @@ void ADC::operator()() {
   mCpu->status.n = temp & (1 << 7);
   mCpu->a = temp & 0x00FF;
 }
+
+const char* ADC::Name() {
+  return "ADC";
+}

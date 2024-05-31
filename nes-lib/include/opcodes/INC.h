@@ -5,4 +5,5 @@ class INC : public IOpcode {
  public:
   INC(Cpu* cpu);
   virtual void operator()();
+  virtual const char* Name();
 };

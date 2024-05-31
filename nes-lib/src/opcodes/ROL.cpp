@@ -16,3 +16,7 @@ void ROL::operator()() {
     mCpu->Write(mCpu->addrAbs, temp & 0x00FF);
   }
 }
+
+const char* ROL::Name() {
+  return "ROL";
+}
