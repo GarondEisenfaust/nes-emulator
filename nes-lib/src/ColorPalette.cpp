@@ -1,4 +1,5 @@
 #include "ColorPalette.h"
+#include <algorithm>
 
 std::unique_ptr<ColorPaletteU8> MakePixelColors() {
   auto pixelColors = std::make_unique<ColorPaletteU8>();
@@ -74,8 +75,7 @@ std::unique_ptr<ColorPaletteU8> MakePixelColors() {
   return pixelColors;
 }
 
-std::unique_ptr<ColorPaletteF> MakePixelColorsFloat()
-{
+std::unique_ptr<ColorPaletteF> MakePixelColorsFloat() {
   auto pixelColorsU8 = MakePixelColors();
   auto pixelColors = std::make_unique<ColorPaletteF>();
   std::transform(pixelColorsU8->begin(), pixelColorsU8->end(), pixelColors->data(),
