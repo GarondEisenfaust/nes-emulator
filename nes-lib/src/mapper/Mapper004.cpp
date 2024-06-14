@@ -79,7 +79,6 @@ void Mapper004::ScanlineCounter() {
   }
   if (mInteruptCounter == 0 && mInteruptEnable) {
     mInteruptActive = true;
-    printf("Interupt\n");
   }
 }
 
@@ -96,7 +95,6 @@ void Mapper004::DetermineMirrorMode(bool evenAddress, uint8_t data) {
 void Mapper004::ReloadInterruptCounter(bool evenAddress, uint8_t data) {
   if (evenAddress) {
     mInteruptReloadValue = data;
-    printf("data %i\n", data);
   } else {
     mInteruptCounter = 0;
   }
@@ -151,9 +149,7 @@ void Mapper004::DetermineInterruptEnable(bool evenAddress) {
   if (evenAddress) {
     mInteruptEnable = false;
     mInteruptActive = false;
-    printf("Disable\n");
   } else {
     mInteruptEnable = true;
-    printf("Enable\n");
   }
 }

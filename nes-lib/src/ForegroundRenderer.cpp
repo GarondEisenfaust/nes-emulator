@@ -97,7 +97,6 @@ void ForegroundRenderer::LoadSpriteShifters(uint16_t spritePatternAddrLow, uint1
 }
 
 uint16_t ForegroundRenderer::GetLowAddressOfBigSprite(uint8_t i) {
-  printf("big\n");
   if (!(mSpriteOnScanline[i].attribute & (1 << 7))) {
     if (mPpu->mScanline - mSpriteOnScanline[i].y < 8) {
       return ((mSpriteOnScanline[i].id & 0x01) << 12) | ((mSpriteOnScanline[i].id & 0xFE) << 4) |
@@ -118,7 +117,6 @@ uint16_t ForegroundRenderer::GetLowAddressOfBigSprite(uint8_t i) {
 }
 
 uint16_t ForegroundRenderer::GetLowAddressOfSmallSprite(uint8_t i) {
-  // printf("small\n");
   if (!(mSpriteOnScanline[i].attribute & (1 << 7))) {
     return (mPpu->GetPatternSpriteFlag() << 12) | (mSpriteOnScanline[i].id << 4) |
            (mPpu->mScanline - mSpriteOnScanline[i].y);
@@ -143,14 +141,11 @@ void ForegroundRenderer::DetectSpritesOnScanline() {
       break;
     }
     int16_t diff = mPpu->mScanline - mOam[i].y;
-    // printf("biggggg %i\n", mPpu->GetSpriteSizeFlag());
-    // printf("thingy %i\n", mPpu->GetSpriteSizeFlag());
 
     if (!(0 <= diff && diff < (mPpu->GetSpriteSizeFlag() ? 16 : 8))) {
       continue;
     }
     if (mSpriteCount >= mSpriteOnScanline.size()) {
-      // printf("too many\n");
       continue;
     }
     if (i == 0) {
