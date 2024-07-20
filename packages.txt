@@ -2,6 +2,7 @@ apt-utils
 build-essential
 clang-15
 cmake
+ninja-build
 freeglut3-dev
 libfontenc-dev
 libglu1-mesa-dev
