@@ -82,7 +82,9 @@
     "format": "cpp",
     "span": "cpp",
     "stdfloat": "cpp",
-    "ranges": "cpp"
+    "ranges": "cpp",
+    "future": "cpp",
+    "text_encoding": "cpp"
   },
   "cmake.configureOnOpen": false,
   "cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",
