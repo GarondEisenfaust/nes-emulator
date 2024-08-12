@@ -1,118 +1,103 @@
-#include <jni.h>
+#include "Apu.h"
+#include "AudioDevice.h"
+#include "BackgroundRenderer.h"
+#include "Bus.h"
+#include "Controller.h"
+#include "Cpu.h"
+#include "ForegroundRenderer.h"
+#include "IRenderer.h"
+#include "Ppu.h"
+#include "rendering/IFrameDecoder.h"
+#include "rendering/LookupTableFrameDecoder.h"
+#include "rendering/LookupTableFrameDecoderGpu.h"
+#include "rendering/NtscSignalFrameDecoder.h"
+#include "rendering/NtscSignalFrameDecoderGpu.h"
+#include "rendering/RenderContext.h"
+#include <game-activity/GameActivity.h>
+#include <game-activity/native_app_glue/android_native_app_glue.h>
+#include <game-text-input/gametextinput.h>
+#include <chrono>
+#include <thread>
 
-#include "AndroidOut.h"
-#include "Renderer.h"
+void RenderCompleteFrame(Bus& bus, IRenderer& renderer) {
+  if (!bus.CartridgeInserted()) {
+    return;
+  }
+  while (!renderer.FrameComplete()) {
+    bus.Clock();
+  }
+  renderer.StartNewFrame();
+}
 
-#include <game-activity/GameActivity.cpp>
-#include <game-text-input/gametextinput.cpp>
+void MakeOneStep(Bus& bus) {
+  auto finished = false;
 
+  do {
+    bus.Clock();
+  } while (bus.mCpu->cycles > 0);
+
+  do {
+    bus.Clock();
+  } while (bus.mCpu->cycles <= 0);
+}
+RenderContext renderContext;
+
+std::unique_ptr<IFrameDecoder> CreateDecoder() { return std::make_unique<NtscSignalFrameDecoderGpu>(); }
 extern "C" {
 
-#include <game-activity/native_app_glue/android_native_app_glue.c>
-
-/*!
- * Handles commands sent to this Android application
- * @param pApp the app the commands are coming from
- * @param cmd the command to handle
- */
 void handle_cmd(android_app *pApp, int32_t cmd) {
-    switch (cmd) {
-        case APP_CMD_INIT_WINDOW:
-            // A new window is created, associate a renderer with it. You may replace this with a
-            // "game" class if that suits your needs. Remember to change all instances of userData
-            // if you change the class here as a reinterpret_cast is dangerous this in the
-            // android_main function and the APP_CMD_TERM_WINDOW handler case.
-            pApp->userData = new Renderer(pApp);
-            break;
-        case APP_CMD_TERM_WINDOW:
-            // The window is being destroyed. Use this to clean up your userData to avoid leaking
-            // resources.
-            //
-            // We have to check if userData is assigned just in case this comes in really quickly
-            if (pApp->userData) {
-                //
-                auto *pRenderer = reinterpret_cast<Renderer *>(pApp->userData);
-                pApp->userData = nullptr;
-                delete pRenderer;
-            }
-            break;
-        default:
-            break;
-    }
+  switch (cmd) {
+    case APP_CMD_INIT_WINDOW:
+      // A new window is created, associate a renderer with it. You may replace this with a
+      // "game" class if that suits your needs. Remember to change all instances of userData
+      // if you change the class here as a reinterpret_cast is dangerous this in the
+      // android_main function and the APP_CMD_TERM_WINDOW handler case.
+      renderContext.Init(pApp);
+      break;
+    default:
+      break;
+  }
 }
 
-/*!
- * Enable the motion events you want to handle; not handled events are
- * passed back to OS for further processing. For this example case,
- * only pointer and joystick devices are enabled.
- *
- * @param motionEvent the newly arrived GameActivityMotionEvent.
- * @return true if the event is from a pointer or joystick device,
- *         false for all other input devices.
- */
-bool motion_event_filter_func(const GameActivityMotionEvent *motionEvent) {
-    auto sourceClass = motionEvent->source & AINPUT_SOURCE_CLASS_MASK;
-    return (sourceClass == AINPUT_SOURCE_CLASS_POINTER ||
-            sourceClass == AINPUT_SOURCE_CLASS_JOYSTICK);
-}
+void android_main(struct android_app* app) {
+  app->onAppCmd = handle_cmd;
 
-/*!
- * This the main entry point for a native activity
- */
-void android_main(struct android_app *pApp) {
-    // Can be removed, useful to ensure your code is running
-    aout << "Welcome to android_main" << std::endl;
+  std::unique_ptr<IFrameDecoder> decoder = CreateDecoder();
+  renderContext.SetFrameDecoder(decoder.get());
 
-    // Register an event handler for Android events
-    pApp->onAppCmd = handle_cmd;
+  auto ram = std::make_unique<Ram>();
+  Bus bus(*ram);
+  Cpu cpu;
+  Ppu ppu(renderContext);
+  Apu apu;
 
-    // Set input event filters (set it to NULL if the app wants to process all inputs).
-    // Note that for key inputs, this example uses the default default_key_filter()
-    // implemented in android_native_app_glue.c.
-    android_app_set_motion_event_filter(pApp, motion_event_filter_func);
+  ForegroundRenderer foregroundRenderer;
+  foregroundRenderer.SetPpu(&ppu);
+  ppu.SetForegroundRenderer(&foregroundRenderer);
 
-    // This sets up a typical game/event loop. It will run until the app is destroyed.
-    do {
-        // Process all pending events before running game logic.
-        bool done = false;
-        while (!done) {
-            // 0 is non-blocking.
-            int timeout = 0;
-            int events;
-            android_poll_source *pSource;
-            int result = ALooper_pollOnce(timeout, nullptr, &events,
-                                          reinterpret_cast<void**>(&pSource));
-            switch (result) {
-                case ALOOPER_POLL_TIMEOUT:
-                    [[clang::fallthrough]];
-                case ALOOPER_POLL_WAKE:
-                    // No events occurred before the timeout or explicit wake. Stop checking for events.
-                    done = true;
-                    break;
-                case ALOOPER_EVENT_ERROR:
-                    aout << "ALooper_pollOnce returned an error" << std::endl;
-                    break;
-                case ALOOPER_POLL_CALLBACK:
-                    break;
-                default:
-                    if (pSource) {
-                        pSource->process(pApp, pSource);
-                    }
-            }
-        }
-        auto *pRenderer = reinterpret_cast<Renderer *>(pApp->userData);
+  BackgroundRenderer backgroundRenderer;
+  backgroundRenderer.SetPpu(&ppu);
+  ppu.SetBackgroundRenderer(&backgroundRenderer);
 
-        // Check if any user data is associated. This is assigned in handle_cmd
-        if (pRenderer) {
-            // We know that our user data is a Renderer, so reinterpret cast it. If you change your
-            // user data remember to change it here
+  Controller controller;
 
-            // Process game input
-            pRenderer->handleInput();
+  bus.ConnectController(&controller);
+  cpu.ConnectBus(&bus);
+  ppu.ConnectBus(&bus);
+  apu.ConnectBus(&bus);
 
-            // Render a frame
-            pRenderer->render();
-        }
-    } while (!pApp->destroyRequested);
+  bus.InsertCartridge(std::make_shared<Cartridge>(""));
+  bus.Reset();
+
+  AudioDevice audioDevice;
+
+  using namespace std::chrono_literals;
+  const auto diff = (1000ms / 60);
+  auto next = std::chrono::system_clock::now();
+  renderContext.GameLoop([&]() {
+    RenderCompleteFrame(bus, renderContext);
+    std::this_thread::sleep_until(next);
+    next += diff;
+  });
 }
 }

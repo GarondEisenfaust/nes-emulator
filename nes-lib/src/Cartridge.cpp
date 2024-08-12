@@ -49,6 +49,7 @@ Cartridge::Cartridge(const std::string& path) {
   romStream.open(path, std::ifstream::binary);
 
   if (!romStream.is_open()) {
+    auto v = strerror(errno);
     return;
   }
 
