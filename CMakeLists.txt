@@ -21,6 +21,11 @@ if(RUN_TESTS)
   enable_testing()
 endif()
 
-add_subdirectory(nes)
-add_subdirectory(playground)
 add_subdirectory(nes-lib)
+
+if(${ANDROID})
+  add_subdirectory(nes_emulator)
+elseif()
+  add_subdirectory(nes)
+  add_subdirectory(playground)
+endif()

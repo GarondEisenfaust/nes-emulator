@@ -5,11 +5,9 @@
 #include <memory>
 #include <vector>
 #include <android/imagedecoder.h>
+#include <cassert>
 
 #include "AndroidOut.h"
-#include "Shader.h"
-#include "Utility.h"
-#include "TextureAsset.h"
 
 //! executes glGetString and outputs the result to logcat
 #define PRINT_GL_STRING(s) {aout << #s": "<< glGetString(s) << std::endl;}
@@ -38,51 +36,24 @@ aout << std::endl;\
 
 // Vertex shader, you'd typically load this from assets
 static const char *vertex = R"vertex(#version 300 es
-in vec3 inPosition;
-in vec2 inUV;
+layout (location = 0) in vec3 aPos;
 
-out vec2 fragUV;
-
-uniform mat4 uProjection;
-
-void main() {
-    fragUV = inUV;
-    gl_Position = uProjection * vec4(inPosition, 1.0);
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
 }
 )vertex";
 
 // Fragment shader, you'd typically load this from assets
 static const char *fragment = R"fragment(#version 300 es
 precision mediump float;
+out vec4 fragColor;
 
-in vec2 fragUV;
-
-uniform sampler2D uTexture;
-
-out vec4 outColor;
-
-void main() {
-    outColor = texture(uTexture, fragUV);
+void main()
+{
+    fragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
 }
 )fragment";
-
-/*!
- * Half the height of the projection matrix. This gives you a renderable area of height 4 ranging
- * from -2 to 2
- */
-static constexpr float kProjectionHalfHeight = 2.f;
-
-/*!
- * The near plane distance for the projection matrix. Since this is an orthographic projection
- * matrix, it's convenient to have negative values for sorting (and avoiding z-fighting at 0).
- */
-static constexpr float kProjectionNearPlane = -1.f;
-
-/*!
- * The far plane distance for the projection matrix. Since this is an orthographic porjection
- * matrix, it's convenient to have the far plane equidistant from 0 as the near plane.
- */
-static constexpr float kProjectionFarPlane = 1.f;
 
 Renderer::~Renderer() {
     if (display_ != EGL_NO_DISPLAY) {
@@ -101,63 +72,22 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render() {
-    // Check to see if the surface has changed size. This is _necessary_ to do every frame when
-    // using immersive mode as you'll get no other notification that your renderable area has
-    // changed.
     updateRenderArea();
-
-    // When the renderable area changes, the projection matrix has to also be updated. This is true
-    // even if you change from the sample orthographic projection matrix as your aspect ratio has
-    // likely changed.
-    if (shaderNeedsNewProjectionMatrix_) {
-        // a placeholder projection matrix allocated on the stack. Column-major memory layout
-        float projectionMatrix[16] = {0};
-
-        // build an orthographic projection matrix for 2d rendering
-        Utility::buildOrthographicMatrix(
-                projectionMatrix,
-                kProjectionHalfHeight,
-                float(width_) / height_,
-                kProjectionNearPlane,
-                kProjectionFarPlane);
-
-        // send the matrix to the shader
-        // Note: the shader must be active for this to work. Since we only have one shader for this
-        // demo, we can assume that it's active.
-        shader_->setProjectionMatrix(projectionMatrix);
-
-        // make sure the matrix isn't generated every frame
-        shaderNeedsNewProjectionMatrix_ = false;
-    }
-
-    // clear the color buffer
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Render all the models. There's no depth testing in this sample so they're accepted in the
-    // order provided. But the sample EGL setup requests a 24 bit depth buffer so you could
-    // configure it at the end of initRenderer
-    if (!models_.empty()) {
-        for (const auto &model: models_) {
-            shader_->drawModel(model);
-        }
-    }
+    glUseProgram(shaderProgram);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    // Present the rendered image. This is an implicit glFlush.
     auto swapResult = eglSwapBuffers(display_, surface_);
     assert(swapResult == EGL_TRUE);
 }
 
 void Renderer::initRenderer() {
     // Choose your render attributes
-    constexpr EGLint attribs[] = {
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_BLUE_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_RED_SIZE, 8,
-            EGL_DEPTH_SIZE, 24,
-            EGL_NONE
-    };
+    constexpr EGLint attribs[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT, EGL_SURFACE_TYPE,
+                                  EGL_WINDOW_BIT, EGL_BLUE_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_RED_SIZE,
+                                  8, EGL_DEPTH_SIZE, 24, EGL_NONE};
 
     // The default display is probably what you want on Android
     auto display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -174,22 +104,22 @@ void Renderer::initRenderer() {
     // Find a config we like.
     // Could likely just grab the first if we don't care about anything else in the config.
     // Otherwise hook in your own heuristic
-    auto config = *std::find_if(
-            supportedConfigs.get(),
-            supportedConfigs.get() + numConfigs,
-            [&display](const EGLConfig &config) {
-                EGLint red, green, blue, depth;
-                if (eglGetConfigAttrib(display, config, EGL_RED_SIZE, &red)
-                    && eglGetConfigAttrib(display, config, EGL_GREEN_SIZE, &green)
-                    && eglGetConfigAttrib(display, config, EGL_BLUE_SIZE, &blue)
-                    && eglGetConfigAttrib(display, config, EGL_DEPTH_SIZE, &depth)) {
+    auto config = *std::find_if(supportedConfigs.get(), supportedConfigs.get() + numConfigs,
+                                [&display](const EGLConfig &config) {
+                                    EGLint red, green, blue, depth;
+                                    if (eglGetConfigAttrib(display, config, EGL_RED_SIZE, &red) &&
+                                        eglGetConfigAttrib(display, config, EGL_GREEN_SIZE,
+                                                           &green) &&
+                                        eglGetConfigAttrib(display, config, EGL_BLUE_SIZE, &blue) &&
+                                        eglGetConfigAttrib(display, config, EGL_DEPTH_SIZE,
+                                                           &depth)) {
 
-                    aout << "Found config with " << red << ", " << green << ", " << blue << ", "
-                         << depth << std::endl;
-                    return red == 8 && green == 8 && blue == 8 && depth == 24;
-                }
-                return false;
-            });
+                                        aout << "Found config with " << red << ", " << green << ", "
+                                             << blue << ", " << depth << std::endl;
+                                        return red == 8 && green == 8 && blue == 8 && depth == 24;
+                                    }
+                                    return false;
+                                });
 
     aout << "Found " << numConfigs << " configs" << std::endl;
     aout << "Chose " << config << std::endl;
@@ -220,23 +150,55 @@ void Renderer::initRenderer() {
     PRINT_GL_STRING(GL_VERSION);
     PRINT_GL_STRING_AS_LIST(GL_EXTENSIONS);
 
-    shader_ = std::unique_ptr<Shader>(
-            Shader::loadShader(vertex, fragment, "inPosition", "inUV", "uProjection"));
-    assert(shader_);
-
-    // Note: there's only one shader in this demo, so I'll activate it here. For a more complex game
-    // you'll want to track the active shader and activate/deactivate it as necessary
-    shader_->activate();
-
     // setup any other gl related global states
     glClearColor(CORNFLOWER_BLUE);
 
     // enable alpha globally for now, you probably don't want to do this in a game
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
 
-    // get some demo models into memory
-    createModels();
+void Renderer::initTriangle() {
+    uint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertex, nullptr);
+    glCompileShader(vertexShader);
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+        aout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    uint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragment, nullptr);
+    glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+        aout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
+        aout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 }
 
 void Renderer::updateRenderArea() {
@@ -249,44 +211,8 @@ void Renderer::updateRenderArea() {
     if (width != width_ || height != height_) {
         width_ = width;
         height_ = height;
-        glViewport(0, 0, width, height);
-
-        // make sure that we lazily recreate the projection matrix before we render
-        shaderNeedsNewProjectionMatrix_ = true;
+        glViewport(0, 0, width_, height_);
     }
-}
-
-/**
- * @brief Create any demo models we want for this demo.
- */
-void Renderer::createModels() {
-    /*
-     * This is a square:
-     * 0 --- 1
-     * | \   |
-     * |  \  |
-     * |   \ |
-     * 3 --- 2
-     */
-    std::vector<Vertex> vertices = {
-            Vertex(Vector3{1, 1, 0}, Vector2{0, 0}), // 0
-            Vertex(Vector3{-1, 1, 0}, Vector2{1, 0}), // 1
-            Vertex(Vector3{-1, -1, 0}, Vector2{1, 1}), // 2
-            Vertex(Vector3{1, -1, 0}, Vector2{0, 1}) // 3
-    };
-    std::vector<Index> indices = {
-            0, 1, 2, 0, 2, 3
-    };
-
-    // loads an image and assigns it to the square.
-    //
-    // Note: there is no texture management in this sample, so if you reuse an image be careful not
-    // to load it repeatedly. Since you get a shared_ptr you can safely reuse it in many models.
-    auto assetManager = app_->activity->assetManager;
-    auto spAndroidRobotTexture = TextureAsset::loadAsset(assetManager, "android_robot.png");
-
-    // Create a model and put it in the back of the render list.
-    models_.emplace_back(vertices, indices, spAndroidRobotTexture);
 }
 
 void Renderer::handleInput() {
@@ -316,8 +242,7 @@ void Renderer::handleInput() {
         switch (action & AMOTION_EVENT_ACTION_MASK) {
             case AMOTION_EVENT_ACTION_DOWN:
             case AMOTION_EVENT_ACTION_POINTER_DOWN:
-                aout << "(" << pointer.id << ", " << x << ", " << y << ") "
-                     << "Pointer Down";
+                aout << "(" << pointer.id << ", " << x << ", " << y << ") " << "Pointer Down";
                 break;
 
             case AMOTION_EVENT_ACTION_CANCEL:
@@ -326,8 +251,7 @@ void Renderer::handleInput() {
                 // code pass through on purpose.
             case AMOTION_EVENT_ACTION_UP:
             case AMOTION_EVENT_ACTION_POINTER_UP:
-                aout << "(" << pointer.id << ", " << x << ", " << y << ") "
-                     << "Pointer Up";
+                aout << "(" << pointer.id << ", " << x << ", " << y << ") " << "Pointer Up";
                 break;
 
             case AMOTION_EVENT_ACTION_MOVE:
@@ -356,7 +280,7 @@ void Renderer::handleInput() {
     // handle input key events.
     for (auto i = 0; i < inputBuffer->keyEventsCount; i++) {
         auto &keyEvent = inputBuffer->keyEvents[i];
-        aout << "Key: " << keyEvent.keyCode <<" ";
+        aout << "Key: " << keyEvent.keyCode << " ";
         switch (keyEvent.action) {
             case AKEY_EVENT_ACTION_DOWN:
                 aout << "Key Down";

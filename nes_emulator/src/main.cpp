@@ -100,12 +100,12 @@ void android_main(struct android_app *pApp) {
                     }
             }
         }
+        auto *pRenderer = reinterpret_cast<Renderer *>(pApp->userData);
 
         // Check if any user data is associated. This is assigned in handle_cmd
-        if (pApp->userData) {
+        if (pRenderer) {
             // We know that our user data is a Renderer, so reinterpret cast it. If you change your
             // user data remember to change it here
-            auto *pRenderer = reinterpret_cast<Renderer *>(pApp->userData);
 
             // Process game input
             pRenderer->handleInput();

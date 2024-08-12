@@ -35,13 +35,13 @@ macro(create_executable)
   endif()
 endmacro()
 
-macro(create_library)
+macro(create_library TYPE)
   set_project_name()
 
   # Project name
   project(${PROJECT_NAME})
 
-  add_library(${PROJECT_NAME} ${SOURCE_FILES} ${INCLUDE_FILES} ${SHADERS})
+  add_library(${PROJECT_NAME} ${TYPE} ${SOURCE_FILES} ${INCLUDE_FILES} ${SHADERS})
   target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDES})
 
   if(RUN_TESTS)
