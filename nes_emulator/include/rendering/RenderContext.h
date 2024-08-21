@@ -24,6 +24,7 @@ class RenderContext : public IRenderer {
   void CommitFrame(unsigned int ppuCycle) override;
   void StartNewFrame() override;
   bool FrameComplete() override;
+  bool mInitialized = false;
 
  private:
   int mWidth;

@@ -1,29 +1,49 @@
 package com.example.nes_emulator
 
-import android.view.View
-import com.google.androidgamesdk.GameActivity
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.documentfile.provider.DocumentFile
 
-class MainActivity : GameActivity() {
-    companion object {
-        init {
-            System.loadLibrary("nes_emulator")
-        }
+
+class MainActivity : AppCompatActivity() {
+
+    private fun getFdOfRom(uri: Uri, romName: String): ParcelFileDescriptor {
+        val uriToFile = DocumentFile.fromTreeUri(baseContext, uri)?.listFiles()
+            ?.find { file -> file.name == romName }!!.uri
+        val fd = contentResolver.openFileDescriptor(
+            uriToFile, "r"
+        )!!
+        return fd
     }
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            hideSystemUi()
+    private fun openDirectory(pickerInitialUri: Uri) {
+        val listDir = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            val fd = getFdOfRom(uri!!, "smb.nes")
+            val myIntent = Intent(
+                this, NesActivity::class.java
+            )
+            myIntent.putExtra("romFd", fd.detachFd())
+            startActivity(myIntent)
         }
+        listDir.launch(pickerInitialUri)
     }
 
-    private fun hideSystemUi() {
-        val decorView = window.decorView
-        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_FULLSCREEN)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        openDirectory(Uri.parse("Downloads"))
     }
 }

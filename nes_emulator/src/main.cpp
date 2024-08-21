@@ -1,3 +1,4 @@
+#include "AndroidOut.h"
 #include "Apu.h"
 #include "AudioDevice.h"
 #include "BackgroundRenderer.h"
@@ -17,7 +18,13 @@
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <game-text-input/gametextinput.h>
 #include <chrono>
+#include <cstdio>
+#include <jni.h>
 #include <thread>
+#include <unistd.h>
+
+std::string theRomPath = "";
+int theRomFd = 0;
 
 void RenderCompleteFrame(Bus& bus, IRenderer& renderer) {
   if (!bus.CartridgeInserted()) {
@@ -45,7 +52,7 @@ RenderContext renderContext;
 std::unique_ptr<IFrameDecoder> CreateDecoder() { return std::make_unique<NtscSignalFrameDecoderGpu>(); }
 extern "C" {
 
-void handle_cmd(android_app *pApp, int32_t cmd) {
+void handle_cmd(android_app* pApp, int32_t cmd) {
   switch (cmd) {
     case APP_CMD_INIT_WINDOW:
       // A new window is created, associate a renderer with it. You may replace this with a
@@ -85,13 +92,15 @@ void android_main(struct android_app* app) {
   cpu.ConnectBus(&bus);
   ppu.ConnectBus(&bus);
   apu.ConnectBus(&bus);
+  using namespace std::chrono_literals;
 
-  bus.InsertCartridge(std::make_shared<Cartridge>(""));
+  bus.InsertCartridge(std::make_shared<Cartridge>(theRomFd));
   bus.Reset();
 
   AudioDevice audioDevice;
 
-  using namespace std::chrono_literals;
+  while(!renderContext.mInitialized) { std::this_thread::sleep_for(1s); }
+
   const auto diff = (1000ms / 60);
   auto next = std::chrono::system_clock::now();
   renderContext.GameLoop([&]() {
@@ -100,4 +109,8 @@ void android_main(struct android_app* app) {
     next += diff;
   });
 }
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_example_nes_1emulator_NesActivity_setRomFd(JNIEnv* env, jobject obj, int fd) {
+  theRomFd = fd;
 }

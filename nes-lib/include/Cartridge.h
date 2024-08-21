@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <fstream>
 
 #define CPU_CARTRIDGE_START 0x8000
 #define CPU_CARTRIDGE_END 0xFFFF
@@ -19,6 +20,8 @@ class Cartridge {
   };
 
   Cartridge(const std::string& path);
+  Cartridge(const int fd);
+
   virtual ~Cartridge() = default;
 
   uint8_t CpuRead(uint16_t address);
@@ -34,6 +37,8 @@ class Cartridge {
   MirrorMode GetMirrorMode();
 
  private:
+  void Init(const std::vector<uint8_t >& romStream);
+
   std::vector<uint8_t> mProgramMemory;
   std::vector<uint8_t> mCharacterMemory;
 

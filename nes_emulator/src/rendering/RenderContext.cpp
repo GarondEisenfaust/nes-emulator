@@ -105,7 +105,9 @@ void RenderContext::Init(struct android_app* app) {
 
   EGLint height;
   eglQuerySurface(display_, surface_, EGL_HEIGHT, &mHeight);
-    glViewport(0, 0, mWidth, mHeight);
+  glViewport(0, 0, mWidth, mHeight);
+
+  mInitialized = true;
   }
 
 RenderContext::~RenderContext() {
