@@ -1,4 +1,6 @@
-#version 330 core
+#version 300 es
+precision highp float;
+precision highp int;
 
 in vec2 TexCoord;
 out vec4 FragColor;
@@ -71,9 +73,9 @@ void main() {
   vec3 yiq = vec3(0);
   int offset = samplesToTake / 2;
   for (int i = 0; i < samplesToTake; i++) {
-    float level = samples[i] / samplesToTake;
+    float level = samples[i] / float(samplesToTake);
     int phase = index - difference + i;
-    float x = (PI / offset) * (phase + hueFix + ppuCycle);
+    float x = (PI / float(offset)) * (float(phase) + hueFix + float(ppuCycle));
     yiq += vec3(1, cos(x), sin(x)) * level;
   }
 

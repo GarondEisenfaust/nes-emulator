@@ -69,48 +69,74 @@ void handle_cmd(android_app* pApp, int32_t cmd) {
 void android_main(struct android_app* app) {
   app->onAppCmd = handle_cmd;
 
-  std::unique_ptr<IFrameDecoder> decoder = CreateDecoder();
-  renderContext.SetFrameDecoder(decoder.get());
+  while (true) {
+    // Read all pending events.
+    int events;
+    struct android_poll_source* source;
 
-  auto ram = std::make_unique<Ram>();
-  Bus bus(*ram);
-  Cpu cpu;
-  Ppu ppu(renderContext);
-  Apu apu;
+    // If not animating, block forever waiting for events.
+    // If animating, loop until all events are read, then continue
+    // to draw the next frame of animation.
+    while ((ALooper_pollAll(0, nullptr, &events, (void**)&source)) >= 0 || !renderContext.mInitialized) {
+      // Process this app cycle or inset change event.
+      if (source) {
+        source->process(source->app, source);
+      }
 
-  ForegroundRenderer foregroundRenderer;
-  foregroundRenderer.SetPpu(&ppu);
-  ppu.SetForegroundRenderer(&foregroundRenderer);
+      // ... // Other processing.
 
-  BackgroundRenderer backgroundRenderer;
-  backgroundRenderer.SetPpu(&ppu);
-  ppu.SetBackgroundRenderer(&backgroundRenderer);
+      // Check if app is exiting.
+      if (app->destroyRequested) {
+        // engine_term_display(&engine);
+        return;
+      }
+    }
+    std::unique_ptr<IFrameDecoder> decoder = CreateDecoder();
+    renderContext.SetFrameDecoder(decoder.get());
 
-  Controller controller;
+    auto ram = std::make_unique<Ram>();
+    Bus bus(*ram);
+    Cpu cpu;
+    Ppu ppu(renderContext);
+    Apu apu;
 
-  bus.ConnectController(&controller);
-  cpu.ConnectBus(&bus);
-  ppu.ConnectBus(&bus);
-  apu.ConnectBus(&bus);
-  using namespace std::chrono_literals;
+    ForegroundRenderer foregroundRenderer;
+    foregroundRenderer.SetPpu(&ppu);
+    ppu.SetForegroundRenderer(&foregroundRenderer);
 
-  bus.InsertCartridge(std::make_shared<Cartridge>(theRomFd));
-  bus.Reset();
+    BackgroundRenderer backgroundRenderer;
+    backgroundRenderer.SetPpu(&ppu);
+    ppu.SetBackgroundRenderer(&backgroundRenderer);
 
-  AudioDevice audioDevice;
+    Controller controller;
 
-  while(!renderContext.mInitialized) { std::this_thread::sleep_for(1s); }
+    bus.ConnectController(&controller);
+    cpu.ConnectBus(&bus);
+    ppu.ConnectBus(&bus);
+    apu.ConnectBus(&bus);
+    using namespace std::chrono_literals;
 
-  const auto diff = (1000ms / 60);
-  auto next = std::chrono::system_clock::now();
-  renderContext.GameLoop([&]() {
-    RenderCompleteFrame(bus, renderContext);
-    std::this_thread::sleep_until(next);
-    next += diff;
-  });
+    bus.InsertCartridge(std::make_shared<Cartridge>(theRomFd));
+    bus.Reset();
+
+    AudioDevice audioDevice;
+
+    while (!renderContext.mInitialized) {
+      std::this_thread::sleep_for(1s);
+    }
+
+    const auto diff = (1000ms / 60);
+    auto next = std::chrono::system_clock::now();
+    renderContext.GameLoop([&]() {
+      RenderCompleteFrame(bus, renderContext);
+      std::this_thread::sleep_until(next);
+      next += diff;
+    });
+  }
 }
 }
 
-extern "C" JNIEXPORT void JNICALL Java_com_example_nes_1emulator_NesActivity_setRomFd(JNIEnv* env, jobject obj, int fd) {
+extern "C" JNIEXPORT void JNICALL Java_com_example_nes_1emulator_NesActivity_setRomFd(JNIEnv* env, jobject obj,
+                                                                                      int fd) {
   theRomFd = fd;
 }
