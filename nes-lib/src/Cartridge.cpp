@@ -1,5 +1,6 @@
 #include "Cartridge.h"
 #include "Definitions.h"
+#include "cstring"
 #include "mapper/Mappers.h"
 #include <sstream>
 
@@ -41,43 +42,43 @@ std::unique_ptr<IMapper> MakeMapper(int mapperId, MirrorMode mirrorMode, int pro
 }
 
 Cartridge::Cartridge(const int fd) {
-    std::vector<uint8_t> buffer;
-    auto* f = fdopen(fd, "r");
+  std::vector<uint8_t> buffer;
+  auto* f = fdopen(fd, "r");
 
-    fseek(f, 0, SEEK_END);
-    long fsize = ftell(f);
-    fseek(f, 0, SEEK_SET);  /* same as rewind(f); */
+  fseek(f, 0, SEEK_END);
+  long fsize = ftell(f);
+  fseek(f, 0, SEEK_SET); /* same as rewind(f); */
 
-    buffer.resize(fsize);
-    fread(buffer.data(), fsize, 1, f);
-    fclose(f);
+  buffer.resize(fsize);
+  fread(buffer.data(), fsize, 1, f);
+  fclose(f);
 
   //  std::istringstream romStream;
-   // romStream.rdbuf()->pubsetbuf(buffer.data(), buffer.size());
-    Init(buffer);
+  // romStream.rdbuf()->pubsetbuf(buffer.data(), buffer.size());
+  Init(buffer);
 }
 
 Cartridge::Cartridge(const std::string& path) {
-  //std::ifstream romStream(path);
- // Init(romStream);
- // romStream.close();
+  // std::ifstream romStream(path);
+  // Init(romStream);
+  // romStream.close();
 }
 
-void Cartridge::Init(const std::vector<uint8_t >& romStream) {
+void Cartridge::Init(const std::vector<uint8_t>& romStream) {
   Header header;
   mImageValid = false;
 
- // if (!romStream.is_open()) {
+  // if (!romStream.is_open()) {
   //  auto v = strerror(errno);
-   // return;
- // }
+  // return;
+  // }
 
   auto iter = romStream.begin();
   std::memcpy(&header, &(*iter), sizeof(Header));
-  iter+=sizeof(Header);
+  iter += sizeof(Header);
   // romStream.read(reinterpret_cast<char*>(&header), sizeof(Header));
   if (header.mapper1 & 0x04) {
-    iter+=512;
+    iter += 512;
   }
 
   mMapperId = DetermineMapperId(header);
@@ -85,16 +86,16 @@ void Cartridge::Init(const std::vector<uint8_t >& romStream) {
 
   mProgramBanks = header.programRomChunks;
   mProgramMemory.resize(mProgramBanks * 16384);
- // romStream.read(reinterpret_cast<char*>(mProgramMemory.data()), mProgramMemory.size());
+  // romStream.read(reinterpret_cast<char*>(mProgramMemory.data()), mProgramMemory.size());
   std::memcpy(mProgramMemory.data(), &(*iter), mProgramMemory.size());
-  iter+=mProgramMemory.size();
+  iter += mProgramMemory.size();
 
   mCharacterBanks = header.characterRomChunks;
   const auto banksToAllocate = mCharacterBanks > 0 ? mCharacterBanks : 1;
   mCharacterMemory.resize(banksToAllocate * 8192);
-//  romStream.read(reinterpret_cast<char*>(mCharacterMemory.data()), mCharacterMemory.size());
+  //  romStream.read(reinterpret_cast<char*>(mCharacterMemory.data()), mCharacterMemory.size());
   std::memcpy(mCharacterMemory.data(), &(*iter), mCharacterMemory.size());
-  iter+=mCharacterMemory.size();
+  iter += mCharacterMemory.size();
 
   mMapper = MakeMapper(mMapperId, mirrorMode, mProgramBanks, mCharacterBanks);
   mMapper->Reset();
