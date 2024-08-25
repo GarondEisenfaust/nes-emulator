@@ -2,9 +2,9 @@
 #include "MirrorMode.h"
 #include "mapper/IMapper.h"
 #include <cstdint>
+#include <fstream>
 #include <memory>
 #include <vector>
-#include <fstream>
 
 #define CPU_CARTRIDGE_START 0x8000
 #define CPU_CARTRIDGE_END 0xFFFF
@@ -37,7 +37,7 @@ class Cartridge {
   MirrorMode GetMirrorMode();
 
  private:
-  void Init(const std::vector<uint8_t >& romStream);
+  void Init(const std::vector<uint8_t>& romData);
 
   std::vector<uint8_t> mProgramMemory;
   std::vector<uint8_t> mCharacterMemory;
