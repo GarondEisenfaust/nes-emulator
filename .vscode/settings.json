@@ -87,15 +87,11 @@
     "text_encoding": "cpp"
   },
   "cmake.configureOnOpen": false,
-  "cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",
   "cmake.automaticReconfigure": false,
   "[cpp]": {
     "editor.defaultFormatter": "xaver.clang-format"
   },
   "cmake.options.statusBarVisibility": "visible",
-  "cmake.configureSettings": {
-    "CMAKE_MAKE_PROGRAM": "ninja"
-  },
   "[python]": {
     "editor.defaultFormatter": "eeyore.yapf"
   }

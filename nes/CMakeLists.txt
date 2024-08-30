@@ -12,20 +12,27 @@ set(SOURCE_FILES
     ${CMAKE_BINARY_DIR}/bindings/imgui_impl_glfw.h
     ${CMAKE_BINARY_DIR}/bindings/imgui_impl_opengl3.h
     ${CMAKE_BINARY_DIR}/bindings/imgui_impl_glfw.cpp
-    ${CMAKE_BINARY_DIR}/bindings/imgui_impl_opengl3.cpp)
+    ${CMAKE_BINARY_DIR}/bindings/imgui_impl_opengl3.cpp
+    )
 
 set(INCLUDES ${INCLUDES} ${CMAKE_BINARY_DIR}/bindings/ ${SHADER_HEADER_DIR})
 
 create_executable()
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PUBLIC -msse2 -mavx2)
+
+find_package(imgui REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(glad REQUIRED)
+find_package(miniaudio REQUIRED)
+
 target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE nes-lib
-  PRIVATE CONAN_PKG::miniaudio
-  PRIVATE CONAN_PKG::glfw
-  PRIVATE CONAN_PKG::glad
-  PRIVATE CONAN_PKG::imgui)
+  PRIVATE miniaudio::miniaudio
+  PRIVATE glfw
+  PRIVATE glad::glad
+  PRIVATE imgui::imgui)
 
 set(ROM_SOURCE_DIR ${CMAKE_SOURCE_DIR}/roms)
 set(ROM_TARGET_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/roms)

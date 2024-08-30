@@ -50,6 +50,7 @@ macro(create_library TYPE)
 endmacro()
 
 macro(create_tests)
+  find_package(GTest)
   file(GLOB_RECURSE TEST_FILES "test/*.cpp" "test/*.h")
   if(TEST_FILES)
     set(TEST_NAME ${TEST_NAME} ${PROJECT_NAME}-test)

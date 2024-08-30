@@ -3,6 +3,9 @@ imgui.ini
 venv
 roms
 
+# conan2
+CMakeUserPresets.json
+
 # Android
 *.iml
 .gradle

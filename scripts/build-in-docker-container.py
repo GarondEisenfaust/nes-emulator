@@ -11,14 +11,15 @@ def main():
 
   parser = argparse.ArgumentParser("build-in-docker-container.py")
   parser.add_argument(
-      "source_directory", help="the source directory.", type=str)
-  parser.add_argument("build_directory", help="the build directory", type=str)
-  parser.add_argument("build_type", help="the build type", type=str)
+      "--source_directory", help="the source directory.", type=str)
+  parser.add_argument("--configure_preset", help="the configure preset", type=str)
+  parser.add_argument("--build_preset", help="the configure preset", type=str, required=False)
+
   args = parser.parse_args()
 
   source_dir = str(args.source_directory)
-  build_dir = str(args.build_directory)
-  build_type = str(args.build_type)
+  configure_preset = str(args.configure_preset)
+  build_preset = str(args.build_preset if args.build_preset is not None else configure_preset)
 
   gid = os.getegid()
   uid = os.geteuid()
@@ -32,8 +33,8 @@ def main():
   id = build_container(docker_executable, uid, gid, source_dir)
   run_command_in_build_container(
       docker_executable, uid, gid, source_dir, id,
-      "cmake -B {build_dir} -G Ninja -DCMAKE_BUILD_TYPE={build_type} && cmake --build {build_dir} --config {build_type}"
-      .format(build_type=build_type, build_dir=build_dir))
+      "cmake --preset {configure_preset} && cmake --build --preset {build_preset}"
+      .format(configure_preset=configure_preset, build_preset=build_preset))
 
 
 def run_command_in_build_container(docker_executable: str, uid: int, gid: int,
