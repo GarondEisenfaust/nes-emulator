@@ -20,4 +20,4 @@ if(NOT EXISTS ${CONAN_DEFAULT_PROFILE})
   file(WRITE ${CONAN_DEFAULT_PROFILE} "${FILE_CONTENTS}")
 endif()
 
-execute_process(COMMAND ${CONAN_COMMAND} install ${CMAKE_SOURCE_DIR} --build=missing)
+execute_process(COMMAND ${CONAN_COMMAND} install ${CMAKE_SOURCE_DIR} --build=missing --output-folder=${CMAKE_BINARY_DIR}/conan-output/)

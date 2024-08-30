@@ -25,11 +25,11 @@
       "preLaunchTask": "CMake: build"
     },
     {
-      "name": "nes-docker",
+      "name": "nes without building",
       "type": "cppdbg",
-      "cwd": "${command:cmake.buildDirectory}Docker/bin",
+      "cwd": "${command:cmake.buildDirectory}/bin",
       "request": "launch",
-      "program": "${command:cmake.buildDirectory}Docker/bin/nes",
+      "program": "${command:cmake.buildDirectory}/bin/nes",
       "args": [
         "--rom-dir",
         "roms/",
@@ -44,8 +44,7 @@
           "text": "-enable-pretty-printing",
           "ignoreFailures": true
         }
-      ],
-      "preLaunchTask": "Docker: build"
+      ]
     }
   ]
 }
