@@ -25,6 +25,3 @@ class NesEmulator(ConanFile):
 
     copy(self, "*glfw*", source, target)
     copy(self, "*opengl3*", source, target)
-
-  # def layout(self):
-  #   cmake_layout(self)

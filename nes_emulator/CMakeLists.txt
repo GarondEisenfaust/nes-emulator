@@ -5,9 +5,7 @@ set(SHADER_DIR ${CMAKE_CURRENT_LIST_DIR}/shaders/)
 set(SHADER_HEADER_DIR ${CMAKE_BINARY_DIR}/shaders/)
 generate_shader_headers(${SHADER_DIR} ${SHADER_HEADER_DIR} SHADER_HEADERS)
 
-set(SOURCE_FILES
-        ${SOURCE_FILES}
-        ${SHADER_HEADERS})
+set(SOURCE_FILES ${SOURCE_FILES})
 
 set(INCLUDES ${INCLUDES} ${SHADER_HEADER_DIR})
 
@@ -18,8 +16,8 @@ target_compile_options(${PROJECT_NAME} PUBLIC -msse2 -mavx2)
 find_package(game-activity REQUIRED CONFIG)
 target_link_libraries(${PROJECT_NAME}
         PUBLIC game-activity::game-activity
+        PUBLIC rendering
         PUBLIC EGL
-        PUBLIC GLESv3
         PUBLIC jnigraphics
         PUBLIC android
         PUBLIC log

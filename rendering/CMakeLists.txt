@@ -11,4 +11,10 @@ set(INCLUDES ${INCLUDES} ${CMAKE_BINARY_DIR}/bindings/ ${SHADER_HEADER_DIR})
 
 create_library(STATIC)
 target_link_libraries(
-${PROJECT_NAME} PUBLIC nes-lib)
+  ${PROJECT_NAME}
+  PUBLIC nes-lib
+)
+
+if(${ANDROID})
+  target_link_libraries(${PROJECT_NAME} PUBLIC GLESv3)
+endif()

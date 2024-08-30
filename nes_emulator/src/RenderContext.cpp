@@ -1,5 +1,5 @@
 #include "RenderContext.h"
-#include "../AndroidOut.h"
+#include "AndroidOut.h"
 #include "Definitions.h"
 #include "Shader.h"
 #include "Surface.h"

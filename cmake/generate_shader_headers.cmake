@@ -7,11 +7,17 @@ function(generate_shader_headers SHADER_DIR SHADER_HEADER_DIR RESULT_HEADERS)
     get_filename_component(SHADER_NAME ${SHADER} NAME_WLE)
     set(SHADER_HEADER ${SHADER_HEADER_DIR}${SHADER_NAME}Shader.h)
     list(APPEND SHADER_HEADERS ${SHADER_HEADER})
+
+    if(${ANDROID})
+      set(IS_ANDROID "true")
+    else()
+      set(IS_ANDROID "false")
+    endif()
+
     add_custom_command(
       DEPENDS ${SHADER}
       OUTPUT ${SHADER_HEADER}
-      COMMAND ${PYTHON_CMD} ${GENERATE_SHADER_HEADERS_SCRIPT} ${SHADER}
-              ${SHADER_HEADER}
+      COMMAND ${PYTHON_CMD} ${GENERATE_SHADER_HEADERS_SCRIPT} ${SHADER} ${SHADER_HEADER} ${IS_ANDROID}
       COMMENT "Generating ${SHADER_HEADER} from ${SHADER}")
   endforeach()
   set(${RESULT_HEADERS}
