@@ -1,39 +1,50 @@
-#include "rendering/RenderContext.h"
+#include "RenderContext.h"
+#include "../AndroidOut.h"
 #include "Definitions.h"
+#include "Shader.h"
 #include "Surface.h"
-#include "rendering/Shader.h"
-#include "rendering/Texture.h"
+#include "Texture.h"
+#include <EGL/egl.h>
+#include <GLES3/gl3.h>
+#include <game-activity/GameActivity.cpp>
+#include <game-activity/native_app_glue/android_native_app_glue.c>
+#include <game-text-input/gametextinput.cpp>
+#include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <thread>
-#include <EGL/egl.h>
-#include "../AndroidOut.h"
-#include <GLES3/gl3.h>
-#include <game-activity/GameActivity.cpp>
-#include <game-text-input/gametextinput.cpp>
-#include <cassert>
-#include <game-activity/native_app_glue/android_native_app_glue.c>
 
-#define PRINT_GL_STRING(s) {aout << #s": "<< glGetString(s) << std::endl;}
-#define PRINT_GL_STRING_AS_LIST(s) { \
-std::istringstream extensionStream((const char *) glGetString(s));\
-std::vector<std::string> extensionList(\
-        std::istream_iterator<std::string>{extensionStream},\
-        std::istream_iterator<std::string>());\
-aout << #s":\n";\
-for (auto& extension: extensionList) {\
-    aout << extension << "\n";\
-}\
-aout << std::endl;\
-}
+#define PRINT_GL_STRING(s) \
+  { aout << #s ": " << glGetString(s) << std::endl; }
+#define PRINT_GL_STRING_AS_LIST(s)                                                              \
+  {                                                                                             \
+    std::istringstream extensionStream((const char*)glGetString(s));                            \
+    std::vector<std::string> extensionList(std::istream_iterator<std::string>{extensionStream}, \
+                                           std::istream_iterator<std::string>());               \
+    aout << #s ":\n";                                                                           \
+    for (auto& extension : extensionList) {                                                     \
+      aout << extension << "\n";                                                                \
+    }                                                                                           \
+    aout << std::endl;                                                                          \
+  }
 #define CORNFLOWER_BLUE 100 / 255.f, 149 / 255.f, 237 / 255.f, 1
 
 void RenderContext::Init(struct android_app* app) {
-  constexpr EGLint attribs[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT, EGL_SURFACE_TYPE,
-                                EGL_WINDOW_BIT, EGL_BLUE_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_RED_SIZE,
-                                8, EGL_DEPTH_SIZE, 24, EGL_NONE};
+  constexpr EGLint attribs[] = {EGL_RENDERABLE_TYPE,
+                                EGL_OPENGL_ES3_BIT,
+                                EGL_SURFACE_TYPE,
+                                EGL_WINDOW_BIT,
+                                EGL_BLUE_SIZE,
+                                8,
+                                EGL_GREEN_SIZE,
+                                8,
+                                EGL_RED_SIZE,
+                                8,
+                                EGL_DEPTH_SIZE,
+                                24,
+                                EGL_NONE};
 
   // The default display is probably what you want on Android
   auto display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -50,22 +61,18 @@ void RenderContext::Init(struct android_app* app) {
   // Find a config we like.
   // Could likely just grab the first if we don't care about anything else in the config.
   // Otherwise hook in your own heuristic
-  auto config = *std::find_if(supportedConfigs.get(), supportedConfigs.get() + numConfigs,
-                              [&display](const EGLConfig &config) {
-                                EGLint red, green, blue, depth;
-                                if (eglGetConfigAttrib(display, config, EGL_RED_SIZE, &red) &&
-                                    eglGetConfigAttrib(display, config, EGL_GREEN_SIZE,
-                                                       &green) &&
-                                    eglGetConfigAttrib(display, config, EGL_BLUE_SIZE, &blue) &&
-                                    eglGetConfigAttrib(display, config, EGL_DEPTH_SIZE,
-                                                       &depth)) {
-
-                                  aout << "Found config with " << red << ", " << green << ", "
-                                       << blue << ", " << depth << std::endl;
-                                  return red == 8 && green == 8 && blue == 8 && depth == 24;
-                                }
-                                return false;
-                              });
+  auto config =
+      *std::find_if(supportedConfigs.get(), supportedConfigs.get() + numConfigs, [&display](const EGLConfig& config) {
+        EGLint red, green, blue, depth;
+        if (eglGetConfigAttrib(display, config, EGL_RED_SIZE, &red) &&
+            eglGetConfigAttrib(display, config, EGL_GREEN_SIZE, &green) &&
+            eglGetConfigAttrib(display, config, EGL_BLUE_SIZE, &blue) &&
+            eglGetConfigAttrib(display, config, EGL_DEPTH_SIZE, &depth)) {
+          aout << "Found config with " << red << ", " << green << ", " << blue << ", " << depth << std::endl;
+          return red == 8 && green == 8 && blue == 8 && depth == 24;
+        }
+        return false;
+      });
 
   aout << "Found " << numConfigs << " configs" << std::endl;
   aout << "Chose " << config << std::endl;
@@ -108,7 +115,7 @@ void RenderContext::Init(struct android_app* app) {
   glViewport(0, 0, mWidth, mHeight);
 
   mInitialized = true;
-  }
+}
 
 RenderContext::~RenderContext() {
   if (display_ != EGL_NO_DISPLAY) {
@@ -130,7 +137,6 @@ void RenderContext::GameLoop(std::function<void()> loop) {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
   while (true) {
-
     loop();
 
     glClear(GL_COLOR_BUFFER_BIT);

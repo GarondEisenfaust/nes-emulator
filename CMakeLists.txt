@@ -22,6 +22,7 @@ if(RUN_TESTS)
 endif()
 
 add_subdirectory(nes-lib)
+add_subdirectory(rendering)
 
 if(${ANDROID})
   add_subdirectory(nes_emulator)

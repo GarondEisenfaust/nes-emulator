@@ -1,6 +1,6 @@
-#include <glad/glad.h>
 #include "LookupTableFrameDecoder.h"
 #include "DisplayTextureShader.h"
+#include "OpenGL.h"
 #include "VertexShader.h"
 #include <algorithm>
 

@@ -1,10 +1,10 @@
 #pragma once
+#include "IFrameDecoder.h"
 #include "PixelColor.h"
+#include "ShaderProgram.h"
 #include "SineTable.h"
 #include "Surface.h"
-#include "rendering/IFrameDecoder.h"
-#include "rendering/ShaderProgram.h"
-#include "rendering/Texture.h"
+#include "Texture.h"
 #include <array>
 #include <cstdint>
 #include <memory>

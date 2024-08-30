@@ -1,5 +1,5 @@
-#include <glad/glad.h>
 #include "Surface.h"
+#include "OpenGL.h"
 
 Surface::Surface() {
   glGenVertexArrays(1, &mVao);

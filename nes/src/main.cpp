@@ -8,16 +8,16 @@
 #include "Controller.h"
 #include "Cpu.h"
 #include "ForegroundRenderer.h"
+#include "IFrameDecoder.h"
 #include "IRenderer.h"
 #include "LoadRomWindow.h"
 #include "NesConfig.h"
 #include "Ppu.h"
-#include "rendering/IFrameDecoder.h"
-#include "rendering/LookupTableFrameDecoder.h"
-#include "rendering/LookupTableFrameDecoderGpu.h"
-#include "rendering/NtscSignalFrameDecoder.h"
-#include "rendering/NtscSignalFrameDecoderGpu.h"
-#include "rendering/RenderContext.h"
+#include "RenderContext.h"
+#include <LookupTableFrameDecoder.h>
+#include <LookupTableFrameDecoderGpu.h>
+#include <NtscSignalFrameDecoder.h>
+#include <NtscSignalFrameDecoderGpu.h>
 #include <chrono>
 #include <thread>
 

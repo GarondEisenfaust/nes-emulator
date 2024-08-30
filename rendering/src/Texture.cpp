@@ -1,6 +1,7 @@
-#include <glad/glad.h>
-#include "rendering/Texture.h"
+#include "Texture.h"
+#include "OpenGL.h"
 #include <iostream>
+#include <stddef.h>
 
 Texture::Texture(size_t width, size_t height, int samplingMode, uint8_t* data) : mWidth(width), mHeight(height) {
   glGenTextures(1, &mHandle);

@@ -1,9 +1,9 @@
 #pragma once
 #include "ColorPalette.h"
+#include "IFrameDecoder.h"
+#include "ShaderProgram.h"
+#include "SingleChannelShortTexture.h"
 #include "Surface.h"
-#include "rendering/IFrameDecoder.h"
-#include "rendering/ShaderProgram.h"
-#include "rendering/SingleChannelShortTexture.h"
 #include <memory>
 
 class LookupTableFrameDecoderGpu : public IFrameDecoder {

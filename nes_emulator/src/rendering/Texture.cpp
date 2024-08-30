@@ -1,5 +1,5 @@
+#include "Texture.h"
 #include <GLES3/gl3.h>
-#include "rendering/Texture.h"
 #include <iostream>
 
 Texture::Texture(size_t width, size_t height, int samplingMode, uint8_t* data) : mWidth(width), mHeight(height) {

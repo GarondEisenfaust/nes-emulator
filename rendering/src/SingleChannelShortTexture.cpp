@@ -1,6 +1,8 @@
-#include <glad/glad.h>
-#include "rendering/SingleChannelShortTexture.h"
+#include "SingleChannelShortTexture.h"
+#include "OpenGL.h"
+#include <cstdint>
 #include <iostream>
+#include <stddef.h>
 
 SingleChannelShortTexture::SingleChannelShortTexture(size_t width, size_t height, int samplingMode, uint16_t* data)
     : mWidth(width), mHeight(height) {

@@ -1,10 +1,10 @@
-#include "rendering/Shader.h"
+#include "Shader.h"
+#include <GLES3/gl3.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <tuple>
 #include <vector>
-#include <GLES3/gl3.h>
 
 std::string ReadFile(std::string_view path) {
   std::ifstream fileStream(path.begin());

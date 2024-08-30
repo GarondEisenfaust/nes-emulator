@@ -1,5 +1,5 @@
+#include "ShaderProgram.h"
 #include <GLES3/gl3.h>
-#include "rendering/ShaderProgram.h"
 #include <ColorPalette.h>
 
 ShaderProgram::ShaderProgram() { mHandle = glCreateProgram(); }

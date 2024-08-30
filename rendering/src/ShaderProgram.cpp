@@ -1,5 +1,5 @@
-#include <glad/glad.h>
-#include "rendering/ShaderProgram.h"
+#include "ShaderProgram.h"
+#include "OpenGL.h"
 #include <ColorPalette.h>
 
 ShaderProgram::ShaderProgram() { mHandle = glCreateProgram(); }

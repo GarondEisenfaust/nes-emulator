@@ -1,5 +1,5 @@
+#include "SingleChannelShortTexture.h"
 #include <GLES3/gl3.h>
-#include "rendering/SingleChannelShortTexture.h"
 #include <iostream>
 
 SingleChannelShortTexture::SingleChannelShortTexture(size_t width, size_t height, int samplingMode, uint16_t* data)

@@ -1,9 +1,9 @@
 #pragma once
 
+#include "IFrameDecoder.h"
+#include "ShaderProgram.h"
+#include "ShortTexture.h"
 #include "Surface.h"
-#include "rendering/IFrameDecoder.h"
-#include "rendering/ShaderProgram.h"
-#include "rendering/ShortTexture.h"
 #include <array>
 #include <cstdint>
 

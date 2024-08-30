@@ -2,17 +2,12 @@ cmake_minimum_required(VERSION 3.14)
 
 set_defaults()
 
-set(SHADER_DIR ${CMAKE_CURRENT_LIST_DIR}/shaders)
-set(SHADER_HEADER_DIR ${CMAKE_BINARY_DIR}/shaders/)
-generate_shader_headers(${SHADER_DIR} ${SHADER_HEADER_DIR} SHADER_HEADERS)
-
 set(IMGUI_INCLUDES ${CMAKE_BINARY_DIR}/conan-output/bindings/)
 set(IMGUI_SOURCE ${CMAKE_BINARY_DIR}/conan-output/bindings/imgui_impl_glfw.cpp
                  ${CMAKE_BINARY_DIR}/conan-output/bindings/imgui_impl_opengl3.cpp)
 
-set(SOURCE_FILES ${SOURCE_FILES} ${SHADER_HEADERS} ${IMGUI_SOURCE})
-
-set(INCLUDES ${INCLUDES} ${CMAKE_BINARY_DIR}/bindings/ ${SHADER_HEADER_DIR} ${IMGUI_INCLUDES})
+set(SOURCE_FILES ${SOURCE_FILES} ${IMGUI_SOURCE})
+set(INCLUDES ${INCLUDES} ${CMAKE_BINARY_DIR}/bindings/ ${IMGUI_INCLUDES})
 
 create_executable()
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
@@ -26,6 +21,7 @@ find_package(miniaudio REQUIRED)
 target_link_libraries(
 ${PROJECT_NAME}
   PRIVATE nes-lib
+  PRIVATE rendering
   PRIVATE miniaudio::miniaudio
   PRIVATE glfw
   PRIVATE glad::glad

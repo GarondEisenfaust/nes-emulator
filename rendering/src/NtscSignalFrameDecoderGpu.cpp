@@ -1,6 +1,6 @@
-#include <glad/glad.h>
 #include "NtscSignalFrameDecoderGpu.h"
 #include "NtscDecoderShader.h"
+#include "OpenGL.h"
 #include "VertexShader.h"
 
 NtscSignalFrameDecoderGpu::NtscSignalFrameDecoderGpu()

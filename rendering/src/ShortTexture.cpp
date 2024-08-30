@@ -1,5 +1,5 @@
-#include <glad/glad.h>
-#include "rendering/ShortTexture.h"
+#include "ShortTexture.h"
+#include "OpenGL.h"
 #include <iostream>
 
 ShortTexture::ShortTexture(size_t width, size_t height, int samplingMode, uint16_t* data)

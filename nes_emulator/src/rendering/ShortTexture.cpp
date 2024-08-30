@@ -1,5 +1,5 @@
+#include "ShortTexture.h"
 #include <GLES3/gl3.h>
-#include "rendering/ShortTexture.h"
 #include <iostream>
 
 ShortTexture::ShortTexture(size_t width, size_t height, int samplingMode, uint16_t* data)
