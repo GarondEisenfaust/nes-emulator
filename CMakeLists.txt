@@ -11,9 +11,6 @@ include(cmake/conan.cmake)
 include(cmake/macros.cmake)
 include(cmake/generate_shader_headers.cmake)
 
-message(bbbbb ${CMAKE_CXX_COMPILER})
-
-
 project(
   nes-emulator
   VERSION 1.0
