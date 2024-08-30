@@ -27,7 +27,6 @@ def fixHeader(code: str, is_egl: bool):
 
 shader_path = Path(argv[1])
 output_path = Path(argv[2])
-print(argv)
 is_egl = argv[3] in ["true", "True", "1"]
 
 if shader_path.is_dir():
