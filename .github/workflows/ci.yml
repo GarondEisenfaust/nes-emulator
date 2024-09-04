@@ -21,15 +21,20 @@ jobs:
       - name: Installs dependencies
         run: xargs -a packages.txt sudo apt-get install -y
 
+      - name: Prepare
+        run: ./prepare.py --build-type=${{ matrix.type }}
+
+      - name: Compute preset name
+        run: echo "CMAKE_PRESET=conan-linux-x86_64-$(echo '${{ matrix.type }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Configure
-        run: cmake --preset ${{ matrix.type }}
+        run: cmake --preset $CMAKE_PRESET
 
       - name: Build
-        run: cmake --build --preset ${{ matrix.type }} --verbose
+        run: cmake --build --preset $CMAKE_PRESET --verbose
 
       - name: Test
-        working-directory: ${{github.workspace}}/build/${{ matrix.type }}
-        run: ctest --extra-verbose
+        run: ctest --preset $CMAKE_PRESET
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

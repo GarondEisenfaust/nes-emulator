@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.14)
 
 set_defaults()
 
-set(IMGUI_INCLUDES ${CMAKE_BINARY_DIR}/conan-output/bindings/)
-set(IMGUI_SOURCE ${CMAKE_BINARY_DIR}/conan-output/bindings/imgui_impl_glfw.cpp
-                 ${CMAKE_BINARY_DIR}/conan-output/bindings/imgui_impl_opengl3.cpp)
+set(IMGUI_INCLUDES ${CMAKE_BINARY_DIR}/bindings/)
+set(IMGUI_SOURCE ${CMAKE_BINARY_DIR}/bindings/imgui_impl_glfw.cpp
+                 ${CMAKE_BINARY_DIR}/bindings/imgui_impl_opengl3.cpp)
 
 set(SOURCE_FILES ${SOURCE_FILES} ${IMGUI_SOURCE})
 set(INCLUDES ${INCLUDES} ${CMAKE_BINARY_DIR}/bindings/ ${IMGUI_INCLUDES})

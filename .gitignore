@@ -3,9 +3,6 @@ imgui.ini
 venv
 roms
 
-# conan2
-CMakeUserPresets.json
-
 # Android
 *.iml
 .gradle
@@ -23,3 +20,11 @@ CMakeUserPresets.json
 .cxx
 local.properties
 .idea/
+
+# conan2
+.conan2/**
+
+CMakeUserPresets.json
+
+!.conan2/settings.yml
+!.conan2/profiles/*

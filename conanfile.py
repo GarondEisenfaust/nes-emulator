@@ -4,7 +4,6 @@ from conan import ConanFile
 from conan.tools.cmake import cmake_layout
 from conan.tools.files import copy
 
-
 class NesEmulator(ConanFile):
   name = "nes-emulator"
   version = "1.0"
@@ -17,6 +16,7 @@ class NesEmulator(ConanFile):
     self.requires("glfw/3.4", headers=True)
     self.requires("glad/0.1.36", headers=True)
     self.requires("miniaudio/0.11.11", headers=True)
+    self.requires("glm/1.0.1", headers=True)
 
   def generate(self):
     source = os.path.join(self.dependencies["imgui"].package_folder, "res",
@@ -25,3 +25,9 @@ class NesEmulator(ConanFile):
 
     copy(self, "*glfw*", source, target)
     copy(self, "*opengl3*", source, target)
+
+  def layout(self):
+    build_dir_name = "{}-{}-{}".format(self.settings.os, self.settings.arch, self.settings.build_type).lower()
+    self.folders.build = os.path.join("build", build_dir_name)
+    self.folders.build_folder_vars = ['settings.os', 'settings.arch', 'settings.build_type']
+    self.folders.generators = os.path.join(self.folders.build, "generators")
