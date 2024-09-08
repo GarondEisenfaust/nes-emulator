@@ -1,0 +1,11 @@
+if (NOT ANDROID_ABI OR NOT CMAKE_BUILD_TYPE)
+    return()
+endif()
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    include("${CMAKE_SOURCE_DIR}/build/android-armv8-debug/generators/conan_toolchain.cmake")
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+    include("${CMAKE_SOURCE_DIR}/build/android-armv8-relwithdebinfo/generators/conan_toolchain.cmake")
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    include("${CMAKE_SOURCE_DIR}/build/android-armv8-release/generators/conan_toolchain.cmake")
+endif()

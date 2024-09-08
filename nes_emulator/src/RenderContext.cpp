@@ -113,8 +113,7 @@ void RenderContext::Init(struct android_app* app) {
   EGLint height;
   eglQuerySurface(display_, surface_, EGL_HEIGHT, &mHeight);
   glViewport(0, 0, mWidth, mHeight);
-
-  mInitialized = true;
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }
 
 RenderContext::~RenderContext() {
@@ -134,16 +133,18 @@ RenderContext::~RenderContext() {
 }
 
 void RenderContext::GameLoop(std::function<void()> loop) {
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
   while (true) {
-    loop();
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    mFrameDecoder->DecodeAndDraw(mNesFrameData.data(), mFramePpuCycle);
-
-    eglSwapBuffers(display_, surface_);
+    DrawOneFrame(loop);
   }
+}
+
+void RenderContext::DrawOneFrame(std::function<void()> loop) {
+  loop();
+
+  glClear(GL_COLOR_BUFFER_BIT);
+  mFrameDecoder->DecodeAndDraw(mNesFrameData.data(), mFramePpuCycle);
+
+  eglSwapBuffers(display_, surface_);
 }
 
 void RenderContext::SetNesPixel(int x, int y, uint8_t pixel) {

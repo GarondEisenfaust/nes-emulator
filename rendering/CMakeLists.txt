@@ -10,9 +10,13 @@ set(SOURCE_FILES ${SOURCE_FILES} ${SHADER_HEADERS})
 set(INCLUDES ${INCLUDES} ${CMAKE_BINARY_DIR}/bindings/ ${SHADER_HEADER_DIR})
 
 create_library(STATIC)
+
+find_package(glm)
+
 target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC nes-lib
+  PUBLIC glm::glm
 )
 
 if(${ANDROID})

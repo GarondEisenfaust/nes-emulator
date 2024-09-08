@@ -2,6 +2,7 @@
 #include "ColorPalette.h"
 #include "Shader.h"
 #include "ShortTexture.h"
+#include <glm/mat4x4.hpp>
 #include <memory>
 
 class ShaderProgram {
@@ -16,6 +17,7 @@ class ShaderProgram {
   void SetUniform(const char* name, float value);
   void SetUniform(const char* name, int value);
   void SetUniform(const char* name, const ShortTexture& texture);
+  void SetUniform(const char* name, const glm::mat4& matrix);
 
  private:
   unsigned int mHandle;

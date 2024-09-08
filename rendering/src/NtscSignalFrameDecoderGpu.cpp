@@ -2,6 +2,9 @@
 #include "NtscDecoderShader.h"
 #include "OpenGL.h"
 #include "VertexShader.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 NtscSignalFrameDecoderGpu::NtscSignalFrameDecoderGpu()
     : mCurrentPixelTexture(mTextureWidth, mTextureHeight, GL_NEAREST) {
@@ -16,6 +19,9 @@ NtscSignalFrameDecoderGpu::NtscSignalFrameDecoderGpu()
   mShaderProgram.SetUniform("samplesToGenerate", mSamplesToGeneratePerPixel);
   mShaderProgram.SetUniform("samplesToTake", mSamplesToTakePerPixel);
   mShaderProgram.SetUniform("hueFix", mHueFix);
+
+  const auto transform = glm::scale(glm::identity<glm::mat4>(), glm::vec3(0.5, 0.5, 1.0));
+  mShaderProgram.SetUniform("transform", transform);
 }
 
 void NtscSignalFrameDecoderGpu::DecodeAndDraw(uint16_t* frameData, unsigned int ppuCycle) {

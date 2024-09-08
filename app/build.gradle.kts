@@ -17,7 +17,8 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c++17"
-                targets += listOf("nes_emulator", "nes-lib")
+                targets += listOf("nes_emulator", "nes-lib", "rendering")
+                arguments("-DCMAKE_TOOLCHAIN_FILE=cmake/conan_android_toolchain.cmake")
             }
         }
     }

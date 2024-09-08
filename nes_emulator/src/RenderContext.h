@@ -8,8 +8,8 @@
 #include <array>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <jni.h>
+#include <memory>
 
 class RenderContext : public IRenderer {
  public:
@@ -17,6 +17,7 @@ class RenderContext : public IRenderer {
 
   void Init(struct android_app* app);
   void GameLoop(std::function<void()> loop);
+  void DrawOneFrame(std::function<void()> loop);
   void SetFrameDecoder(IFrameDecoder* frameDecoder);
   uint8_t* GetTextureDataPointer();
 
@@ -24,7 +25,6 @@ class RenderContext : public IRenderer {
   void CommitFrame(unsigned int ppuCycle) override;
   void StartNewFrame() override;
   bool FrameComplete() override;
-  bool mInitialized = false;
 
  private:
   int mWidth;

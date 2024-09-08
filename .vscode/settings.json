@@ -84,14 +84,15 @@
     "stdfloat": "cpp",
     "ranges": "cpp",
     "future": "cpp",
-    "text_encoding": "cpp"
+    "text_encoding": "cpp",
+    "csignal": "cpp"
   },
   "cmake.configureOnOpen": false,
   "cmake.automaticReconfigure": false,
+  "cmake.options.statusBarVisibility": "visible",
   "[cpp]": {
     "editor.defaultFormatter": "xaver.clang-format"
   },
-  "cmake.options.statusBarVisibility": "visible",
   "[python]": {
     "editor.defaultFormatter": "eeyore.yapf"
   }

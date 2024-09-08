@@ -1,5 +1,8 @@
 #include "ShaderProgram.h"
 #include "OpenGL.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <ColorPalette.h>
 
 ShaderProgram::ShaderProgram() { mHandle = glCreateProgram(); }
@@ -33,4 +36,9 @@ void ShaderProgram::SetUniform(const char* name, int value) {
 void ShaderProgram::SetUniform(const char* name, const ShortTexture& texture) {
   const auto uniformLocation = glGetUniformLocation(mHandle, name);
   glUniform1i(uniformLocation, texture.GetHandle());
+}
+
+void ShaderProgram::SetUniform(const char* name, const glm::mat4& matrix) {
+  const auto uniformLocation = glGetUniformLocation(mHandle, name);
+  glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(matrix));
 }
