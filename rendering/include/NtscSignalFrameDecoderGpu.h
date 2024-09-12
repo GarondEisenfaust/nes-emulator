@@ -17,6 +17,7 @@ struct PixelData {
 class NtscSignalFrameDecoderGpu : public IFrameDecoder {
  public:
   NtscSignalFrameDecoderGpu();
+  NtscSignalFrameDecoderGpu(  int windowWidth,int windowHeight);
   void DecodeAndDraw(uint16_t* frameData, unsigned int ppuCycle);
 
  private:
@@ -32,5 +33,7 @@ class NtscSignalFrameDecoderGpu : public IFrameDecoder {
   Surface mSurface;
   ShaderProgram mShaderProgram;
 
+  int mWindowHeight;
+  int mWindowWidth;
   void Draw();
 };

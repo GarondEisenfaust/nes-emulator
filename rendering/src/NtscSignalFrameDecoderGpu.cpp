@@ -20,7 +20,15 @@ NtscSignalFrameDecoderGpu::NtscSignalFrameDecoderGpu()
   mShaderProgram.SetUniform("samplesToTake", mSamplesToTakePerPixel);
   mShaderProgram.SetUniform("hueFix", mHueFix);
 
-  const auto transform = glm::scale(glm::identity<glm::mat4>(), glm::vec3(0.5, 0.5, 1.0));
+  const auto transform = glm::scale(glm::identity<glm::mat4>(), glm::vec3(1));
+  mShaderProgram.SetUniform("transform", transform);
+}
+
+NtscSignalFrameDecoderGpu::NtscSignalFrameDecoderGpu(int windowWidth, int windowHeight) : NtscSignalFrameDecoderGpu() {
+  const constexpr float ratio = static_cast<float>(mTextureWidth) / static_cast<float>(mTextureHeight);
+  const float normalizedWidth = (static_cast<float>(windowHeight) / static_cast<float>(windowWidth)) * ratio;
+  const float normalizedHeight = 1;
+  const auto transform = glm::scale(glm::identity<glm::mat4>(), glm::vec3(normalizedWidth, normalizedHeight, 1.0));
   mShaderProgram.SetUniform("transform", transform);
 }
 

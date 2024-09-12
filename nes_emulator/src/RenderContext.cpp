@@ -113,7 +113,6 @@ void RenderContext::Init(struct android_app* app) {
   EGLint height;
   eglQuerySurface(display_, surface_, EGL_HEIGHT, &mHeight);
   glViewport(0, 0, mWidth, mHeight);
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }
 
 RenderContext::~RenderContext() {
@@ -164,5 +163,9 @@ void RenderContext::CommitFrame(unsigned int ppuCycle) {
 void RenderContext::StartNewFrame() { mFrameComplete = false; }
 
 bool RenderContext::FrameComplete() { return mFrameComplete; }
+
+int RenderContext::GetWidth() { return mWidth; }
+
+int RenderContext::GetHeight() { return mHeight; }
 
 uint8_t* RenderContext::GetTextureDataPointer() { return reinterpret_cast<uint8_t*>(mTextureData.data()); }

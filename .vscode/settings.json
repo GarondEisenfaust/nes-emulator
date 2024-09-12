@@ -85,7 +85,8 @@
     "ranges": "cpp",
     "future": "cpp",
     "text_encoding": "cpp",
-    "csignal": "cpp"
+    "csignal": "cpp",
+    "native_activity.h": "c"
   },
   "cmake.configureOnOpen": false,
   "cmake.automaticReconfigure": false,

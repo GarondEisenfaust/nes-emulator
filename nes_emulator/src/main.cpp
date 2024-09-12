@@ -23,7 +23,6 @@
 #include <thread>
 #include <unistd.h>
 
-std::string theRomPath = "";
 int theRomFd = 0;
 
 void RenderCompleteFrame(Bus& bus, IRenderer& renderer) {
@@ -48,8 +47,6 @@ void MakeOneStep(Bus& bus) {
   } while (bus.mCpu->cycles <= 0);
 }
 
-std::unique_ptr<IFrameDecoder> CreateDecoder() { return std::make_unique<NtscSignalFrameDecoderGpu>(); }
-
 std::unique_ptr<RenderContext> renderContext;
 std::unique_ptr<IFrameDecoder> decoder;
 std::unique_ptr<Ram> ram;
@@ -67,7 +64,7 @@ bool InitNes(android_app* pApp) {
   renderContext = std::make_unique<RenderContext>();
   renderContext->Init(pApp);
 
-  decoder = CreateDecoder();
+  decoder = std::make_unique<NtscSignalFrameDecoderGpu>(renderContext->GetWidth(), renderContext->GetHeight());
   renderContext->SetFrameDecoder(decoder.get());
 
   ram = std::make_unique<Ram>();
