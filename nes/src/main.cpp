@@ -7,6 +7,7 @@
 #include "Bus.h"
 #include "Controller.h"
 #include "Cpu.h"
+#include "Definitions.h"
 #include "ForegroundRenderer.h"
 #include "IFrameDecoder.h"
 #include "IRenderer.h"

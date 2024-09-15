@@ -2,6 +2,7 @@
 #include "AndroidOut.h"
 #include "Definitions.h"
 #include "Shader.h"
+#include "Square.h"
 #include "Surface.h"
 #include "Texture.h"
 #include <EGL/egl.h>
@@ -113,6 +114,7 @@ void RenderContext::Init(struct android_app* app) {
   EGLint height;
   eglQuerySurface(display_, surface_, EGL_HEIGHT, &mHeight);
   glViewport(0, 0, mWidth, mHeight);
+  mSquare = std::make_unique<Square>(2, 3);
 }
 
 RenderContext::~RenderContext() {
@@ -142,6 +144,7 @@ void RenderContext::DrawOneFrame(std::function<void()> loop) {
 
   glClear(GL_COLOR_BUFFER_BIT);
   mFrameDecoder->DecodeAndDraw(mNesFrameData.data(), mFramePpuCycle);
+  mSquare->Draw();
 
   eglSwapBuffers(display_, surface_);
 }

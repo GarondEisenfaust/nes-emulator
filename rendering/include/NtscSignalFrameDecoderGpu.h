@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IFrameDecoder.h"
-#include "ShaderProgram.h"
+#include "ShapeRendering/ShaderProgram.h"
 #include "ShortTexture.h"
 #include "Surface.h"
 #include <array>
@@ -17,7 +17,7 @@ struct PixelData {
 class NtscSignalFrameDecoderGpu : public IFrameDecoder {
  public:
   NtscSignalFrameDecoderGpu();
-  NtscSignalFrameDecoderGpu(  int windowWidth,int windowHeight);
+  NtscSignalFrameDecoderGpu(int windowWidth, int windowHeight);
   void DecodeAndDraw(uint16_t* frameData, unsigned int ppuCycle);
 
  private:

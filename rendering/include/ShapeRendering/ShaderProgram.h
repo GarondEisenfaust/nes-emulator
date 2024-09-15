@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "ShortTexture.h"
 #include <glm/mat4x4.hpp>
+#include <glm/vec4.hpp>
 #include <memory>
 
 class ShaderProgram {
@@ -18,6 +19,8 @@ class ShaderProgram {
   void SetUniform(const char* name, int value);
   void SetUniform(const char* name, const ShortTexture& texture);
   void SetUniform(const char* name, const glm::mat4& matrix);
+  void SetUniform(const char* name, const glm::vec4& vector);
+  void SetUniform(const char* name, const PixelColorF& color);
 
  private:
   unsigned int mHandle;

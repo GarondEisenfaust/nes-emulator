@@ -1,7 +1,7 @@
 #pragma once
 #include "ColorPalette.h"
 #include "IFrameDecoder.h"
-#include "ShaderProgram.h"
+#include "ShapeRendering/ShaderProgram.h"
 #include "SingleChannelShortTexture.h"
 #include "Surface.h"
 #include <memory>

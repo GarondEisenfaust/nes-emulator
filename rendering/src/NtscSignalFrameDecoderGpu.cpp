@@ -57,5 +57,7 @@ void NtscSignalFrameDecoderGpu::DecodeAndDraw(uint16_t* frameData, unsigned int 
 
 void NtscSignalFrameDecoderGpu::Draw() {
   mCurrentPixelTexture.Bind();
+  mShaderProgram.Use();
+
   mSurface.Draw();
 }

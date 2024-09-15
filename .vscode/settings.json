@@ -86,7 +86,8 @@
     "future": "cpp",
     "text_encoding": "cpp",
     "csignal": "cpp",
-    "native_activity.h": "c"
+    "native_activity.h": "c",
+    "print": "cpp"
   },
   "cmake.configureOnOpen": false,
   "cmake.automaticReconfigure": false,

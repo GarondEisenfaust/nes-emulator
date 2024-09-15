@@ -3,7 +3,7 @@
 #include "IFrameDecoder.h"
 #include "IRenderer.h"
 #include "PixelColor.h"
-#include "ShaderProgram.h"
+#include "ShapeRendering/ShaderProgram.h"
 #include <GLFW/glfw3.h>
 #include <array>
 #include <cstdint>

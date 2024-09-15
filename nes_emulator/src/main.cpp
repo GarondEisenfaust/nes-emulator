@@ -14,6 +14,7 @@
 #include "NtscSignalFrameDecoderGpu.h"
 #include "Ppu.h"
 #include "RenderContext.h"
+#include "Square.h"
 #include <game-activity/GameActivity.h>
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <game-text-input/gametextinput.h>
@@ -58,6 +59,7 @@ std::unique_ptr<ForegroundRenderer> foregroundRenderer;
 std::unique_ptr<BackgroundRenderer> backgroundRenderer;
 std::unique_ptr<Controller> controller;
 std::unique_ptr<AudioDevice> audioDevice;
+
 bool initialized = false;
 
 bool InitNes(android_app* pApp) {
@@ -72,6 +74,7 @@ bool InitNes(android_app* pApp) {
   cpu = std::make_unique<Cpu>();
   ppu = std::make_unique<Ppu>(*renderContext);
   apu = std::make_unique<Apu>();
+  audioDevice = std::make_unique<AudioDevice>();
 
   foregroundRenderer = std::make_unique<ForegroundRenderer>();
   foregroundRenderer->SetPpu(ppu.get());
@@ -92,7 +95,6 @@ bool InitNes(android_app* pApp) {
   bus->InsertCartridge(std::make_shared<Cartridge>(theRomFd));
   bus->Reset();
 
-  audioDevice = std::make_unique<AudioDevice>();
   return true;
 }
 
