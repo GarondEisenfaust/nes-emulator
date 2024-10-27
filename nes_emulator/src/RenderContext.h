@@ -2,8 +2,6 @@
 #include "IFrameDecoder.h"
 #include "IRenderer.h"
 #include "PixelColor.h"
-#include "ShaderProgram.h"
-#include "Square.h"
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 #include <array>
@@ -39,7 +37,6 @@ class RenderContext : public IRenderer {
   std::array<PixelColorU8, mGridWidth * mGridHeight> mTextureData;
   bool mFrameComplete = false;
   IFrameDecoder* mFrameDecoder;
-  std::unique_ptr<Square> mSquare;
 
   EGLDisplay display_ = nullptr;
   EGLSurface surface_ = nullptr;
