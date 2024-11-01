@@ -23,6 +23,7 @@
 #include <jni.h>
 #include <thread>
 #include <unistd.h>
+#include "ApuClockContext.h"
 
 int theRomFd = 0;
 
@@ -60,6 +61,7 @@ std::unique_ptr<BackgroundRenderer> backgroundRenderer;
 std::unique_ptr<Controller> controller;
 std::unique_ptr<AudioDevice> audioDevice;
 std::unique_ptr<SolidRectangleRenderer> rectangleRenderer;
+std::unique_ptr<ApuClockContext> apuClockContext;
 std::map<int, std::pair<int, int>> inputEvents;
 
 bool initialized = false;
@@ -97,6 +99,9 @@ bool InitNes(android_app* pApp) {
 
   bus->InsertCartridge(std::make_shared<Cartridge>(theRomFd));
   bus->Reset();
+
+  apuClockContext = std::make_unique<ApuClockContext>(*apu, *audioDevice);
+  audioDevice->Start();
 
   return true;
 }

@@ -11,12 +11,14 @@ set(INCLUDES ${INCLUDES} ${CMAKE_BINARY_DIR}/bindings/ ${SHADER_HEADER_DIR})
 
 create_library(STATIC)
 
-find_package(glm)
+find_package(glm REQUIRED)
+find_package(miniaudio REQUIRED)
 
 target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC nes-lib
   PUBLIC glm::glm
+  PUBLIC miniaudio::miniaudio
 )
 
 if(${ANDROID})
