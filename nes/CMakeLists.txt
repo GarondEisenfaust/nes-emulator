@@ -21,7 +21,7 @@ find_package(miniaudio REQUIRED)
 target_link_libraries(
 ${PROJECT_NAME}
   PRIVATE nes-lib
-  PRIVATE rendering
+  PRIVATE common
   PRIVATE miniaudio::miniaudio
   PRIVATE glfw
   PRIVATE glad::glad

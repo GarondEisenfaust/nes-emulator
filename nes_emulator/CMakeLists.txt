@@ -16,7 +16,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC -msse2 -mavx2)
 find_package(game-activity REQUIRED CONFIG)
 target_link_libraries(${PROJECT_NAME}
         PUBLIC game-activity::game-activity
-        PUBLIC rendering
+        PUBLIC common
         PUBLIC EGL
         PUBLIC jnigraphics
         PUBLIC android
