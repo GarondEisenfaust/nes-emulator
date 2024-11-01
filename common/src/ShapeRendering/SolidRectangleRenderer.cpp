@@ -52,3 +52,7 @@ void SolidRectangleRenderer::Render() {
   }
   glBindVertexArray(0);
 }
+
+int SolidRectangleRenderer::GetScreenHeight() { return mScreenHeight; }
+
+int SolidRectangleRenderer::GetScreenWidth() { return mScreenWidth; }

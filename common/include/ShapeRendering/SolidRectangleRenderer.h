@@ -10,6 +10,8 @@ class SolidRectangleRenderer {
   SolidRectangle& CreateRectangle(int x, int y, int width, int height);
   SolidRectangle& CreateRectangle(int x, int y, int width, int height, const PixelColorF& color);
   void Render();
+  int GetScreenHeight();
+  int GetScreenWidth();
 
  private:
   std::vector<SolidRectangle> mRectangles;

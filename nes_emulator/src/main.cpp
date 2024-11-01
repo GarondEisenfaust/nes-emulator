@@ -1,5 +1,6 @@
 #include "AndroidOut.h"
 #include "Apu.h"
+#include "ApuClockContext.h"
 #include "AudioDevice.h"
 #include "BackgroundRenderer.h"
 #include "Bus.h"
@@ -23,7 +24,6 @@
 #include <jni.h>
 #include <thread>
 #include <unistd.h>
-#include "ApuClockContext.h"
 
 int theRomFd = 0;
 
@@ -62,7 +62,6 @@ std::unique_ptr<Controller> controller;
 std::unique_ptr<AudioDevice> audioDevice;
 std::unique_ptr<SolidRectangleRenderer> rectangleRenderer;
 std::unique_ptr<ApuClockContext> apuClockContext;
-std::map<int, std::pair<int, int>> inputEvents;
 
 bool initialized = false;
 
@@ -120,31 +119,6 @@ void handle_cmd(android_app* pApp, int32_t cmd) {
   }
 }
 
-void handleInputEvents(android_input_buffer* inputBuffer) {
-  for (size_t i = 0; i < inputBuffer->motionEventsCount; i++) {
-    const auto* motionEvent = &inputBuffer->motionEvents[i];
-
-    const int action = motionEvent->action;
-    const int actionMasked = action & AMOTION_EVENT_ACTION_MASK;
-    const int ptrIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
-
-    const bool notPressed = actionMasked == AMOTION_EVENT_ACTION_UP ||
-                            actionMasked == AMOTION_EVENT_ACTION_POINTER_UP ||
-                            actionMasked == AMOTION_EVENT_ACTION_CANCEL;
-
-    const auto* pointer = &motionEvent->pointers[ptrIndex];
-    if (notPressed) {
-      inputEvents.erase(pointer->id);
-      continue;
-    }
-    const int x = static_cast<int>(GameActivityPointerAxes_getX(pointer));
-    const int y = renderContext->GetHeight() - static_cast<int>(GameActivityPointerAxes_getY(pointer));
-    inputEvents[pointer->id] = {x, y};
-  }
-
-  android_app_clear_motion_events(inputBuffer);
-}
-
 extern "C" void android_main(struct android_app* app) {
   app->onAppCmd = handle_cmd;
 
@@ -170,12 +144,7 @@ extern "C" void android_main(struct android_app* app) {
     }
 
     renderContext->DrawOneFrame([&]() {
-      controller->ResetRegisters();
-      handleInputEvents(&app->inputBuffers[app->currentInputBuffer]);
-      for (const auto& inputEvent : inputEvents) {
-        auto pair = inputEvent.second;
-        controller->CheckButtons(0, pair.first, pair.second);
-      }
+      controller->HandleInputEvents(&app->inputBuffers[app->currentInputBuffer]);
       RenderCompleteFrame(*bus, *renderContext);
       rectangleRenderer->Render();
       std::this_thread::sleep_until(next);

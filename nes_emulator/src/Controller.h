@@ -2,17 +2,29 @@
 
 #include "Button.h"
 #include "IController.h"
+#include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <array>
+#include <map>
 
 class SolidRectangleRenderer;
+
+enum TouchEvent { UP, DOWN };
+struct Touch {
+  const int id;
+  const TouchEvent event;
+  const int x;
+  const int y;
+};
 
 class Controller : public IController {
  public:
   Controller(SolidRectangleRenderer& renderer);
-  void CheckButtons(int index, int x, int y);
+
   void Write(uint16_t address, uint8_t data);
   uint8_t Read(uint16_t address);
-  void ResetRegisters();
+  void HandleInputEvents(android_input_buffer* inputBuffer);
+
+  void ResetRegisters(int index);
 
  private:
   SolidRectangleRenderer& mRenderer;
@@ -38,6 +50,13 @@ class Controller : public IController {
     };
     uint8_t reg = 0x00;
   };
+
+  std::map<int, Touch> inputEvents;
   std::array<uint8_t, 2> controllerBuffer;
   std::array<ControllerRegister, 2> mControllerRegister;
-};
+
+  void HandleEvent(const Touch& touch);
+  void CheckTouchEvents(android_input_buffer* inputBuffer);
+  void CheckIfButtonPressed(int index, int x, int y);
+  void CheckIfButtonPressed(int index, const Touch& touch);
+  void CheckIfButtonsPressed(int index);};
