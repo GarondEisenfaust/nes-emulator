@@ -9,7 +9,7 @@ void Controller::Write(uint16_t address, uint8_t data) {
 
 uint8_t Controller::Read(uint16_t address) {
   const auto controllerIndex = address & 0x0001;
-  uint8_t data = (controllerBuffer[controllerIndex] & (1 << 7)) > 0;
+  const uint8_t data = (controllerBuffer[controllerIndex] & (1 << 7)) > 0;
   controllerBuffer[controllerIndex] <<= 1;
   return data;
 }
@@ -40,10 +40,6 @@ void Controller::SetControllerBitBasedOnInput(int gamepadIndex) {
       PressedKeyboard(GLFW_KEY_H) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_X);
   mControllerRegister[gamepadIndex].a =
       PressedKeyboard(GLFW_KEY_J) || PressedGamepad(gamepadIndex, GLFW_GAMEPAD_BUTTON_A);
-
-  if (mControllerRegister[gamepadIndex].a) {
-    auto bb = 9;
-  }
 }
 
 bool Controller::PressedKeyboard(int keyToCheck) {

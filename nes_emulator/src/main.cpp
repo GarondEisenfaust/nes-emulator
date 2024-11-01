@@ -123,9 +123,9 @@ void handleInputEvents(android_input_buffer* inputBuffer) {
     const int actionMasked = action & AMOTION_EVENT_ACTION_MASK;
     const int ptrIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
 
-    const bool notPressed = actionMasked == AMOTION_EVENT_ACTION_UP
-                         || actionMasked == AMOTION_EVENT_ACTION_POINTER_UP
-                         || actionMasked == AMOTION_EVENT_ACTION_CANCEL;
+    const bool notPressed = actionMasked == AMOTION_EVENT_ACTION_UP ||
+                            actionMasked == AMOTION_EVENT_ACTION_POINTER_UP ||
+                            actionMasked == AMOTION_EVENT_ACTION_CANCEL;
 
     const auto* pointer = &motionEvent->pointers[ptrIndex];
     if (notPressed) {
@@ -147,7 +147,7 @@ extern "C" void android_main(struct android_app* app) {
   struct android_poll_source* source;
 
   using namespace std::chrono_literals;
-  auto diff = (1000ms / 60);
+  const auto diff = (1000ms / 60);
   auto next = std::chrono::system_clock::now();
 
   while (true) {
@@ -163,15 +163,14 @@ extern "C" void android_main(struct android_app* app) {
     if (!initialized) {
       continue;
     }
-//    controller->ResetRegisters();
-    handleInputEvents(&app->inputBuffers[0]);
-    handleInputEvents(&app->inputBuffers[1]);
-    handleInputEvents(&app->inputBuffers[2]);
-    for (const auto& inputEvent : inputEvents) {
-      auto pair = inputEvent.second;
-      controller->CheckButtons(pair.first, pair.second);
-    }
+
     renderContext->DrawOneFrame([&]() {
+      controller->ResetRegisters();
+      handleInputEvents(&app->inputBuffers[app->currentInputBuffer]);
+      for (const auto& inputEvent : inputEvents) {
+        auto pair = inputEvent.second;
+        controller->CheckButtons(0, pair.first, pair.second);
+      }
       RenderCompleteFrame(*bus, *renderContext);
       rectangleRenderer->Render();
       std::this_thread::sleep_until(next);
