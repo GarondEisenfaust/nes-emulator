@@ -13,20 +13,13 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        setProperty("archivesBaseName", applicationId)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
                 targets += listOf("nes_emulator", "nes-lib", "common")
                 arguments("-DCMAKE_TOOLCHAIN_FILE=cmake/conan_android_toolchain.cmake")
             }
-        }
-    }
-
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("arm64-v8a")
         }
     }
 
@@ -55,6 +48,51 @@ android {
             version = "3.22.1"
         }
     }
+}
+
+
+abstract class ConanInstall : DefaultTask() {
+
+    @get:Input
+    abstract var rootProject: String
+
+    @get:Input
+    abstract var pythonPath: String
+
+    @TaskAction
+    fun run() {
+        val buildTypes = listOf("Debug", "Release", "RelWithDebInfo")
+        val architectures = listOf("armv7", "armv8", "x86", "x86_64")
+        val permutations = buildTypes.flatMap { buildType ->
+            architectures.map { architecture ->
+                Pair(
+                    buildType, architecture
+                )
+            }
+        }
+        permutations.forEach {
+            val command = listOf(
+                pythonPath,
+                "prepare.py",
+                "--build-type=${it.first}",
+                "--profile=android",
+                "--architecture=${it.second}"
+            )
+
+            println(rootProject)
+            println(command)
+
+            project.exec {
+                workingDir = File(rootProject)
+                commandLine = command
+            }
+        }
+    }
+}
+
+tasks.register<ConanInstall>("conanInstall") {
+    pythonPath = "python"
+    rootProject = projectDir.path + "/../"
 }
 
 dependencies {

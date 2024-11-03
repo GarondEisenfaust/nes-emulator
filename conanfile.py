@@ -12,7 +12,7 @@ class NesEmulator(ConanFile):
   generators = "CMakeToolchain", "CMakeDeps"
 
   def requirements(self):
-    self.requires("glm/1.0.1", headers=True)      
+    self.requires("glm/1.0.1", headers=True)
     self.requires("miniaudio/0.11.11", headers=True)
     self.tool_requires("android-ndk/r27")
 
@@ -27,7 +27,7 @@ class NesEmulator(ConanFile):
       pass
 
   def package_info(self):
-      self.conf_info.define("tools.android:ndk_path", os.path.join(self.package_folder, "ndk"))
+    self.conf_info.define("tools.android:ndk_path", os.path.join(self.package_folder, "ndk"))
 
   def generate(self):
     if self.settings.os != "Android":
