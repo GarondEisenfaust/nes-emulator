@@ -12,7 +12,7 @@ parser.add_argument("--architecture", help="the architecture.", type=str, requir
 args = parser.parse_args()
 build_type = str(args.build_type) if args.build_type is not None else "Release"
 profile = str(args.profile) if args.profile is not None else "default"
-architecture = str(args.architecture)
+architecture = args.architecture
 
 prepare_dir = os.path.dirname(os.path.abspath(__file__)) + "/"
 virtual_env = prepare_dir + "venv/"
@@ -39,7 +39,7 @@ env["CONAN_HOME"] = conan_dir
 command = "{} install {} --update --build=missing --profile={} -s build_type={}".format(
     conan_path, prepare_dir, profile, build_type)
 
-if not architecture:
-  command += " -s arch=" + architecture
+if architecture:
+  command += " -s arch=" + str(architecture)
 
 run_command(command, env)
