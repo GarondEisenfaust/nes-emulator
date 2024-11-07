@@ -14,9 +14,10 @@ class NesEmulator(ConanFile):
   def requirements(self):
     self.requires("glm/1.0.1", headers=True)
     self.requires("miniaudio/0.11.11", headers=True)
-    self.tool_requires("android-ndk/r27")
 
-    if self.settings.os != "Android":
+    if self.settings.os == "Android":
+      self.tool_requires("android-ndk/r27")
+    else:
       self.requires("gtest/1.8.1", headers=True)
       self.requires("imgui/1.91.0", headers=True)
       self.requires("glfw/3.4", headers=True)
