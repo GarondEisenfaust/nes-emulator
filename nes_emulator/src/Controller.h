@@ -28,14 +28,14 @@ class Controller : public IController {
 
  private:
   SolidRectangleRenderer& mRenderer;
-  Button mButtonA;
+  int mScreenWidth;
+  int mScreenHeight;
+  int mButtonWidth;
+  int mButtonHeight;
   Button mButtonB;
+  Button mButtonA;
   Button mButtonStart;
   Button mButtonSelect;
-  Button mButtonUp;
-  Button mButtonDown;
-  Button mButtonRight;
-  Button mButtonLeft;
 
   union ControllerRegister {
     struct {
@@ -55,8 +55,29 @@ class Controller : public IController {
   std::array<uint8_t, 2> controllerBuffer;
   std::array<ControllerRegister, 2> mControllerRegister;
 
+  class DPad {
+   public:
+    DPad(SolidRectangleRenderer& renderer, int positionX, int positionY, int buttonWidth, int buttonHeight);
+    void CheckIfButtonPressed(ControllerRegister& reg, int x, int y);
+
+   private:
+    int mPositionY;
+    int mPositionX;
+    int mButtonWidth;
+    int mButtonHeight;
+    int mMiddleSide;
+    int mHalfDpadSize;
+    Button mButtonUp;
+    Button mButtonDown;
+    Button mButtonRight;
+    Button mButtonLeft;
+  };
+
+  DPad mDPad;
+
   void HandleEvent(const Touch& touch);
   void CheckTouchEvents(android_input_buffer* inputBuffer);
   void CheckIfButtonPressed(int index, int x, int y);
   void CheckIfButtonPressed(int index, const Touch& touch);
-  void CheckIfButtonsPressed(int index);};
+  void CheckIfButtonsPressed(int index);
+};

@@ -1,16 +1,17 @@
-#include "Controller.h"
+﻿#include "Controller.h"
 #include "ShapeRendering/SolidRectangleRenderer.h"
 
 Controller::Controller(SolidRectangleRenderer& renderer)
     : mRenderer(renderer),
-      mButtonLeft(25, 300, 200, 100, mRenderer),
-      mButtonRight(325, 300, 200, 100, mRenderer),
-      mButtonUp(225, 400, 100, 200, mRenderer),
-      mButtonDown(225, 100, 100, 200, mRenderer),
-      mButtonStart(1895, 800, 200, 100, mRenderer),
-      mButtonSelect(125, 800, 200, 100, mRenderer),
-      mButtonA(2000, 300, 200, 100, mRenderer),
-      mButtonB(1750, 300, 200, 100, mRenderer) {}
+      mScreenWidth(renderer.GetScreenWidth()),
+      mScreenHeight(renderer.GetScreenHeight()),
+      mButtonWidth(mScreenWidth * 0.09),
+      mButtonHeight(mScreenHeight * 0.09),
+      mButtonStart(mScreenWidth * 0.925 - mButtonWidth, mScreenHeight * 0.7, mButtonWidth, mButtonHeight, mRenderer),
+      mButtonSelect(mScreenWidth * 0.075, mScreenHeight * 0.7, mButtonWidth, mButtonHeight, mRenderer),
+      mButtonB(mScreenWidth * 0.78, mScreenHeight * 0.25, mButtonWidth, mButtonHeight, mRenderer),
+      mButtonA(mScreenWidth * 0.89, mScreenHeight * 0.25, mButtonWidth, mButtonHeight, mRenderer),
+      mDPad(mRenderer, mScreenWidth * 0.123, mScreenHeight * 0.3, mButtonWidth, mButtonHeight) {}
 
 void Controller::CheckIfButtonPressed(int index, const Touch& touch) { CheckIfButtonPressed(index, touch.x, touch.y); }
 
@@ -19,10 +20,7 @@ void Controller::CheckIfButtonPressed(int index, int x, int y) {
   mControllerRegister[index].b = mButtonB.isPressed(x, y) || mControllerRegister[index].b;
   mControllerRegister[index].start = mButtonStart.isPressed(x, y) || mControllerRegister[index].start;
   mControllerRegister[index].select = mButtonSelect.isPressed(x, y) || mControllerRegister[index].select;
-  mControllerRegister[index].up = mButtonUp.isPressed(x, y) || mControllerRegister[index].up;
-  mControllerRegister[index].down = mButtonDown.isPressed(x, y) || mControllerRegister[index].down;
-  mControllerRegister[index].right = mButtonRight.isPressed(x, y) || mControllerRegister[index].right;
-  mControllerRegister[index].left = mButtonLeft.isPressed(x, y) || mControllerRegister[index].left;
+  mDPad.CheckIfButtonPressed(mControllerRegister[index], x, y);
 }
 
 void Controller::CheckIfButtonsPressed(int index) {
@@ -81,3 +79,23 @@ void Controller::HandleEvent(const Touch& touch) {
 }
 
 void Controller::ResetRegisters(int index) { mControllerRegister[index].reg = 0x00; }
+
+Controller::DPad::DPad(SolidRectangleRenderer& renderer, int positionX, int positionY, int buttonWidth,
+                       int buttonHeight)
+    : mPositionX(positionX),
+      mPositionY(positionY),
+      mButtonWidth(buttonWidth),
+      mButtonHeight(buttonHeight),
+      mMiddleSide(mButtonHeight / 2),
+      mHalfDpadSize(mMiddleSide + mButtonWidth),
+      mButtonLeft(mPositionX - mHalfDpadSize, mPositionY - mMiddleSide, mButtonWidth, mButtonHeight, renderer),
+      mButtonRight(mPositionX + mMiddleSide, mPositionY - mMiddleSide, mButtonWidth, mButtonHeight, renderer),
+      mButtonUp(mPositionX - mMiddleSide, mPositionY + mMiddleSide, mButtonHeight, mButtonWidth, renderer),
+      mButtonDown(mPositionX - mMiddleSide, mPositionY - mHalfDpadSize, mButtonHeight, mButtonWidth, renderer) {}
+
+void Controller::DPad::CheckIfButtonPressed(Controller::ControllerRegister& reg, int x, int y) {
+  reg.up = mButtonUp.isPressed(x, y) || reg.up;
+  reg.down = mButtonDown.isPressed(x, y) || reg.down;
+  reg.left = mButtonLeft.isPressed(x, y) || reg.left;
+  reg.right = mButtonRight.isPressed(x, y) || reg.right;
+}
