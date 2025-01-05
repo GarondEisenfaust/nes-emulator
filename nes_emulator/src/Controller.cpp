@@ -6,7 +6,7 @@ Controller::Controller(SolidRectangleRenderer& renderer)
       mScreenWidth(renderer.GetScreenWidth()),
       mScreenHeight(renderer.GetScreenHeight()),
       mButtonWidth(mScreenWidth * 0.09),
-      mButtonHeight(mScreenHeight * 0.09),
+      mButtonHeight(mScreenHeight * 0.1),
       mButtonB(mScreenWidth * 0.78, mScreenHeight * 0.25, mButtonWidth, mButtonHeight, mRenderer),
       mButtonA(mScreenWidth * 0.89, mScreenHeight * 0.25, mButtonWidth, mButtonHeight, mRenderer),
       mButtonStart(mScreenWidth * 0.925 - mButtonWidth, mScreenHeight * 0.7, mButtonWidth, mButtonHeight, mRenderer),

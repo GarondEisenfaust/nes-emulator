@@ -14,7 +14,7 @@ class SolidRectangleRenderer {
   int GetScreenWidth();
 
  private:
-  std::vector<SolidRectangle> mRectangles;
+  std::vector<std::unique_ptr<SolidRectangle>> mRectangles;
   std::unique_ptr<ShaderProgram> mShaderProgram;
   void InitVertexArray();
 

@@ -1,8 +1,8 @@
 #include "ShapeRendering/SolidRectangleRenderer.h"
 #include "../OpenGL.h"
+#include "Shader.h"
 #include "SolidColorShader.h"
 #include "VertexShader.h"
-#include <Shader.h>
 
 SolidRectangleRenderer::SolidRectangleRenderer(int screenWidth, int screenHeight)
     : mScreenWidth(screenWidth), mScreenHeight(screenHeight) {
@@ -14,15 +14,15 @@ SolidRectangleRenderer::SolidRectangleRenderer(int screenWidth, int screenHeight
   mShaderProgram->AttachShader(fragmentShader);
   mShaderProgram->AttachShader(vertexShader);
   mShaderProgram->Link();
-  mRectangles.reserve(8);
 }
 
 SolidRectangle& SolidRectangleRenderer::CreateRectangle(int x, int y, int width, int height) {
-  return mRectangles.emplace_back(x, y, width, height, mScreenWidth, mScreenHeight);
+  return *mRectangles.emplace_back(std::make_unique<SolidRectangle>(x, y, width, height, mScreenWidth, mScreenHeight));
 }
 
 SolidRectangle& SolidRectangleRenderer::CreateRectangle(int x, int y, int width, int height, const PixelColorF& color) {
-  return mRectangles.emplace_back(x, y, width, height, mScreenWidth, mScreenHeight, color);
+  return *mRectangles.emplace_back(
+      std::make_unique<SolidRectangle>(x, y, width, height, mScreenWidth, mScreenHeight, color));
 }
 
 void SolidRectangleRenderer::InitVertexArray() {
@@ -44,19 +44,13 @@ void SolidRectangleRenderer::Render() {
   mShaderProgram->Use();
   glBindVertexArray(mVao);
   for (auto& rectangle : mRectangles) {
-    rectangle.UpdateTransformIfNecessary();
+    rectangle->UpdateTransformIfNecessary();
   }
 
   for (const auto& rectangle : mRectangles) {
-    mShaderProgram->SetUniform("transform", rectangle.GetTransform());
-    mShaderProgram->SetUniform("color", rectangle.GetColor());
-
-    const bool highlight = rectangle.GetHighlight();
-    if (highlight) {
-      auto bb = 0;
-    }
-    mShaderProgram->SetUniform("highlight", highlight);
-
+    mShaderProgram->SetUniform("transform", rectangle->GetTransform());
+    mShaderProgram->SetUniform("color", rectangle->GetColor());
+    mShaderProgram->SetUniform("highlight", rectangle->GetHighlight());
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   }
   glBindVertexArray(0);

@@ -1,8 +1,8 @@
 #include "ShapeRendering/TexturedRectangleRenderer.h"
 #include "../OpenGL.h"
+#include "Shader.h"
 #include "SolidColorShader.h"
 #include "VertexShader.h"
-#include <Shader.h>
 
 TexturedRectangleRenderer::TexturedRectangleRenderer(int screenWidth, int screenHeight)
     : mScreenWidth(screenWidth), mScreenHeight(screenHeight) {
@@ -17,12 +17,14 @@ TexturedRectangleRenderer::TexturedRectangleRenderer(int screenWidth, int screen
 }
 
 TexturedRectangle& TexturedRectangleRenderer::CreateRectangle(int x, int y, int width, int height) {
-  return mRectangles.emplace_back(x, y, width, height, mScreenWidth, mScreenHeight);
+  return *mRectangles.emplace_back(
+      std::make_unique<TexturedRectangle>(x, y, width, height, mScreenWidth, mScreenHeight));
 }
 
 TexturedRectangle& TexturedRectangleRenderer::CreateRectangle(int x, int y, int width, int height,
                                                               const PixelColorF& color) {
-  return mRectangles.emplace_back(x, y, width, height, mScreenWidth, mScreenHeight, color);
+  return *mRectangles.emplace_back(
+      std::make_unique<TexturedRectangle>(x, y, width, height, mScreenWidth, mScreenHeight, color));
 }
 
 void TexturedRectangleRenderer::InitVertexArray() {
@@ -44,11 +46,12 @@ void TexturedRectangleRenderer::Render() {
   mShaderProgram->Use();
   glBindVertexArray(mVao);
   for (auto& rectangle : mRectangles) {
-    rectangle.UpdateTransformIfNecessary();
+    rectangle->UpdateTransformIfNecessary();
   }
+
   for (const auto& rectangle : mRectangles) {
-    mShaderProgram->SetUniform("transform", rectangle.GetTransform());
-    mShaderProgram->SetUniform("color", rectangle.GetColor());
+    mShaderProgram->SetUniform("transform", rectangle->GetTransform());
+    mShaderProgram->SetUniform("color", rectangle->GetColor());
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   }
   glBindVertexArray(0);

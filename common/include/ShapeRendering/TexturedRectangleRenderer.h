@@ -12,7 +12,7 @@ class TexturedRectangleRenderer {
   void Render();
 
  private:
-  std::vector<TexturedRectangle> mRectangles;
+  std::vector<std::unique_ptr<TexturedRectangle>> mRectangles;
   std::unique_ptr<ShaderProgram> mShaderProgram;
   void InitVertexArray();
 
