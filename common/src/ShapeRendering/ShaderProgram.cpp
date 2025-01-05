@@ -33,6 +33,11 @@ void ShaderProgram::SetUniform(const char* name, int value) {
   glUniform1i(uniformLocation, value);
 }
 
+void ShaderProgram::SetUniform(const char* name, bool value) {
+  const auto uniformLocation = glGetUniformLocation(mHandle, name);
+  glUniform1i(uniformLocation, value);
+}
+
 void ShaderProgram::SetUniform(const char* name, const ShortTexture& texture) {
   const auto uniformLocation = glGetUniformLocation(mHandle, name);
   glUniform1i(uniformLocation, texture.GetHandle());

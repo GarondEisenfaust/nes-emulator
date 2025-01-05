@@ -36,7 +36,6 @@ class Controller : public IController {
   Button mButtonA;
   Button mButtonStart;
   Button mButtonSelect;
-
   union ControllerRegister {
     struct {
       bool right : 1;
@@ -51,14 +50,16 @@ class Controller : public IController {
     uint8_t reg = 0x00;
   };
 
-  std::map<int, Touch> inputEvents;
-  std::array<uint8_t, 2> controllerBuffer;
+  std::map<int, Touch> mInputEvents;
+  std::array<uint8_t, 2> mControllerBuffer;
   std::array<ControllerRegister, 2> mControllerRegister;
 
   class DPad {
    public:
     DPad(SolidRectangleRenderer& renderer, int positionX, int positionY, int buttonWidth, int buttonHeight);
-    void CheckIfButtonPressed(ControllerRegister& reg, int x, int y);
+    void UpdatePressedState(int x, int y);
+    void UpdateControllerRegister(ControllerRegister& reg);
+    void ClearPressedState();
 
    private:
     int mPositionY;
@@ -67,6 +68,7 @@ class Controller : public IController {
     int mButtonHeight;
     int mMiddleSide;
     int mHalfDpadSize;
+
     Button mButtonUp;
     Button mButtonDown;
     Button mButtonRight;
@@ -77,7 +79,9 @@ class Controller : public IController {
 
   void HandleEvent(const Touch& touch);
   void CheckTouchEvents(android_input_buffer* inputBuffer);
-  void CheckIfButtonPressed(int index, int x, int y);
-  void CheckIfButtonPressed(int index, const Touch& touch);
-  void CheckIfButtonsPressed(int index);
+  void UpdateButtonState(int index, int x, int y);
+  void UpdateButtonState(int index, const Touch& touch);
+  void UpdateButtonState(int index);
+  void UpdateControllerRegister(int index);
+  void ClearPressedState();
 };

@@ -4,13 +4,13 @@ Controller::Controller(GLFWwindow* window) : mWindow(window) {}
 
 void Controller::Write(uint16_t address, uint8_t data) {
   const auto controllerIndex = data & 0x0001;
-  controllerBuffer[controllerIndex] = mControllerRegister[controllerIndex].reg;
+  mControllerBuffer[controllerIndex] = mControllerRegister[controllerIndex].reg;
 }
 
 uint8_t Controller::Read(uint16_t address) {
   const auto controllerIndex = address & 0x0001;
-  const uint8_t data = (controllerBuffer[controllerIndex] & (1 << 7)) > 0;
-  controllerBuffer[controllerIndex] <<= 1;
+  const uint8_t data = (mControllerBuffer[controllerIndex] & (1 << 7)) > 0;
+  mControllerBuffer[controllerIndex] <<= 1;
   return data;
 }
 

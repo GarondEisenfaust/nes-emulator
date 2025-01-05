@@ -15,7 +15,8 @@ SolidRectangle::SolidRectangle(int x, int y, int width, int height, int screenWi
       mScreenWidth(screenWidth),
       mScreenHeight(screenHeight),
       mColor(color),
-      mNeedsUpdate(true) {}
+      mNeedsUpdate(true),
+      mHighlight(false) {}
 
 SolidRectangle::~SolidRectangle() {}
 
@@ -47,3 +48,9 @@ void SolidRectangle::UpdateTransformIfNecessary() {
 const glm::mat4& SolidRectangle::GetTransform() const { return mTransform; }
 
 const PixelColorF& SolidRectangle::GetColor() const { return mColor; }
+
+bool SolidRectangle::GetHighlight() const { return mHighlight; }
+
+void SolidRectangle::Highlight() { mHighlight = true; }
+
+void SolidRectangle::DontHighlight() { mHighlight = false; }

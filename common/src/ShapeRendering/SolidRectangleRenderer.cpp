@@ -14,6 +14,7 @@ SolidRectangleRenderer::SolidRectangleRenderer(int screenWidth, int screenHeight
   mShaderProgram->AttachShader(fragmentShader);
   mShaderProgram->AttachShader(vertexShader);
   mShaderProgram->Link();
+  mRectangles.reserve(8);
 }
 
 SolidRectangle& SolidRectangleRenderer::CreateRectangle(int x, int y, int width, int height) {
@@ -45,9 +46,17 @@ void SolidRectangleRenderer::Render() {
   for (auto& rectangle : mRectangles) {
     rectangle.UpdateTransformIfNecessary();
   }
+
   for (const auto& rectangle : mRectangles) {
     mShaderProgram->SetUniform("transform", rectangle.GetTransform());
     mShaderProgram->SetUniform("color", rectangle.GetColor());
+
+    const bool highlight = rectangle.GetHighlight();
+    if (highlight) {
+      auto bb = 0;
+    }
+    mShaderProgram->SetUniform("highlight", highlight);
+
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   }
   glBindVertexArray(0);

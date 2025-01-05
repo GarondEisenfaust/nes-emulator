@@ -12,6 +12,9 @@ class SolidRectangle {
   void UpdateTransformIfNecessary();
   const glm::mat4& GetTransform() const;
   const PixelColorF& GetColor() const;
+  bool GetHighlight() const;
+  void Highlight();
+  void DontHighlight();
 
  private:
   int mX;
@@ -21,6 +24,7 @@ class SolidRectangle {
   int mScreenWidth;
   int mScreenHeight;
   bool mNeedsUpdate;
+  bool mHighlight;
   glm::mat4 mTransform;
   PixelColorF mColor;
 };

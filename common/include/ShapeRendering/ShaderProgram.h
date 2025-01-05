@@ -17,6 +17,7 @@ class ShaderProgram {
   void SetUniform(const char* name, ColorPaletteF& colorPalette);
   void SetUniform(const char* name, float value);
   void SetUniform(const char* name, int value);
+  void SetUniform(const char* name, bool value);
   void SetUniform(const char* name, const ShortTexture& texture);
   void SetUniform(const char* name, const glm::mat4& matrix);
   void SetUniform(const char* name, const glm::vec4& vector);

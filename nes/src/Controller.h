@@ -30,7 +30,7 @@ class Controller : public IController {
   };
 
   GLFWwindow* mWindow;
-  std::array<uint8_t, 2> controllerBuffer;
+  std::array<uint8_t, 2> mControllerBuffer;
   std::array<ControllerRegister, 2> mControllerRegister;
 
   std::array<GLFWgamepadstate, 2> mGamepadState;
