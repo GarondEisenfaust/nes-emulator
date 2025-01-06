@@ -25,7 +25,7 @@ add_subdirectory(nes-lib)
 add_subdirectory(common)
 
 if(${ANDROID})
-  add_subdirectory(nes_emulator)
+  add_subdirectory(nes-android)
 else()
   add_subdirectory(nes)
   add_subdirectory(playground)

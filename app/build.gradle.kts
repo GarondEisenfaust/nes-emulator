@@ -17,7 +17,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                targets += listOf("nes_emulator", "nes-lib", "common")
+                targets += listOf("nes-android", "nes-lib", "common")
                 arguments("-DCMAKE_TOOLCHAIN_FILE=cmake/conan_android_toolchain.cmake")
             }
         }

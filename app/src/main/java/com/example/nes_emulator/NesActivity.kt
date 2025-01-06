@@ -8,7 +8,7 @@ import com.google.androidgamesdk.GameActivity
 class NesActivity : GameActivity() {
     companion object {
         init {
-            System.loadLibrary("nes_emulator")
+            System.loadLibrary("nes-android")
         }
     }
 
