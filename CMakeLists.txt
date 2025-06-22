@@ -16,6 +16,8 @@ project(
   VERSION 1.0
   LANGUAGES CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(RUN_TESTS "Build the tests" ON)
 if(RUN_TESTS)
   enable_testing()

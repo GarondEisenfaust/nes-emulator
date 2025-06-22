@@ -1,16 +1,9 @@
 #include "Ppu.h"
 #include "Bus.h"
-#include "Definitions.h"
 #include "ForegroundRenderer.h"
 #include "IRenderer.h"
 #include "Mirror.h"
 #include "PixelInfo.h"
-#include <algorithm>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <unordered_set>
-#include <vector>
 
 Ppu::Ppu(IRenderer& renderer)
     : mCycle(0), mScanline(0), mColorPalette(std::move(MakePixelColors())), mRenderer(renderer) {}

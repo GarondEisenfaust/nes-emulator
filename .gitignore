@@ -2,6 +2,8 @@ build
 imgui.ini
 venv
 roms
+compile_commands.json
+.cache
 
 # Android
 *.iml

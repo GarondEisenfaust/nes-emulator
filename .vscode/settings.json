@@ -92,6 +92,7 @@
   "cmake.configureOnOpen": false,
   "cmake.automaticReconfigure": false,
   "cmake.options.statusBarVisibility": "visible",
+  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "[cpp]": {
     "editor.defaultFormatter": "xaver.clang-format"
   },

@@ -3,48 +3,22 @@
   "configurations": [
     {
       "name": "nes",
-      "type": "cppdbg",
-      "cwd": "${command:cmake.buildDirectory}/bin",
+      "type": "gdb",
       "request": "launch",
-      "program": "${command:cmake.buildDirectory}/bin/nes",
-      "args": [
-        "--rom-dir",
-        "roms/",
-        "--rom",
-        "roms/smb.nes",
-        "--decoder",
-        "ntsc-gpu"
-      ],
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
+      "target": "${command:cmake.buildDirectory}/bin/nes",
+      "cwd": "${workspaceRoot}",
+      "valuesFormatting": "prettyPrinters",
+      "arguments": "--rom-dir roms/ --rom roms/smb.nes --decoder ntsc-gpu",
       "preLaunchTask": "CMake: build"
     },
     {
       "name": "nes without building",
-      "type": "cppdbg",
-      "cwd": "${command:cmake.buildDirectory}/bin",
+      "type": "gdb",
       "request": "launch",
-      "program": "${command:cmake.buildDirectory}/bin/nes",
-      "args": [
-        "--rom-dir",
-        "roms/",
-        "--rom",
-        "roms/smb.nes",
-        "--decoder",
-        "ntsc-gpu"
-      ],
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
+      "target": "${command:cmake.buildDirectory}/bin/nes",
+      "cwd": "${workspaceRoot}",
+      "valuesFormatting": "prettyPrinters",
+      "arguments": "--rom-dir roms/ --rom roms/smb.nes --decoder ntsc-gpu"
     }
   ]
 }

@@ -2,7 +2,6 @@
 #include "ShaderProgram.h"
 #include "SolidRectangle.h"
 #include <memory>
-#include <vector>
 
 class SolidRectangleRenderer {
  public:

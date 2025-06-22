@@ -1,7 +1,6 @@
 #pragma once
 #include "PixelColor.h"
 #include <glm/glm.hpp>
-#include <vector>
 
 class SolidRectangleRenderer;
 class SolidRectangle {

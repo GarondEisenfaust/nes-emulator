@@ -3,8 +3,9 @@
     "ms-vscode.cmake-tools",
     "fredericbonnet.cmake-test-adapter",
     "xaver.clang-format",
-    "ms-vscode.cpptools",
     "dtoplak.vscode-glsllint",
-    "cheshirekow.cmake-format"
+    "cheshirekow.cmake-format",
+    "webfreak.debug",
+    "llvm-vs-code-extensions.vscode-clangd"
   ]
 }
