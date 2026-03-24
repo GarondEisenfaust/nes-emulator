@@ -1,4 +1,4 @@
-#! /bin/python
+#!/usr/bin/env python
 
 import os.path
 import subprocess
@@ -28,8 +28,8 @@ def run_command(command: str, env=os.environ.copy()):
 
 
 if not os.path.exists(virtual_env):
-  print("Creating virtualenv at {}".format(virtual_env))
-  run_command("python -m virtualenv {}".format(virtual_env))
+  print("Creating venv at {}".format(virtual_env))
+  run_command("python -m venv {}".format(virtual_env))
 
 run_command("{} install -r {}".format(pip_path, requirements_txt))
 

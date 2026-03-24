@@ -1,4 +1,4 @@
-#! /bin/python
+#!/usr/bin/env python
 
 file1 = open('../scripts/opcodes.txt', 'r')
 Lines = file1.readlines()
