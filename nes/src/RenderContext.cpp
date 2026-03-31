@@ -59,11 +59,6 @@ RenderContext::~RenderContext() {
 
 void RenderContext::GameLoop(std::function<void()> loop) {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  SolidRectangleRenderer rectangleRenderer(mWidth, mHeight);
-  rectangleRenderer.CreateRectangle(0, 60, 300, 60, {1, 0, 0, 1});
-  rectangleRenderer.CreateRectangle(724, 660, 150, 100, {0, 1, 0.5, 1});
-  rectangleRenderer.CreateRectangle(824, 760, 150, 100, {1, 1, 0, 1});
-  rectangleRenderer.CreateRectangle(924, 860, 150, 100, {0, 1, 1, 1});
 
   while (!glfwWindowShouldClose(mWindow)) {
     glfwPollEvents();
@@ -76,7 +71,6 @@ void RenderContext::GameLoop(std::function<void()> loop) {
 
     glClear(GL_COLOR_BUFFER_BIT);
     mFrameDecoder->DecodeAndDraw(mNesFrameData.data(), mFramePpuCycle);
-    rectangleRenderer.Render();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
